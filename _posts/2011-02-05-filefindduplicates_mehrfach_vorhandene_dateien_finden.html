@@ -1,0 +1,84 @@
+---
+layout: post
+title: File::Find::Duplicates - mehrfach vorhandene Dateien finden
+date: '2011-02-05 12:45:00 +0000'
+mt_id: 212
+blog_id: 1
+post_id: 212
+permalink: /2011/02/filefindduplicates_mehrfach_vorhandene_dateien_finden.html
+categories:
+- '101'
+---
+<p>
+<a href="http://search.cpan.org/perldoc?File::Find::Duplicates">File::Find::Duplicates</a> von <a href="http://search.cpan.org/~tmtm/">Tony Bowden</a> durchsucht Verzeichnisse nach mehrfach vorhandenen Dateien.</p>
+
+<h2>Vorgehensweise</h2>
+<p>
+Zunächst erstellt <a href="http://search.cpan.org/perldoc?File::Find::Duplicates">File::Find::Duplicates</a> Listen von Dateien identischer Größe.
+</p>
+<p>
+ Nur für Dateien der selben Größe wird  eine <a href="http://de.wikipedia.org/wiki/Message-Digest_Algorithm_5">MD5</a> Prüfsumme erstellt.
+</p>
+<p>
+Dateien gelten als identisch, wenn sowohl Größe als auch MD5-Prüfsumme übereinstimmen.
+</p>
+<p>
+Diese Vorgehensweise erzielt  eine hohe Geschwindigkeit und nimmt dafür eine sehr geringe Wahrscheinlichkeit für<a href="http://www.mscs.dal.ca/~selinger/md5collision/"> "False Positives"</a> in Kauf.
+</p>
+
+<h2>Beispiel</h2>
+<p>
+Dieses einfache Beispielprogramm nimmt eine Liste von Verzeichnissen als Kommandozeilenargumente entgegen, durchsucht diese rekursiv und gibt die gefunden Duplikate (Name,Größe, MD5) aus.
+</p>
+<p>
+<em>find_duplicate_files</em> liefert im Erfolgsfall eine Liste von Objekten zurück, welche die Methoden <em>size()</em>, <em>md5()</em> und <em>files()</em> zur Verfügung stellen.
+</p>
+<p>
+Im Misserfolgsfall (keine Duplikate)  wird eine leere Liste zurückgegeben. 
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">File::Find::Duplicates</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@dirs</span> = <span style="color: #00688B;">@ARGV</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Basic Sanity Check</span>
+<span style="color: #00688B;">usage</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #8B008B; font-weight:bold;">scalar</span> <span style="color: #00688B;">@ARGV</span> &gt; <span style="color: #B452CD;">1</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@dupesets</span> = <span style="color: #00688B;">find_duplicate_files</span><span style="color: #000000;">(</span><span style="color: #00688B;">@dirs</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$dupeset</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@dupesets</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+	<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Duplicate files: &quot;</span><span style="color: #000000;">,</span> <span style="color: #8B008B; font-weight:bold;">join</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;, &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@</span>{ <span style="color: #00688B;">$dupeset</span><span style="color: #00688B;">-&gt;files</span> } <span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;MD5:  &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$dupeset</span><span style="color: #00688B;">-&gt;md5</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Size: &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$dupeset</span><span style="color: #00688B;">-&gt;size</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot; Bytes\n&quot;</span><span style="color: #000000;">;</span>
+	<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+
+<a name="usage"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">usage</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">warn</span> <span style="color: #CD5555;">&quot;Usage: $0 DIR1 DIR2\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">exit</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt z.B. folgende Ausgabe:
+</p>
+<pre>
+perl basic.pl . /tmp/
+Duplicate files: ./basic.pl, /tmp/basic.pl
+MD5:  9bc2302a67edcd34e3f3cd44f6d5284b
+Size: 465 Bytes
+</pre>
+
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?File::Find::Duplicates">File::Find::Duplicates</a></li>
+<li><a href="http://search.cpan.org/perldoc?File::Find">File::Find</a></li>
+<li><a href="http://search.cpan.org/perldoc?Class::Struct">Class::Struct</a></li>
+<li><a href="http://search.cpan.org/perldoc?Digest::MD5">Digest::MD5</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Message-Digest_Algorithm_5">Message-Digest Algorithm 5</a></li>
+</ul>
+

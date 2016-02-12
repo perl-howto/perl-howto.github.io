@@ -1,0 +1,157 @@
+---
+layout: post
+title: Statistics::Descriptive - Grundlegende Berechnungen der Beschreibenden Statistik
+date: '2009-08-16 11:30:00 +0000'
+mt_id: 161
+blog_id: 1
+post_id: 161
+permalink: /2009/08/statisticsdescriptive-grundlegende_berechnungen_der_beschreibenden_statistik.html
+categories:
+- '101'
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Statistics::Descriptive">Statistics::Descriptive</a> von <a href="http://search.cpan.org/~shlomif/">Shlomi Fish</a> bietet einen einfachen Zugriff auf die grundlegenden Berechnungen der<a href="http://de.wikipedia.org/wiki/Deskriptive_Statistik"> Beschreibenden Statistik</a>, wie Median, Mittelwerte, Summe, Standardabweichung und Varianz, Häufigkeitsverteilung, Percentile bzw. Quantile und lineare Regresionsanalyse.
+</p>
+
+<h2>Beispiel:</h2>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Statistics::Descriptive</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@messwerte</span> = <span style=" color: #CD5555;">qw( 17 19 30 22 24 16 12 15 18 20 25 13 29 28 27 26 )</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$stat</span> = <span style=" color: #000000;">Statistics::Descriptive::Full</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;add_data</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">@messwerte</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">display_results</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<a name="display_results"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">display_results</span> <span style=" color: #000000;">{</span>
+
+        <span style=" color: #228B22;"># Returns the number of data items.</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Anzahl Elemente: &#39;</span><span style=" color: #000000;">,</span>  <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;count</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    
+        <span style=" color: #228B22;"># Returns the mean of the data.</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Arithmetischer Mittelwert: &#39;</span><span style=" color: #000000;">,</span>  <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;mean</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+        <span style=" color: #228B22;"># Sorts the data and returns the median value of the data.</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Median: &#39;</span><span style=" color: #000000;">,</span>  <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;median</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+        <span style=" color: #228B22;"># Returns the harmonic mean of the data. </span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Harmonischer Mittelwert: &#39;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;harmonic_mean</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+        <span style=" color: #228B22;"># Returns the geometric mean of the data.</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Geometrischer Mittelwert: &#39;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;geometric_mean</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    
+        <span style=" color: #228B22;"># Returns the sum of the data.</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Summe: &#39;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;sum</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    
+        <span style=" color: #228B22;"># Returns the variance of the data. Division by n-1 is used.</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Varianz: &#39;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;variance</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    
+        <span style=" color: #228B22;"># Returns the standard deviation of the data. Division by n-1 is used.</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Standardabweichung: &#39;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;standard_deviation</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    
+        <span style=" color: #228B22;"># Returns the minimum value of the data set.</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Minimum: &#39;</span> <span style=" color: #000000;">,</span> <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;min</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    
+        <span style=" color: #228B22;"># Returns the index of the minimum value of the data set.</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Index Minimum: &#39;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;mindex</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    
+        <span style=" color: #228B22;"># Returns the maximum value of the data set.</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Maximum: &#39;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;max</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    
+        <span style=" color: #228B22;"># Returns the index of the maximum value of the data set.</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Index Maximum: &#39;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;maxdex</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    
+        <span style=" color: #228B22;"># Returns the sample range (max - min) of the data set.</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Stichprobenbereich: &#39;</span><span style=" color: #000000;">,</span>  <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;sample_range</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+   <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+   <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Percentile/Quantile\n&quot;</span><span style=" color: #000000;">;</span>
+
+        <span style=" color: #228B22;"># Percentile</span>
+        <span style=" color: #228B22;"># skalaren Kontext erzwingen, da print Listenkontext verwendet</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Wert 25% Percentil: &#39;</span><span style=" color: #000000;">,</span> <span style=" color: #8B008B; font-weight:bold;">scalar</span> <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;percentile</span><span style=" color: #000000;">(</span><span style=" color: #B452CD;">25</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$value</span><span style=" color: #000000;">,</span><span style=" color: #00688B;">$index</span><span style=" color: #000000;">)</span> =  <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;percentile</span><span style=" color: #000000;">(</span><span style=" color: #B452CD;">25</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Wert 25% Percentil: $value, Index: $index \n&quot;</span><span style=" color: #000000;">;</span>
+
+        <span style=" color: #228B22;"># Quantile</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Q1: &#39;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;quantile</span><span style=" color: #000000;">(</span><span style=" color: #B452CD;">1</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Q2: &#39;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;quantile</span><span style=" color: #000000;">(</span><span style=" color: #B452CD;">2</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Q3: &#39;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;quantile</span><span style=" color: #000000;">(</span><span style=" color: #B452CD;">3</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Q4: &#39;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;quantile</span><span style=" color: #000000;">(</span><span style=" color: #B452CD;">4</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$partitions</span> = <span style=" color: #B452CD;">4</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Haeufigkeitsverteilung fuer $partitions Partitionen: \n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$f</span> = <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;frequency_distribution_ref</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$partitions</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span> 
+    <span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$partition</span> <span style=" color: #000000;">(</span> <span style=" color: #8B008B; font-weight:bold;">sort</span> <span style=" color: #000000;">{</span><span style=" color: #00688B;">$a</span> &lt;=&gt; <span style=" color: #00688B;">$b</span><span style=" color: #000000;">}</span> <span style=" color: #8B008B; font-weight:bold;">keys</span> <span style=" color: #00688B;">%$f</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+      		<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Partition = $partition, Anzahl = $f-&gt;{$partition}\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #000000;">}</span>
+
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Regressionsanalyse: Methode der kleinsten Quadrate\n&quot;</span><span style=" color: #000000;">;</span>
+
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$q</span><span style=" color: #000000;">,</span><span style=" color: #00688B;">$m</span><span style=" color: #000000;">,</span><span style=" color: #00688B;">$r</span><span style=" color: #000000;">,</span><span style=" color: #00688B;">$rms</span><span style=" color: #000000;">)</span> = <span style=" color: #00688B;">$stat</span><span style=" color: #00688B;">-&gt;least_squares_fit</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Geradengleichung: y = $m * x + $q\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Linearer Korrelationskoeffizient nach Pearson: $r\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #228B22;"># Wurzel aus dem mittleren quadratischen Fehler</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Root Mean Square Error (RMSE): $rms\n&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Anzahl Elemente: 16
+Arithmetischer Mittelwert: 21.3125
+Median: 21
+Harmonischer Mittelwert: 19.6902742958359
+Geometrischer Mittelwert: 20.5128887373903
+Summe: 341
+Varianz: 34.3625
+Standardabweichung: 5.86195359927047
+Minimum: 12
+Index Minimum: 0
+Maximum: 30
+Index Maximum: 15
+Stichprobenbereich: 18
+
+Percentile/Quantile
+Wert 25% Percentil: 16
+Wert 25% Percentil: 16, Index: 3 
+Q1: 16.75
+Q2: 21
+Q3: 26.25
+Q4: 30
+
+Haeufigkeitsverteilung fuer 4 Partitionen: 
+Partition = 16.5, Anzahl = 4
+Partition = 21, Anzahl = 4
+Partition = 25.5, Anzahl = 3
+Partition = 30, Anzahl = 5
+
+Regressionsanalyse: Methode der kleinsten Quadrate
+Geradengleichung: y = 1.22794117647059 * x + 10.875
+Linearer Korrelationskoeffizient nach Pearson: 0.997307339918983
+Root Mean Square Error (RMSE): 0.41623752410203
+</pre>
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Statistics::Descriptive">Statistics::Descriptive - Module of basic descriptive statistical functions</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Deskriptive_Statistik">Deskriptive Statistik</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Mittelwert">Mittelwert</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Median">Median</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Percentil">Quantil</a></li>
+<li><a href="http://de.wikipedia.org/wiki/H%C3%A4ufigkeitsverteilung">Häufigkeitsverteilung</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Methode_der_kleinsten_Quadrate">Methode der kleinsten Quadrate</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Korrelationskoeffizient">Korrelationskoeffizient</a></li>
+</ul>

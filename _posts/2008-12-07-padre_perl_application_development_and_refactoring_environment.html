@@ -1,0 +1,114 @@
+---
+layout: post
+title: Padre  (Perl Application Development and Refactoring Environment) 0.20
+date: '2008-12-07 11:28:00 +0000'
+mt_id: 107
+blog_id: 1
+post_id: 107
+permalink: /2008/12/padre_perl_application_development_and_refactoring_environment.html
+categories:
+- ide
+---
+<p>
+<a href="http://padre.perlide.org/">Padre</a> (<strong>P</strong>erl <strong>A</strong>pplication <strong>D</strong>evelopment and <strong>R</strong>efactoring <strong>E</strong>nvironment), eine neue <a href="http://de.wikipedia.org/wiki/Integrierte_Entwicklungsumgebung">IDE</a> für Perl, die besonderen Wert auf Benutzerfreundlichkeit legt, ist <a href="http://use.perl.org/~gabor/journal/38006">vor ein paar Tagen</a> in der Version 0.20 erschienen.
+</p>
+
+<h2>Vor allem für Einsteiger</h2>
+<p>
+<a href="http://www.szabgab.com/">Gabor Szabo</a>, <a href="http://www.pti.co.il/">Perl Trainer</a> und Initiator des <a href="http://padre.perlide.org/">Padre</a> Projektes, kennt die Schwierigkeiten, mit denen Einsteiger in die dynamische Programmiersprache Perl konfrontiert werden, sehr gut.
+</p>
+<p>
+Gerade Einsteiger mit Windows-Hintergrund verstehen nicht, das es keine wirklich gute IDE für Perl gibt. (Einsteiger mit Linux-Hintergrund wundern sich hier eher weniger, die sind noch ganz andere Ecken und Kanten gewohnt.)
+</p>
+<p>
+Eines der Ziele des Padre-Projekts ist daher die Unterstützung für Einsteiger, insbesondere Programmieranfänger mit Windows-Hintergrund. 
+</p>
+
+<h3>Häufig gewünschte Features von Einsteigern (m/w)</h3>
+<ul class="no-bullet">
+<li>Gutes Syntax Highlighting</li>
+<li>Automatische Prüfung der Syntax</li>
+<li>Hervorhebung der Klammern und Anzeige der zusammengehörenden Klammern</li>
+<li>Code-Vorschläge und automatische Vervollständigung bei Schlüsselwörtern</li>
+<li>Anzeige der nötigen Parameter für Perl-Schlüsselwörter</li>
+<li>Kontextsensitive Hilfe für Variablen, Schleifenkonstrukte und Module</li>
+<li>Integrierte Anzeige der Dokumentation (Pod-Viewer)</li>
+<li>Integrierter Debugger (Breaks, Watches, usw.)</li>
+<li>Direkter Sprung zu Codeabschnitten oder Zeilen, die ein die() oder warn() auslösen</li>
+<li>Mouse over Tooltips mit Variableninhalten</li>
+<li>Integriertes Ausgabefenster</li>
+<li>Highlighting für Regexes</li>
+</ul>
+
+<h2>Bereits umgesetzte Features</h2>
+<p>
+Einige der geplanten Features sind in der Version 0.20 bereits umgesetzt.
+</p>
+<h3>Syntaxhighlighting</h3>
+<p>
+Ein absolutes Muss.
+</p>
+<p>
+<a href="{{ site.url }}/assets/images/padre/padre.0.20-syntax-highlight.png">
+<form mt:asset-id="37" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="padre.0.20-syntax-highlight_klein.png" src="{{ site.url }}/assets/images/padre/padre.0.20-syntax-highlight_klein.png" width="452" height="305"  style="" /></form></a></p>
+
+
+<h3>Perldoc</h3>
+<p>
+Sobald der Mauszeiger oder Cursor am Ende eines Schlüsselwortes steht, wird der passende Abschnitt aus <a href="http://perldoc.perl.org/">perldoc</a> angezeigt. 
+</p>
+<a href="{{ site.url }}/assets/images/padre/padre.0.20-perldoc.png">
+<form mt:asset-id="26" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="padre.0.20-perldoc_klein.png" src="{{ site.url }}/assets/images/padre/padre.0.20-perldoc_klein.png" width="452" height="305"  style="" /></form></a>
+
+<h3>Integriertes Ausgabefenster</h3>
+<p>
+Ein tolles Feature für Einsteiger, die nicht besonders gerne auf der Kommandozeile arbeiten.
+</p>
+<a href="{{ site.url }}/assets/images/padre/padre.0.20-run-script01.png">
+<form mt:asset-id="31" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="padre.0.20-run-script01_klein.png" src="{{ site.url }}/assets/images/padre/padre.0.20-run-script01_klein.png" width="452" height="305"  style="" /></form></a>
+<p>
+</p>
+<a href="{{ site.url }}/assets/images/padre/padre.0.20-run-script02.png">
+<form mt:asset-id="31" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="padre.0.20-run-script01_klein.png" src="{{ site.url }}/assets/images/padre/padre.0.20-run-script02_klein.png" width="452" height="305"  style="" /></form></a>
+<p>
+Das Ausgabefenster zeigt übrigens auch die Fehler und Warnungen aus STDERR an.
+</p>
+
+<h3>Explorer für Unterprogramme</h3>
+<p>
+Neben der Übersicht der Unterprogramme in einem separatem Frame, kann man auch per Doppelklick direkt zur Subroutine springen.
+</p>
+<a href="{{ site.url }}/assets/images/padre/padre.0.20-sub-browser.png">
+<form mt:asset-id="35" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="padre.0.20-sub-browser_klein.png" src="{{ site.url }}/assets/images/padre/padre.0.20-sub-browser_klein.png" width="452" height="305"  style="" /></form></a>
+
+<h3>Plugins</h3>
+<p>
+Padre lässt sich über in Perl geschriebene Plugins bequem erweitern. 
+</p>
+<p>
+<a href="{{ site.url }}/assets/images/padre/padre.0.20-plugin-manager.png">
+<form mt:asset-id="29" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="padre.0.20-plugin-manager_klein.png" src="{{ site.url }}/assets/images/padre/padre.0.20-plugin-manager_klein.png" width="452" height="305"  style="" /></form></a>
+</p>
+<p>
+Ich schätze besonders das<a href="http://search.cpan.org/perldoc?Padre::Plugin::Vi::CommandLine"> Vi-Plugin</a>: Damit läßt sich Padre genauso bedienen wie Vi. <strong>Cool</strong>.
+</p>
+
+<h2>Fazit</h3>
+<p>
+Trotz der kleinen Versionsnummer schon ein guter Editor. Ich werde Padre sicherlich in 2009 für Einsteigerschulungen einsetzen.
+</p>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://www.szabgab.com/blog/2008/05/1211438612.html">Open Source IDE for Perl</a></li>
+<li><a href="http://padre.perlide.org/">Padre (Projektseite)</a></li>
+<li><a href="http://search.cpan.org/perldoc?Padre">CPAN: Padre</a></li>
+<li><a href="http://yapc.tv/2008/ye/lt/lt2-07-gabor-padre/">YAPC::EU::2008 lighting talk of Gabor (video)</a></li>
+<li><a href="http://www.szabgab.com/blog/2008/08/1219321463.html">Who needs and IDE for Perl anyway?</a></li>
+<li><a href="http://www.perl.com/pub/a/2005/08/25/tools.html">Perl.com: Perl Needs Better Tools</a></li>
+<li><a href="http://www.szabgab.com/blog/2008/11/1226214450.html">How to run an Open Source Project</a></li>
+<li><a href="http://www.perl-blog.de/2008/09/empfehlungen-perl-schulung-und-entwicklung.html">Alvar Freude: Empfehlungen für eine Perl-Schulungs- und Entwicklungs-Umgebung</a></li>
+<li><a href="http://www.perlfoundation.org/perl5/index.cgi?editors">Perl5 Wiki:Editors</a></li>
+<li><a href="http://wiki.perl-community.de/bin/view/Wissensbasis/PerlEditoren">PerlCommunityWiki » Wissensbasis » PerlEditoren</a></li>
+</ul>

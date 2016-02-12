@@ -1,0 +1,217 @@
+---
+layout: post
+title: Datenstrukturen visualisieren mit GraphViz::Data::Grapher
+date: '2008-08-19 16:15:00 +0000'
+mt_id: 95
+blog_id: 1
+post_id: 95
+permalink: /2008/08/datenstrukturen_visualisieren.html
+categories:
+- '101'
+---
+<p>
+<a href="http://search.cpan.org/perldoc?GraphViz::Data::Grapher">GraphViz::Data::Grapher</a>  von <a href="http://search.cpan.org/~lbrocard/">Léon Brocard</a> ermöglicht die graphische Darstellung komplexer Datenstrukturen.
+</p>
+
+<p>
+Dieser Beitrag geht auf folgende häufig anzutreffende Datenstrukturen ein
+<ul class="no-bullet">
+<li>Arrays of Arrays
+<li>Hashes of Arrays
+<li>Arrays of Hashes
+<li>Hashes of Hashes
+<li>Hash mit komplexer Datenstruktur
+</ul>
+und zeigt wie diese mit <a href="http://search.cpan.org/perldoc?GraphViz::Data::Grapher">GraphViz::Data::Grapher</a>  visualisiert werden können.
+</p>
+<p>
+&nbsp;
+</p>
+
+<h2>Arrays of Arrays</h2>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">GraphViz::Data::Grapher</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@AoA</span> = <span style=" color: #000000;">(</span>
+        <span style=" color: #000000;">[</span> <span style=" color: #CD5555;">&quot;fred&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;barney&quot;</span> <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">[</span> <span style=" color: #CD5555;">&quot;george&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;jane&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;elroy&quot;</span> <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">[</span> <span style=" color: #CD5555;">&quot;homer&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;marge&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;bart&quot;</span> <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+      <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$graph</span> = <span style=" color: #000000;">GraphViz::Data::Grapher</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">@AoA</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$graph</span><span style=" color: #00688B;">-&gt;as_png</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;AoA.png&quot;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Graphik:
+</p>
+
+<form mt:asset-id="10" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="AoA.png" src="{{ site.url }}/assets/gvdg/AoA.png" width="547" height="155"  style="" /></form>
+<p>
+&nbsp;
+</p>
+
+<h2>Hashes of Arrays</h2>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">GraphViz::Data::Grapher</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span>  <span style=" color: #00688B;">%HoA</span> = <span style=" color: #000000;">(</span>
+        <span style=" color: #000000;">flintstones</span>        <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">[</span> <span style=" color: #CD5555;">&quot;fred&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;barney&quot;</span> <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">jetsons</span>            <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">[</span> <span style=" color: #CD5555;">&quot;george&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;jane&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;elroy&quot;</span> <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">simpsons</span>           <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">[</span> <span style=" color: #CD5555;">&quot;homer&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;marge&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;bart&quot;</span> <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+      <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$graph</span> = <span style=" color: #000000;">GraphViz::Data::Grapher</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">%HoA</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$graph</span><span style=" color: #00688B;">-&gt;as_png</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;HoA.png&quot;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Graphik:
+</p>
+
+<form mt:asset-id="12" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="HoA.png" src="{{ site.url }}/assets/gvdg/HoA.png" width="547" height="155"  style="" /></form>
+<p>
+&nbsp;
+</p>
+
+<h2>Arrays of Hashes</h2>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">GraphViz::Data::Grapher</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@AoH</span> = <span style=" color: #000000;">(</span>
+        <span style=" color: #000000;">{</span>
+            <span style=" color: #000000;">Lead</span>     <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;fred&quot;</span><span style=" color: #000000;">,</span>
+            <span style=" color: #000000;">Friend</span>   <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;barney&quot;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">{</span>
+            <span style=" color: #000000;">Lead</span>     <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;george&quot;</span><span style=" color: #000000;">,</span>
+            <span style=" color: #000000;">Wife</span>     <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;jane&quot;</span><span style=" color: #000000;">,</span>
+            <span style=" color: #000000;">Son</span>      <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;elroy&quot;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">{</span>
+            <span style=" color: #000000;">Lead</span>     <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;homer&quot;</span><span style=" color: #000000;">,</span>
+            <span style=" color: #000000;">Wife</span>     <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;marge&quot;</span><span style=" color: #000000;">,</span>
+            <span style=" color: #000000;">Son</span>      <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;bart&quot;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+  <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$graph</span> = <span style=" color: #000000;">GraphViz::Data::Grapher</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">@AoH</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$graph</span><span style=" color: #00688B;">-&gt;as_png</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;AoH.png&quot;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Graphik:
+</p>
+
+<form mt:asset-id="11" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="AoH.png" src="{{ site.url }}/assets/gvdg/AoH.png" width="755" height="251"  style="" /></form>
+<p>
+&nbsp;
+</p>
+
+<h2>Hashes of Hashes</h2>
+
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">GraphViz::Data::Grapher</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">%HoH</span> = <span style=" color: #000000;">(</span>
+        <span style=" color: #000000;">flintstones</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">{</span>
+                <span style=" color: #000000;">lead</span>      <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;fred&quot;</span><span style=" color: #000000;">,</span>
+                <span style=" color: #000000;">pal</span>       <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;barney&quot;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">jetsons</span>     <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">{</span>
+                <span style=" color: #000000;">lead</span>      <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;george&quot;</span><span style=" color: #000000;">,</span>
+                <span style=" color: #000000;">wife</span>      <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;jane&quot;</span><span style=" color: #000000;">,</span>
+                <span style=" color: #CD5555;">&quot;his boy&quot;</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;elroy&quot;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">simpsons</span>    <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">{</span>
+                <span style=" color: #000000;">lead</span>      <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;homer&quot;</span><span style=" color: #000000;">,</span>
+                <span style=" color: #000000;">wife</span>      <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;marge&quot;</span><span style=" color: #000000;">,</span>
+                <span style=" color: #000000;">kid</span>       <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;bart&quot;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+ <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$graph</span> = <span style=" color: #000000;">GraphViz::Data::Grapher</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">%HoH</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$graph</span><span style=" color: #00688B;">-&gt;as_png</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;HoH.png&quot;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Graphik:
+</p>
+<form mt:asset-id="13" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="HoH.png" src="{{ site.url }}/assets/gvdg/HoH.png" width="755" height="251"  style="" /></form>
+<p>
+&nbsp;
+</p>
+
+<h2>Hash mit komplexer Datenstruktur</h2>
+
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">GraphViz::Data::Grapher</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span>      <span style=" color: #00688B;">%TV</span> = <span style=" color: #000000;">(</span>
+        <span style=" color: #000000;">flintstones</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">{</span>
+            <span style=" color: #000000;">series</span>   <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;flintstones&quot;</span><span style=" color: #000000;">,</span>
+            <span style=" color: #000000;">nights</span>   <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">[</span> <span style=" color: #CD5555;">qw(monday thursday friday)</span> <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+            <span style=" color: #000000;">members</span>  <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">[</span>
+                <span style=" color: #000000;">{</span> <span style=" color: #000000;">name</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;fred&quot;</span><span style=" color: #000000;">,</span>    <span style=" color: #000000;">role</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;lead&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">age</span>  <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">36</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+                <span style=" color: #000000;">{</span> <span style=" color: #000000;">name</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;wilma&quot;</span><span style=" color: #000000;">,</span>   <span style=" color: #000000;">role</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;wife&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">age</span>  <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">31</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+                <span style=" color: #000000;">{</span> <span style=" color: #000000;">name</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;pebbles&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">role</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;kid&quot;</span><span style=" color: #000000;">,</span>  <span style=" color: #000000;">age</span>  <span style=" color: #000000;">=&gt;</span>  <span style=" color: #B452CD;">4</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+            <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+
+        <span style=" color: #000000;">jetsons</span>     <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">{</span>
+            <span style=" color: #000000;">series</span>   <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;jetsons&quot;</span><span style=" color: #000000;">,</span>
+            <span style=" color: #000000;">nights</span>   <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">[</span> <span style=" color: #CD5555;">qw(wednesday saturday)</span> <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+            <span style=" color: #000000;">members</span>  <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">[</span>
+                <span style=" color: #000000;">{</span> <span style=" color: #000000;">name</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;george&quot;</span><span style=" color: #000000;">,</span>  <span style=" color: #000000;">role</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;lead&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">age</span>  <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">41</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+                <span style=" color: #000000;">{</span> <span style=" color: #000000;">name</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;jane&quot;</span><span style=" color: #000000;">,</span>    <span style=" color: #000000;">role</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;wife&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">age</span>  <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">39</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+                <span style=" color: #000000;">{</span> <span style=" color: #000000;">name</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;elroy&quot;</span><span style=" color: #000000;">,</span>   <span style=" color: #000000;">role</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;kid&quot;</span><span style=" color: #000000;">,</span>  <span style=" color: #000000;">age</span>  <span style=" color: #000000;">=&gt;</span>  <span style=" color: #B452CD;">9</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+            <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+         <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+
+        <span style=" color: #000000;">simpsons</span>    <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">{</span>
+            <span style=" color: #000000;">series</span>   <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;simpsons&quot;</span><span style=" color: #000000;">,</span>
+            <span style=" color: #000000;">nights</span>   <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">[</span> <span style=" color: #CD5555;">qw(monday)</span> <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+            <span style=" color: #000000;">members</span>  <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">[</span>
+                <span style=" color: #000000;">{</span> <span style=" color: #000000;">name</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;homer&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">role</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;lead&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">age</span>  <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">34</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+                <span style=" color: #000000;">{</span> <span style=" color: #000000;">name</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;marge&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">role</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;wife&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">age</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">37</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+                <span style=" color: #000000;">{</span> <span style=" color: #000000;">name</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;bart&quot;</span><span style=" color: #000000;">,</span>  <span style=" color: #000000;">role</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;kid&quot;</span><span style=" color: #000000;">,</span>  <span style=" color: #000000;">age</span>  <span style=" color: #000000;">=&gt;</span>  <span style=" color: #B452CD;">11</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+            <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+         <span style=" color: #000000;">}</span><span style=" color: #000000;">,</span>
+      <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$graph</span> = <span style=" color: #000000;">GraphViz::Data::Grapher</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">%TV</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$graph</span><span style=" color: #00688B;">-&gt;as_png</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;complex.png&quot;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Graphik:
+</p>
+<form mt:asset-id="14" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="complex.png" src="{{ site.url }}/assets/gvdg/complex.png" width="2587" height="539"  style="" /></form>
+<p>
+&nbsp;
+</p>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?GraphViz::Data::Grapher">GraphViz::Data::Grapher</a></li>
+<li><a href="http://search.cpan.org/perldoc?GraphViz::Data::Structure">GraphViz::Data::Structure</a> Eine Alternative</li>
+<li><a href="http://www.perlmonks.org/?node_id=481745">PerlMonks: How can I visualize my complex data structure?</a></li>
+<li><a href="{{ site.url }}/2008/06/komplexe-datenstrukturen-mit-d.html">Komplexe Datenstrukturen mit Dumpvalue darstellen</a></li>
+<li><a href="http://perldoc.perl.org/perldsc.html">perldsc - Perl Data Structures Cookbook</a></li>
+</ul>

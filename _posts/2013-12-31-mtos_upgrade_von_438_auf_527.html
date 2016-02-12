@@ -1,0 +1,96 @@
+---
+layout: post
+title: 'Interna: Upgrade MTOS  von 4.38 auf 5.2.7'
+date: '2013-12-31 11:36:11 +0000'
+mt_id: 253
+blog_id: 1
+post_id: 253
+permalink: /2013/12/mtos_upgrade_von_438_auf_527.html
+published: false
+categories:
+- intern
+---
+<p>
+<a href="{{ site.url }}/">Perl-Howto.de</a> läuft seit 2008 mit dem CMS Movable Type in Version 4.x in der Open Source Variante (MTOS).
+</p>
+<p>
+Der <a href="http://movabletype.org/news/2013/07/mtos_support_policy.html">Support für Movable Type</a> 4.38 endet am <a href="http://movabletype.org/news/2012/12/new_movable_type_product_life_cycle_policy_announced_today_1.html">31.12.2013</a>, so daß ein Upgrade auf 5.2.x, das wohl auch in 2014 noch Sicherheitsupdates erhält, dringend angeraten ist.
+</p>
+<p>
+Mit dem Erscheinen der <a href="http://movabletype.org/news/2013/10/movable_type_launches_mt6.html">Version 6</a> von Movable Type wird auch der <a href="http://movabletype.org/news/2013/07/license_change_on_movable_type_6.html">Support der Open Source Variante von Movable Type</a> sehr deutlich reduziert bzw. eingestellt (5.2.x wird die letzte OS Variante sein).
+</p>
+<p>
+Die niedrige Priorität der OS Variante ist wohl auch ein Grund, warum die <a href="http://movabletype.org/">MTOS Website</a> so vernachlässigt ist.
+</p>
+<p>
+Dieses Chaos erschwert das Update auf eine aktuelle Version  - daher hier eine kurze Schilderung der wichtigsten Schritte, die ich beim Upgrade von Version 4.38 auf 5.2.7 durch geführt habe.
+</p>
+
+<h2>Einigermaßen aktuelle Version beschaffen</h2>
+<p>
+Auf dem <a href="http://movabletype.org/downloads/stable/">MTOS Download Server</a> gibt es keine aktuellen Updates mehr für die Open Source Version von Movable Type.
+</p>
+<p>
+Das <a href="http://packages.debian.org/de/sid/movabletype-opensource">Debian Paket movabletype-opensource</a> enthält immerhin ein <i>tar.gz</i> der Version 5.2.7, welche <a href="http://movabletype.org/news/2013/11/movable_type_601_529_and_5161_released_to_close_security_vul.html">sicherheitstechnisch leider nicht ganz auf dem aktuellem Stand</a> ist.
+</p>
+<p>
+Eine offizielle Downloadmöglichkeit für die aktuelle Version 5.2.9 habe ich leider nicht gefunden. 
+</p>
+<p>
+Es gibt wohl den <a href="https://github.com/movabletype/movabletype/tree/support-5.2x">MTOS support-5.2x</a> Branch im <a href="https://github.com/movabletype/movabletype">MTOS GitHub Repo</a> und eine <a href="http://movable-type.ru/2013/12/movable-type-529.php">Website in Russland</a>.
+</p>
+<p>
+Anscheinend muss man wirklich bei SixApart <a href="http://movabletype.org/news/2013/11/movable_type_601_529_and_5161_released_to_close_security_vul.html">nachfragen</a>.
+</p>
+
+<h2>RTFM</h2>
+<p>
+Ein Blick in den offiziellen <a href="http://movabletype.org/documentation/installation/upgrade-movable-type.html">Upgrade Guide for Movable Type</a> kann sicherlich nicht schaden.
+</p>
+
+<h2>Backups</h2>
+<p>
+Neben dem <a href="http://movabletype.org/documentation/administrator/maintenance/backup-and-restore.html">Movable Type System Backup</a> ist ein <a href="http://movabletype.org/documentation/reference/mysql-backup-restore.html">Backup der MySQL-Datenbank</a> <b>zwingend</b> erforderlich.
+</p>
+<p>
+Ein Backup aller MTOS relevanten Dateien, wie Assets, Entries, Images, usw. empfehle ich sehr. 
+</p>
+
+<h2>Aufräumarbeiten vor dem Upgrade</h2>
+<p>
+Um die Upgrade Dauer vom alten Datenbankschema auf das neue deutlich zu verkürzen, empfehle ich ein Zurücksetzen des <a href="http://movabletype.org/documentation/administrator/maintenance/activity-log.html">Activy Logs</A>.
+</p>
+<p>
+Die als Spam gekennzeichneten Kommentare in MTOS4 tauchen in MTOS5 als neue Kommentare auf, daher empfehle ich hier ebenfalls Löschen.
+</p>
+<p>
+<a href="http://movabletype.org/documentation/developer/the-plugin-directory.html">Plugins</a> würde ich ebenfalls deinstallieren und später neu installieren.
+</p>
+
+
+<h2>mt-static und cgi-bin/mt/ umbennen</h2>
+<p>
+Die beiden Ordner <i>mt-static</i> bzw. <i>cgi-bin/mt</i> habe ich einfach auf dem Server in <i>mt4</i> umbenannt. Alle übrigen Dateien und Ordner habe ich so auf dem Server belassen, wie MTOS diese angelegt hat. So hat man im Fall der Fälle schnell Zugriff auf die vorherige Version. (Symbolische Links sind natürlich auch eine Möglichkeit.)
+</p>
+
+<h2>Upgrade auf die neue Version</h2>
+<p>
+Nun das <i>tar.gz</i> mit der Version 5.2.7 auspacken und die Ordner <i>mt-static</i> bzw. <i>cgi-bin/mt</i> an den passenden Ort verschieben und die <a href="http://movabletype.org/documentation/installation/troubleshooting.html#file-permissions">Rechte entsprechend setzen</a>.
+</p>
+<p>
+Ob alle notwendigen bzw. optionalen Perl-Module installiert sind, lässt sich wie gewohnt mit <i>mt-check.cgi</i> prüfen.
+</p>
+<p>
+Die alte Konfigurationsdatei <i>mt-config.cgi</i> aus dem Ordner <i>mt4</i> in den neuen Ordner <i>mt</i> kopieren und MTOS wie gewohnt über <i>mt.cgi</i> aufrufen. Das Update startet automatisch und ist nicht rückwärts kompatibel.
+</p>
+<p>
+Nach dem Datenbankupgrade muss evtl. noch Designs und Themes  wieder installiert werden und ggf. die eigenen Änderungen an den CSS-Dateien in <i>mt-static</i> manuell nachgezogen werden.
+</p>
+
+<h2>Summary</h2>
+<p>
+Wer nicht all zu viel an MTOS herumgeschraubt hat, sollte ein Uprade problemlos durchführen können. Im Zweifel vorher auf einem Testsystem ausprobieren.
+</p>
+<p>
+Das SixApart die OS-Variante einstellt finde ich noch nachvollziehbar. Das SixApart nicht in der Lage oder nicht bereit ist, die Dekommissionierung fachgerecht durch zu ziehen, finde ich schon sehr befremdlich. Meine ursprüngliche Idee, einfach auf die MT6 Pro Version umzusteigen, erhält dadurch eine deutlich geringere Priorität. Ich suche jetzt erst ein Mal nach einem anderem CMS.
+</p>

@@ -1,0 +1,71 @@
+---
+layout: post
+title: ASCII-Tabellen mit Text::ASCIITable
+date: '2009-09-21 19:30:00 +0000'
+mt_id: 165
+blog_id: 1
+post_id: 165
+permalink: /2009/09/asciitabellen_mit_textasciitable.html
+categories:
+- '101'
+---
+<p>
+Dank <a href="http://search.cpan.org/perldoc?Text::ASCIITable">Text::ASCIITable</a> von <a href="http://search.cpan.org/~lunatic/">Håkon Nessjøen</a> lassen sich schöne Tabellen im Textmodus im Handumdrehen erstellen.
+</p>
+<p>
+&nbsp;
+</p>
+<h2>Beispiel</h2>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Text::ASCIITable</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$table</span> = <span style=" color: #000000;">Text::ASCIITable</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">{</span> <span style=" color: #000000;">headingText</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;Sales per Year&#39;</span> <span style=" color: #000000;">}</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$table</span><span style=" color: #00688B;">-&gt;setCols</span><span style=" color: #000000;">(</span> <span style=" color: #CD5555;">&#39;Year&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;Sales&#39;</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$table</span><span style=" color: #00688B;">-&gt;alignCol</span><span style=" color: #000000;">(</span> <span style=" color: #CD5555;">&#39;Year&#39;</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;left&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;Sales&#39;</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;right&#39;</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$table</span><span style=" color: #00688B;">-&gt;addRow</span><span style=" color: #000000;">(</span> <span style=" color: #B452CD;">2005</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;3000.00&quot;</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$table</span><span style=" color: #00688B;">-&gt;addRow</span><span style=" color: #000000;">(</span> <span style=" color: #B452CD;">2006</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;4000.00&quot;</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$table</span><span style=" color: #00688B;">-&gt;addRow</span><span style=" color: #000000;">(</span> <span style=" color: #B452CD;">2007</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;3500.00&quot;</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$table</span><span style=" color: #00688B;">-&gt;addRow</span><span style=" color: #000000;">(</span> <span style=" color: #B452CD;">2008</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;5800.00&quot;</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$table</span><span style=" color: #00688B;">-&gt;addRowLine</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$table</span><span style=" color: #00688B;">-&gt;addRow</span><span style=" color: #000000;">(</span> <span style=" color: #CD5555;">&#39;Average&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;4075.00&quot;</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$table</span><span style=" color: #000000;">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+<pre>
+.-------------------.
+|   Sales per Year  |
++---------+---------+
+| Year    | Sales   |
++---------+---------+
+| 2005    | 3000.00 |
+| 2006    | 4000.00 |
+| 2007    | 3500.00 |
+| 2008    | 5800.00 |
++---------+---------+
+| Average | 4075.00 |
+'---------+---------'
+</pre>
+<p>
+&nbsp;
+</p>
+
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Text::ASCIITable">Text::ASCIITable - Create a nice formatted table using ASCII characters</a></li>
+<li>Perl-Uwe: <a href="http://www.perl-uwe.de/blog/2008-11/tabellen-mit-text-asciitable/">Tabellen mit Text::ASCIITable</a></li>
+<li><a href="http://search.cpan.org/perldoc?Text::Table">Text::Table - Organize Data in Tables</a></li>
+<li><a href="http://search.cpan.org/perldoc?Text::FormatTable">Text::FormatTable - Format text tables</a></li>
+<li><a href="http://search.cpan.org/perldoc?Text::SimpleTable">Text::SimpleTable - Simple Eyecandy ASCII Tables</a></li>
+</ul>

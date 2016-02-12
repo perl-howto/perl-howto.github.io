@@ -1,0 +1,224 @@
+---
+layout: post
+title: Zufallszahlen (Pseudo Random Numbers) mit Bordmitteln erzeugen
+date: '2008-06-23 22:20:00 +0000'
+mt_id: 76
+blog_id: 1
+post_id: 76
+permalink: /2008/06/zufallszahlen_pseudo_random_nu.html
+categories:
+- '101'
+---
+<h2>Zufallszahlen erzeugen mit Bordmitteln</h2>
+<p>
+Perl stellt die Funktion <a href="http://perldoc.perl.org/functions/rand.html">rand(x)</a>, welche eine Zufallszahl zurück liefert, die größer oder gleich 0 und kleiner als x ist, zur Verfügung.
+</p>
+<p>
+<strong>Beispiel: Zufallszahl zwischen 0 und 9,99</strong>
+</p>
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+
+<span class="c"># Ganzzahlige Zufallszahl zwischen 0 und 9,99</span>
+<span class="k">my</span> <span class="i">$zufallszahl</span> = <span class="k">rand</span><span class="s">(</span><span class="n">10</span><span class="s">)</span><span class="sc">;</span>
+<span class="k">print</span> <span class="q">&quot;Zufallszahl: $zufallszahl\n&quot;</span><span class="sc">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Zufallszahl: 5.26864530825154
+</pre>
+<p>
+Ganzahlige Zufallszahlen erhalten Sie durch Kombination von <a href="http://perldoc.perl.org/functions/int.html">int()</a> und <a href="http://perldoc.perl.org/functions/rand.html">rand(x)</a>.  Falls Sie eine Zufallszahl im Bereich 1 bis einschließlich x benötigen, addieren Sie einfach 1 zur Zufallszahl.
+</p>
+<p>
+<strong>Beispiel: Ganzzahlige Zufallszahlen erzeugen</strong>
+</p>
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+
+<span class="c"># Ganzzahlige Zufallszahl zwischen 0 und 9</span>
+<span class="k">my</span> <span class="i">$zufallszahl</span> = <span class="k">int</span><span class="s">(</span><span class="k">rand</span><span class="s">(</span><span class="n">10</span><span class="s">)</span><span class="s">)</span><span class="sc">;</span>
+<span class="k">print</span> <span class="q">&quot;Zufallszahl: $zufallszahl\n&quot;</span><span class="sc">;</span>
+
+<span class="c"># Ganzzahlige Zufallszahl zwischen 1 und 10 </span>
+<span class="i">$zufallszahl</span> = <span class="k">int</span><span class="s">(</span><span class="k">rand</span><span class="s">(</span><span class="n">10</span><span class="s">)</span> +<span class="n">1</span> <span class="s">)</span><span class="sc">;</span>
+<span class="k">print</span> <span class="q">&quot;Zufallszahl: $zufallszahl\n&quot;</span><span class="sc">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Zufallszahl: 5
+Zufallszahl: 2
+</pre>
+<p>
+<strong>Beispiel: Ein Element aus einem Array zufällig auswählen</strong>
+</p>
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">@Numbers</span> = <span class="q">qw(0 1 2 3 4 5 6 7 8 9)</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$ausgewaehlt</span><span class="sc">;</span>
+
+<span class="i">$ausgewaehlt</span> = <span class="k">int</span><span class="s">(</span><span class="k">rand</span><span class="s">(</span><span class="k">scalar</span><span class="s">(</span><span class="i">@Numbers</span><span class="s">)</span><span class="s">)</span><span class="s">)</span><span class="sc">;</span>
+
+<span class="k">print</span> <span class="q">&quot;Auswahl: $ausgewaehlt\n&quot;</span><span class="sc">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Auswahl: 2
+</pre>
+
+<p>
+<strong>Beispiel: Ziehen ohne Zurücklegen</strong>
+</p>
+<p>
+Wenn Sie mehrere Elemente zufällig auswählen möchten, bietet sich eine <a href="http://perldoc.perl.org/perlsyn.html#For-Loops">for-Schleife</a> an.
+</p>
+<p>Doppelte Elemente können Sie mit <a href="http://perldoc.perl.org/functions/redo.html">redo</a> in Kombination mit einem <a href="http://perldoc.perl.org/perldata.html">Hash</a> entfernen.
+</p>
+<p>
+Jedes gezogene Element wird in einem Hash getrackt. Falls es bereits gezogen wurde, wird die for Schleife mit redo (Mach's noch einmal) wiederholt. redo erhöht den Schleifenzähler im Gegensatz zu <a href="http://perldoc.perl.org/functions/next.html">next</a> nicht. 
+</p>
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+
+<span class="c"># Beispiel Ziehen ohne Zurücklegen (3 aus 16)</span>
+
+<span class="k">my</span> <span class="i">@Numbers</span> = <span class="q">qw(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16)</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$ziehung</span> = <span class="q">&#39;&#39;</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">%bereits_gezogen</span> = <span class="s">(</span><span class="s">)</span><span class="sc">;</span>
+<span class="k">my</span> <span class="i">$gezogen</span><span class="sc">;</span>
+
+
+<span class="k">for</span> <span class="s">(</span> <span class="n">1</span> .. <span class="n">3</span> <span class="s">)</span> <span class="s">{</span>
+	<span class="i">$gezogen</span> = <span class="k">int</span><span class="s">(</span><span class="k">rand</span><span class="s">(</span><span class="k">scalar</span><span class="s">(</span><span class="i">@Numbers</span><span class="s">)</span><span class="s">)</span><span class="s">)</span><span class="sc">;</span>
+        	<span class="k">print</span> <span class="q">&quot;Auswahl: $gezogen\n&quot;</span><span class="sc">;</span> 
+
+        <span class="k">redo</span> <span class="k">if</span> <span class="k">exists</span> <span class="i">$bereits_gezogen</span>{<span class="i">$gezogen</span>}<span class="sc">;</span>
+        <span class="i">$bereits_gezogen</span>{<span class="i">$gezogen</span>}++<span class="sc">;</span>
+        <span class="i">$ziehung</span> .= <span class="i">$gezogen</span><span class="sc">;</span>	
+<span class="s">}</span>
+
+<span class="k">print</span> <span class="q">&quot;Ziehung: $ziehung\n&quot;</span><span class="sc">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Auswahl: 8
+Auswahl: 3
+Auswahl: 8
+Auswahl: 7
+Ziehung: 837
+</pre>
+
+<h2>Zufallszahlengenerator initialisieren mit srand()</h2>
+<p>
+<a href="http://perldoc.perl.org/functions/srand.html">srand() </a>initialisiert den Zufallszahlengenerator, der von <a href="http://perldoc.perl.org/functions/rand.html">rand()</a> verwendet wird. Diese zufällige Initialisierung dient der Erzeugung verschiedener Zufallszahlen bei jedem Aufruf Ihres Programms.
+</p>
+<p>
+Oder andersherum betrachtet, wenn stets das selbe Seed verwendet wird, werden auch immer die selben Zufallszahlen erzeugt, d.h. wenn jemand das Seed kennt oder erraten kann, kann er auch die nachfolgenden Zufallszahlen erraten.
+</p>
+<p>
+Zur Verdeutlichung ein einfaches Beispiel: 
+</p>
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+
+<span class="c"># Sechs Seeds erstellen</span>
+<span class="k">my</span> <span class="i">@seeds</span> = <span class="s">(</span><span class="n">15</span> .. <span class="n">20</span><span class="s">)</span><span class="sc">;</span>
+
+<span class="c"># Dreimal &quot;Zufallszahlen&quot; erzeugen</span>
+<span class="k">for</span> <span class="s">(</span> <span class="n">1</span> .. <span class="n">3</span> <span class="s">)</span> <span class="s">{</span>
+     <span class="i">&amp;generate_pin</span><span class="s">(</span><span class="i">$_</span><span class="s">)</span><span class="sc">;</span>
+     <span class="k">print</span> <span class="q">&quot;\n&quot;</span><span class="sc">;</span>
+<span class="s">}</span>
+<span class="k">exit</span><span class="s">(</span><span class="n">0</span><span class="s">)</span><span class="sc">;</span>
+<span class="c">###############################################################################</span>
+<a name="generate_pin"></a><span class="k">sub </span><span class="m">generate_pin</span> <span class="s">{</span>
+	<span class="k">my</span> <span class="i">$n</span> = <span class="k">shift</span><span class="sc">;</span>
+	<span class="k">my</span> <span class="i">$counter</span> = <span class="n">0</span><span class="sc">;</span>
+        <span class="k">my</span> <span class="i">@Numbers</span> = <span class="q">qw(0 1 2 3 4 5 6 7 8 9)</span><span class="sc">;</span>
+	<span class="k">foreach</span> <span class="k">my</span> <span class="i">$seed</span> <span class="s">(</span><span class="i">@seeds</span><span class="s">)</span> <span class="s">{</span>
+		<span class="c">############</span>
+		<span class="k">srand</span> <span class="i">$seed</span><span class="sc">;</span>
+		<span class="c">############</span>
+		++<span class="i">$counter</span><span class="sc">;</span>
+		<span class="k">my</span> <span class="i">$pin</span> = <span class="q">&#39;&#39;</span><span class="sc">;</span>
+		<span class="k">my</span> <span class="i">$x</span><span class="sc">;</span>
+		<span class="k">for</span> <span class="s">(</span><span class="n">1</span> .. <span class="n">5</span><span class="s">)</span> <span class="s">{</span>
+			<span class="i">$x</span> = <span class="k">int</span><span class="s">(</span><span class="k">rand</span><span class="s">(</span><span class="k">scalar</span><span class="s">(</span><span class="i">@Numbers</span><span class="s">)</span><span class="s">)</span><span class="s">)</span><span class="sc">;</span>
+			<span class="i">$pin</span> .= <span class="i">$Numbers</span>[<span class="i">$x</span>]<span class="sc">;</span>
+		<span class="s">}</span>
+		<span class="k">print</span> <span class="q">&quot;PIN Nr: $counter in Runde $n: $pin\n&quot;</span><span class="sc">;</span>
+	<span class="s">}</span>
+<span class="s">}</span>
+<span class="c">###############################################################################</span>
+</pre>
+<p>
+Ausgabe.
+</p>
+<pre>
+PIN Nr: 1 in Runde 1: 23184
+PIN Nr: 2 in Runde 1: 10933
+PIN Nr: 3 in Runde 1: 97673
+PIN Nr: 4 in Runde 1: 84323
+PIN Nr: 5 in Runde 1: 71173
+PIN Nr: 6 in Runde 1: 58813
+
+PIN Nr: 1 in Runde 2: 23184
+PIN Nr: 2 in Runde 2: 10933
+PIN Nr: 3 in Runde 2: 97673
+PIN Nr: 4 in Runde 2: 84323
+PIN Nr: 5 in Runde 2: 71173
+PIN Nr: 6 in Runde 2: 58813
+
+PIN Nr: 1 in Runde 3: 23184
+PIN Nr: 2 in Runde 3: 10933
+PIN Nr: 3 in Runde 3: 97673
+PIN Nr: 4 in Runde 3: 84323
+PIN Nr: 5 in Runde 3: 71173
+PIN Nr: 6 in Runde 3: 58813
+</pre>
+<p>
+Es werden jedesmal die selben (!) Zufallszahlen erzeugt.
+</p>
+<p>
+<strong>Rufen Sie niemals srand() auf, wenn Sie nicht genau wissen, was Sie tun.</strong>
+</p>
+<p>
+Perl ruft srand() automatisch für Sie mit einem geeignetem Seed auf, sobald rand() verwendet wird.
+</p>
+
+
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://perldoc.perl.org/perlfaq4.html">perlfaq4</a></li>
+<li><a href="http://perldoc.perl.org/functions/rand.html">rand()</a></li>
+<li><a href="http://perldoc.perl.org/functions/srand.html">srand()</a></li>
+<li><a href="http://perldoc.perl.org/functions/int.html">int()</a></li>
+<li><a href="http://perldoc.perl.org/functions/redo.html">redo</a></li>
+<li><a href="http://perldoc.perl.org/functions/next.html">next</a></li>
+<li><a href="http://perldoc.perl.org/perldata.html">perldata</a></li>
+<li><a href="http://www.hidemail.de/blog/rand-perl.shtml">/blog/perl: rand() - Zufallszahl ermitteln in Perl</a></li>
+<li><a href="http://www.teialehrbuch.de/Kostenlose-Kurse/Perl-und-CGI/10864-Bedingte-Anweisungen.html">Teia Lehrbuch: 3.1.2 Bedingte Anweisungen</a></li>
+</ul>

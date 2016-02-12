@@ -1,0 +1,86 @@
+---
+layout: post
+title: 'Memory::Usage - Aktuelle Speichernutzung  '
+date: '2011-09-11 22:19:19 +0000'
+mt_id: 220
+blog_id: 1
+post_id: 220
+permalink: /2011/09/memoryusage_aktuelle_speichernutzung.html
+categories:
+- linux
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Memory::Usage">Memory::Usage</a> von <a href="http://search.cpan.org/~doneill/">David O'Neill</a> zeigt den aktuellen Speicherbedarf eines Programms aus der Sicht des Betriebssystems an. Da hierzu die Datei <i>/proc/$pid/statm</i> genutzt wird, funktioniert Memory::Usage derzeit nur auf Betriebssystemen, welche diese Datei zur Verf&uuml;gung stellen, z.B. <a href="http://www.linuxfoundation.org/">Linux</a>.
+</p>
+<p>
+Memory::Usage untergliedert die Speichernutzung wie folgt:
+</p>
+<ul class="no-bullet">
+ <li>virtual memory size (vzs)</li>
+ <li>resident set size (rss)</li>
+ <li>shared memory size (shared)</li>
+ <li>text (aka code or exe) size (code)</li>
+ <li>data and stack size (data)</li>
+</ul>
+<p>
+&nbsp;
+</p>
+<h2>Beispiel</h2>
+<p>
+Im diesem Beispiel wird der Speicherverbrauch vor und nach dem Aufbau einer speicherhungrigen Datenstruktur mit <i>record()</i> gemessen.
+ Anschlie&szlig;end wird ein Report auf den Standardfehlerkanal STDERR via <i>dump()</i> ausgegeben.
+</p>
+
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Memory::Usage</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$mu</span> = <span style="color: #000000;">Memory::Usage</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">%hash</span> = <span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Record amount of memory used by current process</span>
+<span style="color: #00688B;">$mu</span><span style="color: #00688B;">-&gt;record</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;starting work&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Use some memory</span>
+<span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #000000;">(</span> <span style="color: #B452CD;">1</span> .. <span style="color: #B452CD;">10_000_000</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+	<span style="color: #00688B;">$hash</span>{ <span style="color: #00688B;">$_</span> } = <span style="color: #B452CD;">1</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+
+<span style="color: #228B22;"># Record amount in use afterwards</span>
+<span style="color: #00688B;">$mu</span><span style="color: #00688B;">-&gt;record</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;finished work&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Spit out a report</span>
+<span style="color: #00688B;">$mu</span><span style="color: #00688B;">-&gt;dump</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">exit</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm liefert folgende Ausgabe:
+</p>
+<pre>
+time    vsz (  diff)    rss (  diff) shared (  diff)   code (  diff)   data (  diff)
+    0   5304 (  5304)   2072 (  2072)   1652 (  1652)   1244 (  1244)    692 (   692) starting work
+   37  834004 ( 828700) 830784 ( 828712)   1676 (    24)   1244 (     0)  829392 ( 828700) finished work
+</pre>
+<p>
+Die Laufzeit wird in Sekunden angeben, alle Speicherangaben in Kilobytes. Memory::Usage rechnet intern <a href="http://de.wikipedia.org/wiki/Paging">pages</a> in Kilobyte um (4 kb je page).
+</p>
+<p>
+&nbsp;
+</p>
+
+<h2>Siehe auch:</h2>
+
+<ul class="no-bullet">
+ <li><a href="http://search.cpan.org/perldoc?Memory::Usage">Memory::Usage</a></li>
+ <li><a href="http://linux.die.net/man/5/proc">proc(5) - Linux man page</a></li>
+ <li><a href="http://search.cpan.org/perldoc?Devel::Peek">Devel::Peek</a></li>
+ <li><a href="http://perldoc.perl.org/perldebguts.html#Using-%24ENV{PERL_DEBUG_MSTATS}">Debugging Perl memory usage: Using $ENV{PERL_DEBUG_MSTATS}</a></li>
+ <li><a href="http://search.cpan.org/perldoc?Devel::Size">Devel::Size</a></li>
+ <li><a href="{{ site.url }}/2008/09/develsize-wieviel-speicher-b.html">Devel::Size - Wieviel Speicher belegt meine Datenstruktur?</a></li>
+ <li><a href="http://search.cpan.org/perldoc?Memchmark">Memchmark</a></li>
+</ul>

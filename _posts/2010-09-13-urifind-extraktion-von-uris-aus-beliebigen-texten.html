@@ -1,0 +1,115 @@
+---
+layout: post
+title: URI::Find - Extraktion von URIs aus beliebigen Texten
+date: '2010-09-13 22:40:00 +0000'
+mt_id: 200
+blog_id: 1
+post_id: 200
+permalink: /2010/09/urifind-extraktion-von-uris-aus-beliebigen-texten.html
+categories:
+- lwp
+---
+<p>
+<a href="http://search.cpan.org/perldoc?URI::Find">URI::Find</a> von <a href="http://search.cpan.org/~mschwern/">Michael G Schwern</a> vereinfacht das Extrahieren von <a href="http://de.wikipedia.org/wiki/Uniform_Resource_Identifier">URI</a>s aus beliebigen Texten.
+</p>
+<p>&nbsp;</p>
+
+<h2>Beispiel URI Extraktion</h2>
+<p>
+Das Beispielprogramm holt eine Webseite und gibt den HTML-Quelltext an die Methode <em>find</em>. Die Methode  <em>find</em> ruft bei jedem gefundenem URI die callback-Funktion  <em>callback</em> mit zwei Parametern auf: Einem Objekt der Klasse <a href="http://search.cpan.org/perldoc?URI::URL">URI::URL</a> und dem gefundenem URI. Der Rückgabewert der callback-Funktion wird genutzt, um die gefundene URI im Text (hier in <em>$html</em>) zu ersetzen.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">URI::Find</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">LWP::Simple</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$url</span> = <span style="color: #CD5555;">&#39;{{ site.url }}&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$html</span> = <span style="color: #000000;">get</span> <span style="color: #00688B;">$url</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Container fuer URIs</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">%uris</span> = <span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$finder</span> = <span style="color: #000000;">URI::Find</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span> \<span style="color: #00688B;">&amp;callback</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$found</span> = <span style="color: #00688B;">$finder</span><span style="color: #00688B;">-&gt;find</span><span style="color: #000000;">(</span> \<span style="color: #00688B;">$html</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># URIs absteigend sortiert ausgeben</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@uris</span> = <span style="color: #8B008B; font-weight:bold;">reverse</span> <span style="color: #8B008B; font-weight:bold;">sort</span> <span style="color: #8B008B; font-weight:bold;">keys</span> <span style="color: #00688B;">%uris</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$uri</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@uris</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;$uri\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+<span style="color: #8B008B; font-weight:bold;">exit</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<a name="callback"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">callback</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$uri_url</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$uri</span> <span style="color: #000000;">)</span> = <span style="color: #00688B;">@_</span><span style="color: #000000;">;</span>
+
+    <span style="color: #228B22;"># $uri_url ist ein Objekt der Klasse URI::URL</span>
+
+    <span style="color: #228B22;"># Doppelte URIs entfernen</span>
+    <span style="color: #00688B;">$uris</span>{<span style="color: #00688B;">$uri</span>}++<span style="color: #000000;">;</span>
+
+    <span style="color: #228B22;"># Der Ruckgabewert ersetzt die URI in \$html</span>
+    <span style="color: #8B008B; font-weight:bold;">return</span> <span style="color: #CD5555;">&quot;--- Ersetzt durch XXXXX ---&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+https://www.socialtext.net/perl5/index.cgi?events_2010_froscon
+http://www.zeit.de/digital/datenschutz/2010-09/twitter-oauthcalypse-authentification
+http://www.yahoo.de
+http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd
+http://www.w3.org/1999/xhtml
+http://www.thomas-fahle.de/perl-training/index.html
+http://www.thomas-fahle.de/perl-programmierung/index.html
+http://www.thomas-fahle.de/2010/08/kurzbericht-perlfroscon-2010-st-augustin-21-und-22-august-2010.html
+http://www.thomas-fahle.de
+http://www.slideshare.net/thomasfahle/dancer-5032076
+http://www.slideshare.net/reneebperl/fr-os-con2010develnytprof
+http://www.slideshare.net/reneebperl/fr-os-con2010bmatrainer
+......
+</pre>
+<p>
+<a href="http://search.cpan.org/perldoc?URI::Find">URI::Find</a> nimmt es bei Erkennung der URI mit dem Schema sehr genau - eine etwas laxere Erkennung bietet <a href="http://search.cpan.org/perldoc?URI::Find::Schemeless">URI::Find::Schemeless</a>. 
+</p>
+
+<p>&nbsp;</p>
+
+<h2>Kommandozeile: urifind</h2>
+<p>
+ <a href="http://search.cpan.org/perldoc?URI::Find">URI::Find</a> bietet auch ein Kommandozeilen Tool, <a href="http://search.cpan.org/perldoc?urifind">urifind</a>, welches Dateien nach URIs durchsucht.
+</p>
+<pre>
+ $ urifind file
+</pre>
+<p>
+In bester *NIX-Manier lässt sich <a href="http://search.cpan.org/perldoc?urifind">urifind</a> auch als<a href="http://de.wikipedia.org/wiki/Filter_%28Unix%29"> Filte</a>r verwenden:
+<pre>
+$ wget {{ site.url }} -O - | urifind -u -s -r
+</pre>
+erzeugt die selbe Ausgabe wie das oben gezeigte Beispiel.
+</p>
+<p>
+Weitere Optionen liefert <em>urifind -h</em>.
+</p>
+
+
+<p>&nbsp;</p>
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li>CPAN: <a href="http://search.cpan.org/perldoc?URI::Find">URI::Find</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?URI::Find::Schemeless">URI::Find::Schemeless</a> </li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?urifind">urifind</a>  find URIs in a document and dump them to STDOUT</li>
+<li><a href="http://perldoc.perl.org/perlfaq9.html">perlfaq9</a> - perldoc.perl.org</li>
+<li>Perl 2002 Advent Calendar: <a href="http://perladvent.pm.org/2002/1st/">URI::Find</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?HTML::LinkExtor">HTML::LinkExtor</a> </li>
+<li>Web Techniques<a href="http://www.stonehenge.com/merlyn/WebTechniques/col62.html"> Column 62 </a>(Jun 2001)</li>
+</ul>

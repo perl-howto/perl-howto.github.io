@@ -1,0 +1,125 @@
+---
+layout: post
+title: File::HomeDir - Heimatverzeichnis und dazugehörige Verzeichnisse ermitteln
+date: '2008-07-02 22:15:00 +0000'
+mt_id: 89
+blog_id: 1
+post_id: 89
+permalink: /2008/07/file_homedir_heimatverzeichnis_ermitteln.html
+categories:
+- '101'
+---
+<p>
+Jedem Nutzer eines Computers wird eine eigene zentrale Datenablage, sein Heimatverzeichnis, zugewiesen. 
+</p>
+<p>
+Unterhalb des Heimatverzeichnisse werden zusätzlich noch weitere Verzeichnisse für bestimmte Daten, z.B. Bilder oder Musik, angelegt.
+</p>
+
+<h2>File::HomeDir</h2>
+<p>
+<a href="http://search.cpan.org/dist/File-HomeDir/">File::HomeDir</a> von <a href="http://search.cpan.org/~adamk/">Adam Kennedy</a> bietet eine betriebssystemunabhängige Möglichkeit das Heimatverzeichnis und die dazugehörigen Spezialordner zu ermitteln.
+</p>
+
+<p>
+Die niedrige Versionsnummer (0.80) deutet es schon an: <a href="http://search.cpan.org/dist/File-HomeDir/">File::HomeDir</a> ist noch nicht ganz ausgereift. Für einige typische, eher einfache Fälle kann es jedoch schon eingesetzt werden. 
+</p>
+
+
+<h2>Beispiel (Aktueller User)</h2>
+
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Aktueller User</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$home</span>    = <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">-&gt;my_home</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$desktop</span> = <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">-&gt;my_desktop</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$docs</span>    = <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">-&gt;my_documents</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$music</span>   = <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">-&gt;my_music</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$pics</span>    = <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">-&gt;my_pictures</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$videos</span>  = <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">-&gt;my_videos</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$data</span>    = <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">-&gt;my_data</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Home:    $home    \n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$home</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Desktop: $desktop \n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$desktop</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Docs:    $docs    \n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$docs</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Music:   $music   \n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$music</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Bilder:  $pics    \n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$pics</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Videos:  $videos  \n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$videos</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Daten:   $data    \n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$data</span><span style=" color: #000000;">;</span>
+</pre>
+
+<p>
+Ausgabe unter Linux:
+</p>
+<pre>
+Home:    /home/tf    
+Desktop: /home/tf 
+Docs:    /home/tf    
+Music:   /home/tf   
+Bilder:  /home/tf    
+Videos:  /home/tf  
+Daten:   /home/tf
+</pre>
+<p>
+Ausgabe unter Windows:
+</p>
+<pre>
+Home:    C:\Dokumente und Einstellungen\tf
+Desktop: C:\Dokumente und Einstellungen\tf\Desktop
+Docs:    C:\Dokumente und Einstellungen\tf\Eigene Dateien
+Music:   C:\Dokumente und Einstellungen\tf\Eigene Dateien\Eigene Musik
+Bilder:  C:\Dokumente und Einstellungen\tf\Eigene Dateien\Eigene Bilder
+Videos:  C:\Dokumente und Einstellungen\tf\Eigene Dateien\Eigene Videos
+Daten:   C:\Dokumente und Einstellungen\tf\Lokale Einstellungen\Anwendungsdaten
+</pre>
+
+
+<h2>Beispiel (Anderer User)</h2>
+<p>
+Dieses Beispiel funktioniert unter Windows leider noch nicht.
+</p>
+
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Anderer User</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$user</span> = <span style=" color: #CD5555;">&#39;root&#39;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$home</span>    = <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">-&gt;users_home</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$user&quot;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$desktop</span> = <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">-&gt;users_desktop</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$user&quot;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$docs</span>    = <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">-&gt;users_documents</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$user&quot;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$music</span>   = <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">-&gt;users_music</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$user&quot;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$pics</span>    = <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">-&gt;users_pictures</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$user&quot;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$videos</span>  = <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">-&gt;users_videos</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$user&quot;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$data</span>    = <span style=" color: #000000;">File::HomeDir</span><span style=" color: #000000;">-&gt;users_data</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$user&quot;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Home:    $home    \n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$home</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Desktop: $desktop \n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$desktop</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Docs:    $docs    \n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$docs</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Music:   $music   \n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$music</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Bilder:  $pics    \n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$pics</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Videos:  $videos  \n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$videos</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Daten:   $data    \n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$data</span><span style=" color: #000000;">;</span>
+</pre>
+
+<h2>ActiveState Perl</h2>
+<p>
+<a href="http://www.activestate.com/Products/activeperl/index.mhtml">ActiveState</a>  liefert <a href="http://search.cpan.org/dist/File-HomeDir/">File::HomeDir</a> in der Version 0.69 aus. Aktuell ist Version 0.80.Daher sollte <a href="http://search.cpan.org/dist/File-HomeDir/">File::HomeDir</a> besser per CPAN-Shell installiert werden und nicht per <a href="http://aspn.activestate.com/ASPN/Downloads/ActivePerl/PPM/">ppm</a>.
+</p>
+<pre>
+C:\>perl -MCPAN -e shell
+cpan> install File::HomeDir
+</pre>
+
+<h2>Gnome, KDE und andere Desktops für Linux</h2>
+<p>
+Diverse Desktops für Linux legen, ähnlich wie Windows, spezielle Ordner für bestimmte Daten an. <a href="http://search.cpan.org/dist/File-HomeDir/">File::HomeDir</a> findet diese Ordner in der Version 0.80 nicht. Das steht noch auf der Todo-Liste.
+</p>

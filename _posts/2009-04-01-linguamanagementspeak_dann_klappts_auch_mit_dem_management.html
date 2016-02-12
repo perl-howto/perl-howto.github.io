@@ -1,0 +1,85 @@
+---
+layout: post
+title: Lingua::ManagementSpeak - Dann klappt's auch mit dem Management
+date: '2009-04-01 00:00:02 +0000'
+mt_id: 133
+blog_id: 1
+post_id: 133
+permalink: /2009/04/linguamanagementspeak_dann_klappts_auch_mit_dem_management.html
+categories:
+- humor
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Lingua::ManagementSpeak">Lingua::ManagementSpeak</a> von <a href="http://search.cpan.org/~gryphon/">Gryphon Shafer</a> hilft bei der Ausarbeitung von englischen Texten im bewährten <a href="http://de.wikipedia.org/wiki/Schlagwort_(Sprachwissenschaft)">Buzz Word</a>-Stil.
+</p>
+<p>
+Nachfolgend zwei einfache Beispiele:
+</p>
+<h2>Beispiel: Überschrift, Einleitung und weitere Absätze</h2>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Lingua::ManagementSpeak</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$ms</span> = <span style=" color: #000000;">new</span> <span style=" color: #000000;">Lingua::ManagementSpeak</span><span style=" color: #000000;">;</span>
+
+	<span style=" color: #228B22;"># Ueberschrift</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$ms</span><span style=" color: #00688B;">-&gt;header</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #228B22;"># Einleitung</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$ms</span><span style=" color: #00688B;">-&gt;paragraph</span><span style=" color: #000000;">(</span><span style=" color: #B452CD;">1</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #228B22;"># Weiterer Absatz</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$ms</span><span style=" color: #00688B;">-&gt;paragraph</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende zufällige Ausgabe:
+</p>
+<pre>
+Embracing Excelled Sexy ROI
+
+They might expedite our synergies once we optimize our user-centric e-markets.
+
+We must incentivize our e-business markets when they visualize my e-markets. Its
+interfaces are sold because we suggested my back-end functionalities. My users
+envisions end-to-end portals. They shall monetize our innovative systems as though my 
+turn-key web-readiness can architect my synergistic markets, still its bandwidth is communicated.
+</pre>
+<h2>Beispiel: Bullets für Powerpoint</h2>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Lingua::ManagementSpeak</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$ms</span> = <span style=" color: #000000;">new</span> <span style=" color: #000000;">Lingua::ManagementSpeak</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$number_of_bullets</span> = <span style=" color: #B452CD;">5</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@bullets</span> = <span style=" color: #00688B;">$ms</span><span style=" color: #00688B;">-&gt;bullets</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$number_of_bullets</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$bullet</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">@bullets</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;* &#39;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$bullet</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende zufällige Ausgabe:
+</p>
+<pre>
+* Syndicate our back-end mindshare
+* Maximize our clicks-and-mortar communities
+* Syndicate our impactful web-readiness
+* Implement this sticky experiences
+* Enable my intuitive ROI
+</pre>
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Lingua::ManagementSpeak">Lingua::ManagementSpeak - Tool to generate managerial-sounding text and full documents</a></li>
+<li><a href="http://twitter.com/perloneliner/statuses/1407909562">Twitter: perloneliner - your boss will love you</a> </li>
+<li><a href="http://de.wikipedia.org/wiki/Schlagwort_(Sprachwissenschaft)">Schlagwort (Sprachwissenschaft)</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Bullshit-Bingo">Bullshit-Bingo</a></li>
+<li><a href="http://en.wikipedia.org/wiki/List_of_buzzwords">List of buzz words</a></li>
+<li><a href="http://de.wikipedia.org/wiki/1._April">1.</a><a href="http://de.wikipedia.org/wiki/Aprilscherz"> April</a></li>
+</ul>

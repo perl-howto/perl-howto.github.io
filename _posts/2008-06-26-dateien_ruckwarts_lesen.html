@@ -1,0 +1,138 @@
+---
+layout: post
+title: Dateien rückwärts lesen
+date: '2008-06-26 11:30:00 +0000'
+mt_id: 81
+blog_id: 1
+post_id: 81
+permalink: /2008/06/dateien_ruckwarts_lesen.html
+categories:
+- '101'
+---
+<h2>Fall 1: Kleine Dateien</h2>
+
+<p>
+Falls die Datei klein ist, kann man  sie einfach komplett in ein Array einlesen und dieses mit <a href="http://perldoc.perl.org/functions/reverse.html">reverse()</a> umdrehen.
+</p>
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$file</span> = <span class="q">&#39;test.txt&#39;</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">@zeilen_rueckwaerts</span> = <span class="s">(</span><span class="s">)</span><span class="sc">;</span>
+
+<span class="k">open</span> <span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="q">&#39;&lt;&#39;</span><span class="cm">,</span> <span class="i">$file</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="q">&quot;Fehler open()  $!&quot;</span><span class="sc">;</span>
+<span class="i">@zeilen_rueckwaerts</span> = <span class="k">reverse</span> <span class="q">&lt;FH&gt;</span><span class="sc">;</span>
+<span class="k">close</span><span class="s">(</span><span class="w">FH</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="q">&quot;Fehler close() $!&quot;</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$zeile</span> = <span class="q">&#39;&#39;</span><span class="sc">;</span>
+<span class="k">foreach</span> <span class="i">$zeile</span> <span class="s">(</span><span class="i">@zeilen_rueckwaerts</span><span class="s">)</span> <span class="s">{</span>
+          <span class="c"># Zeilenenden wie in der eingelesenen Datei</span>
+        <span class="k">print</span> <span class="i">$zeile</span><span class="sc">;</span>
+<span class="s">}</span>
+</pre>
+<p>
+Angewandt auf die Beispieldatei <em>test.txt</em>
+</p>
+<pre>
+Zeile 01
+Zeile 02
+Zeile 03
+Zeile 04
+Zeile 05
+</pre>
+<p>
+ergibt sich folgende Ausgabe:
+</p>
+<pre>
+Zeile 05
+Zeile 04
+Zeile 03
+Zeile 02
+Zeile 01
+</pre>
+
+
+<h2>Fall 2: Große  Dateien</h2>
+
+<p>
+Das CPAN-Modul <a href="http://search.cpan.org/perldoc?File::ReadBackwards">File::ReadBackwards</a> kann auch mit sehr großen Dateien umgehen. Die Datei muss <strong>nicht</strong> in den Hauptspeicher passen.
+</p>
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+
+<span class="k">use</span> <span class="w">File::ReadBackwards</span> <span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$file</span> = <span class="q">&#39;test.txt&#39;</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$bw</span> = <span class="w">File::ReadBackwards</span><span class="w">-&gt;new</span><span class="s">(</span> <span class="i">$file</span> <span class="s">)</span> <span class="k">or</span>
+                        <span class="k">die</span> <span class="q">&quot;can&#39;t read $file $!&quot;</span> <span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$line</span> = <span class="q">&#39;&#39;</span><span class="sc">;</span>
+
+<span class="k">while</span><span class="s">(</span> <span class="k">defined</span><span class="s">(</span> <span class="i">$line</span> = <span class="i">$bw</span><span class="i">-&gt;readline</span> <span class="s">)</span> <span class="s">)</span> <span class="s">{</span>
+                <span class="c"># Zeilenenden wie in der eingelesenen Datei</span>
+               <span class="k">print</span> <span class="i">$line</span> <span class="sc">;</span>
+<span class="s">}</span>
+<span class="k">exit</span><span class="s">(</span><span class="s">)</span><span class="sc">;</span>
+</pre>
+<p>
+<a href="http://search.cpan.org/perldoc?File::ReadBackwards">File::ReadBackwards</a>   ist nicht gedacht, um Änderungen in einer Datei zu verfolgen, dafür gibt es <a href="http://search.cpan.org/perldoc?File::Tail">File::Tail</a>.
+</p>
+
+<h2>Rückwärts suchen</h2>
+
+<p>
+Das nachfolgende Beispiel durchsucht eine Datei rückwärts, d.h. die Suche beginnt in der letzten Zeile, und stoppt sobald der erste Treffer erzielt wurde. Das ist sehr praktisch, wenn man in einer Log-Datei nach dem neuesten Ereignis suchen möchte.
+</p>
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+
+<span class="k">use</span> <span class="w">File::ReadBackwards</span> <span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$file</span> = <span class="q">&#39;test.txt&#39;</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$bw</span> = <span class="w">File::ReadBackwards</span><span class="w">-&gt;new</span><span class="s">(</span> <span class="i">$file</span> <span class="s">)</span> <span class="k">or</span>
+                        <span class="k">die</span> <span class="q">&quot;can&#39;t read $file $!&quot;</span> <span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$line</span> = <span class="q">&#39;&#39;</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$suchbegriff</span> = <span class="q">&#39;03&#39;</span><span class="sc">;</span>
+
+<span class="k">while</span><span class="s">(</span> <span class="k">defined</span><span class="s">(</span> <span class="i">$line</span> = <span class="i">$bw</span><span class="i">-&gt;readline</span> <span class="s">)</span> <span class="s">)</span> <span class="s">{</span>
+        <span class="k">print</span> <span class="q">&quot;Bearbeite $line&quot;</span><span class="sc">;</span>
+        <span class="k">if</span> <span class="s">(</span> <span class="i">$line</span> =~ <span class="q">/$suchbegriff/</span><span class="s">)</span> <span class="s">{</span>
+                <span class="k">print</span> <span class="q">&quot;Treffer: $line&quot;</span> <span class="sc">;</span>
+                        <span class="c"># Suche beenden</span>
+                <span class="k">last</span><span class="sc">;</span>
+        <span class="s">}</span>
+<span class="s">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe
+</p>
+<pre>
+Bearbeite Zeile 05
+Bearbeite Zeile 04
+Bearbeite Zeile 03
+Treffer: Zeile 03
+</pre>
+
+<h2>Caveats</h2>
+
+<p>
+<a href="http://search.cpan.org/perldoc?File::ReadBackwards">File::ReadBackwards</a> (Version 1.04) unterstützt <a href="http://perldoc.perl.org/functions/flock.html">flock()</a> nicht. Es kann also vorkommen, daß die letzte Zeile nicht komplett zurückgegeben wird. Dies hängt auch von der Größe des Dateipuffers des Betriebssystems und der Anzahl der Prozesse, die gerade in die Datei schreiben, ab. 
+</p>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?File::ReadBackwards">File::ReadBackwards</a></li>
+<li><a href="http://search.cpan.org/perldoc?File::Tail">File::Tail</a></li>
+</ul>

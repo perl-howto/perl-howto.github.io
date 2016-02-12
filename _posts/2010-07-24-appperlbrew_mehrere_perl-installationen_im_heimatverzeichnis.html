@@ -1,0 +1,276 @@
+---
+layout: post
+title: App::perlbrew - Mehrere Perl-Installationen im Heimatverzeichnis
+date: '2010-07-24 18:30:00 +0000'
+mt_id: 193
+blog_id: 1
+post_id: 193
+permalink: /2010/07/appperlbrew_mehrere_perl-installationen_im_heimatverzeichnis.html
+categories:
+- '101'
+---
+<p>
+<a href="http://search.cpan.org/dist/App-perlbrew/">App::perlbrew - Manage perl installations in your $HOME</a> 
+von <a href="http://search.cpan.org/~gugod/">&#21129;&#24247;&#27665; (Kang-min Liu)</a> ermöglicht die einfache 
+Installation (ohne root-Rechte) und Verwendung mehrerer Perls in unterschiedlichen Versionen und Konfigurationen in einem eigenem Verzeichnis.
+</p>
+<p>
+Das noch sehr junge Projekt bietet eine einfache, leichtgewichtige Alternative zu den bekannten und bewährten Modulen <a href="http://search.cpan.org/perldoc?local::lib">local::lib</a>
+und dem leistungsfähigerem <a href="http://search.cpan.org/perldoc?buildperl.pl">Devel-PPPort - buildperl.pl - build/install perl distributions</a>.
+</p>
+<p>
+&nbsp;
+</p>
+
+<h2>OSDC 2010 Lightning talk - Kang-min Liu perlbrew!</h2>
+<p>
+In diesem <a href="http://www.youtube.com/watch?v=KTQp5_iS6Zg">Video</a> des Lightining Talks auf der<a href="http://www.oscon.com/oscon2010"> OSCON 2010</a> stellt Kang-min Liu perlbrew kurz vor und erläutert warum er dieses Modul geschaffen hat.  
+</p>
+<object width="640" height="385"><param name="movie" value="http://www.youtube.com/v/KTQp5_iS6Zg&amp;hl=de_DE&amp;fs=1?rel=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/KTQp5_iS6Zg&amp;hl=de_DE&amp;fs=1?rel=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
+<p>
+&nbsp;
+</p>
+
+<h2>Installation und grundlegende Konfiguration</h2>
+<p>
+<a href="http://search.cpan.org/dist/App-perlbrew/">App::perlbrew</a> läßt sich entweder wie gehabt über die CPAN-Shell
+</p>
+<pre>
+cpan > install App::perlbrew
+</pre>
+<p>
+oder wie folgt 
+</p>
+<pre>
+$ curl -LO http://xrl.us/perlbrew
+$ chmod +x perlbrew
+</pre>
+<p>
+installieren. Anschließend steht das Kommandozeilen-Tool <em>perlbrew</em> zur Verfügung. 
+</p>
+<p>
+Die grundlegende Konfiguration erfolgt über die Option <em>init</em> - alle erforderlichen Dateien und Verzeichnisse werden als Default im Heimatverzeichnis im Ordner <em>~/perl5/perlbrew</em> angelegt.
+</p>
+<pre>
+$ perlbrew init
+ 
+ Perlbrew environment initiated, required directories are created under
+
+     /home/bob/perl5/perlbrew
+
+  Well-done! Congratulations! Please add the following line to the end
+ of your ~/.bashrc
+
+     source /home/bob/perl5/perlbrew/etc/bashrc
+ ...
+</pre>
+<p>
+Wer <em>perlbrew</em> in ein anderes Verzeichnis installieren möchte, setzt dazu 
+die Umgebungsvariable <em>PERLBREW_ROOT</em>: 
+</p>
+<pre>
+$ export PERLBREW_ROOT=/opt/perlbrew
+$ perlbrew install
+</pre>
+<p>
+Nach dem die o.g. Änderungen in der Datei <em>~/.bashrc</em> ausgeführt wurden, 
+aus der Shell abmelden und erneut einloggen, damit die Änderungen wirksam werden.
+</p>
+<p>
+&nbsp;
+</p>
+
+<h2>Mehrere Perls installieren</h2>
+<p>
+Mittels <em>perlbrew install</em> kann ein neues Perl installiert werden. Optionen, welche die Konfiguration des neuen Perls beeinflußen, werden über den Schalter <em>-D=</em> eingestellt.
+Die möglichen Optionen lassen sich der Datei <a href="http://cpansearch.perl.org/src/JESSE/perl-5.12.1/INSTALL">INSTALL</a> des 
+jeweiligen Perls entnehmen.
+</p>
+<p>
+Hier ein Perl 5.12.1 mit <em>Threads</em>:
+</p>
+<pre>
+$ perlbrew install perl-5.12.1 -D=usethreads
+
+ Attempting to load conf from /home/bob/perl5/perlbrew/Conf.pm
+ Fetching perl-5.12.1 as /home/bob/perl5/perlbrew/dists/perl-5.12.1.tar.gz
+ Installing perl-5.12.1 into /home/bob/perl5/perlbrew/perls/perl-5.12.1
+ This could take a while. You can run the following command on another shell to track the status:
+
+  tail -f /home/bob/perl5/perlbrew/build.log
+
+ (cd /home/bob/perl5/perlbrew/build; tar xzf /home/bob/perl5/perlbrew/dists/perl-5.12.1.tar.gz;cd /home/bob/perl5/perlbrew/build/perl-5.12.1;rm -f config.sh Policy.sh;sh Configure -de -Dprefix=/home/bob/perl5/perlbrew/perls/perl-5.12.1 -Dusethreads;make;make test && make install) >> '/home/bob/perl5/perlbrew/build.log' 2>&1 
+
+ Installed perl-5.12.1 as perl-5.12.1 successfully. Run the following command to switch to it.
+
+  perlbrew switch perl-5.12.1
+</pre>
+<p>
+Hier ein Perl 5.12.1 mit Standard-Optionen, also ohne <em>Threads</em> 
+- über den Schalter <em>-as</em> wird ein passender Name für dieses Perl gewählt. 
+</p>
+<pre>
+$ perlbrew install perl-5.12.1 -as perl-5.12.1-nothreads
+
+ Attempting to load conf from /home/bob/perl5/perlbrew/Conf.pm
+ Use the previously fetched perl-5.12.1.tar.gz
+ Installing perl-5.12.1 into /home/bob/perl5/perlbrew/perls/perl-5.12.1-nothreads
+ This could take a while. You can run the following command on another shell to track the status:
+
+   tail -f /home/bob/perl5/perlbrew/build.log
+
+ (cd /home/bob/perl5/perlbrew/build; tar xzf /home/bob/perl5/perlbrew/dists/perl-5.12.1.tar.gz;cd /home/bob/perl5/perlbrew/build/perl-5.12.1;rm -f config.sh Policy.sh;sh Configure -de -Dprefix=/home/bob/perl5/perlbrew/perls/perl-5.12.1-nothreads;make;make test && make install) >> '/home/bob/perl5/perlbrew/build.log' 2>&1 
+ Installed perl-5.12.1 as perl-5.12.1-nothreads successfully. Run the following command to switch to it.
+
+  perlbrew switch perl-5.12.1-nothreads
+ </pre>
+
+<p>
+Hier ein Perl 5.12.1 mit Standard-Optionen, also ohne <em>Threads</em>, aber mit Debugging-Informationen. 
+</p> 
+ <pre>
+$ perlbrew install perl-5.12.1 -D=DEBUGGING=both -as perl-5.12.1-nothreads-debug
+ 
+ Attempting to load conf from /home/bob/perl5/perlbrew/Conf.pm
+ Use the previously fetched perl-5.12.1.tar.gz
+ Installing perl-5.12.1 into /home/bob/perl5/perlbrew/perls/perl-5.12.1-nothreads-debug
+ This could take a while. You can run the following command on another shell to track the status:
+
+  tail -f /home/bob/perl5/perlbrew/build.log
+
+ (cd /home/bob/perl5/perlbrew/build; tar xzf /home/bob/perl5/perlbrew/dists/perl-5.12.1.tar.gz;cd /home/bob/perl5/perlbrew/build/perl-5.12.1;rm -f config.sh Policy.sh;sh Configure -de -Dprefix=/home/bob/perl5/perlbrew/perls/perl-5.12.1-nothreads-debug -DDEBUGGING=both;make;make test && make install) >> '/home/bob/perl5/perlbrew/build.log' 2>&1 
+
+ Installed perl-5.12.1 as perl-5.12.1-nothreads-debug successfully. Run the following command to switch to it.
+
+  perlbrew switch perl-5.12.1-nothreads-debug
+</pre>
+
+<p>
+Hier ein Perl 5.12.1 mit <em>Threads</em> und Debugging-Informationen.
+</p>
+<pre>
+$ perlbrew install perl-5.12.1 -D=DEBUGGING=both -D=usethreads -as perl-5.12.1-debug
+ 
+ Attempting to load conf from /home/bob/perl5/perlbrew/Conf.pm
+ Use the previously fetched perl-5.12.1.tar.gz
+ Installing perl-5.12.1 into /home/bob/perl5/perlbrew/perls/perl-5.12.1-debug
+ This could take a while. You can run the following command on another shell to track the status:
+
+   tail -f /home/bob/perl5/perlbrew/build.log
+
+ (cd /home/bob/perl5/perlbrew/build; tar xzf /home/bob/perl5/perlbrew/dists/perl-5.12.1.tar.gz;cd /home/bob/perl5/perlbrew/build/perl-5.12.1;rm -f config.sh Policy.sh;sh Configure -de -Dprefix=/home/bob/perl5/perlbrew/perls/perl-5.12.1-debug -DDEBUGGING=both -Dusethreads;make;make test && make install) >> '/home/bob/perl5/perlbrew/build.log' 2>&1 
+ Installed perl-5.12.1 as perl-5.12.1-debug successfully. Run the following command to switch to it.
+
+   perlbrew switch perl-5.12.1-debug
+</pre>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Zwischen den verschiedenen Perls hin- und herschalten</h2>
+<p>
+Zunächst werfen wir einen Blick auf das System-Perl:
+</p>
+<pre>
+$ perl -v
+
+This is perl, v5.10.1 (*) built for i486-linux-gnu-thread-multi
+</pre>
+<p>
+Ein Übersicht aller installierten Perls liefert die Option <em>installed</em>
+</p>
+<pre>
+$ perlbrew installed
+ perl-5.12.1
+ perl-5.12.1-debug
+ perl-5.12.1-nothreads
+ perl-5.12.1-nothreads-debug
+ /usr/bin/perl
+</pre>
+<p>
+Über die Option <em>switch</em> kann auf ein anderes Perl umgeschaltet werden.
+Da <em>perlbrew</em> die Umgebungsvariable <b>PATH</b> verändert, ist es zwingend 
+erforderlich, die Shell über diese Änderung per <b>hash -r</b> (manchmal auch 
+<em>rehash</em>) zu informieren.
+</p>
+<pre>
+$ perlbrew switch perl-5.12.1
+$ hash -r 
+$ perl -v
+
+ This is perl 5, version 12, subversion 1 (v5.12.1) built for i686-linux-thread-multi
+</pre>
+<p>
+Zurück zum System-Perl gelangt man über die Option <em>off</em>:
+</p>
+<pre>
+$ perlbrew off
+$ hash -r
+$ perl -v
+
+This is perl, v5.10.1 (*) built for i486-linux-gnu-thread-multi
+</pre>
+<p>
+&nbsp;
+</p>
+
+
+<h2>CPAN-Module installieren</h2>
+<p>
+Wie bereits erwähnt, verändert <em>perlbrew</em> beim Switchen die Umgebungsvariable <b>PATH</b> und setzt zusätzlich das richtige <em>cpan</em>-Programm in diesen Pfad.
+</p>
+<pre>
+$ perlbrew switch perl-5.12.1-nothreads
+$ hash -r
+
+$ cpan 
+cpan> install YAML
+...
+Appending installation info to <b>/home/bob/perl5/perlbrew/perls/perl-5.12.1-nothreads/lib/5.12.1/i686-linux/perllocal.pod</b>
+cpan> quit
+
+$ perlbrew off
+$ hash -r
+</pre>
+<p>
+oder auch:
+</p>
+<pre>
+$ perlbrew switch perl-5.12.1-nothreads
+$ hash -r
+
+$ perl -MCPAN -e shell 
+...
+</pre>
+<p>
+&nbsp;
+</p>
+
+
+<p>
+<b>That's it.</b>
+</p>
+<p>
+&nbsp;
+</p>
+
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/dist/App-perlbrew/">App::perlbrew - Manage perl installations in your $HOME</a></li>
+<li><a href="http://github.com/gugod/App-perlbrew">gugod's App-perlbrew at master - GitHub</a></li>
+<li><a href="http://gugod.org/2010/03/perlbrew-home-perl-installation-made-easy.html">perlbrew: $HOME perl installation made easy</a></li>
+<li><a href="http://www.perl.org/pub/2010/03/testing-perl-5120-rc-1-with-appperlbrew.html">Testing Perl 5.12.0 RC 1 with App::perlbrew - Perl Pub</a></li>
+<li><a href="http://hanekomu.at/blog/cpan_gems/20100716-1556-modern_perl_administration_tools.html">&#36339;&#12397;&#36796;&#12416;&#12398;&#26085;&#35352; - hanekomu's Perl blog - Modern Perl administration tools</a></li>
+<li><a href="http://chris.prather.org/brewing-up-a-storm.md.html">Chris Prather: Brewing Up a Storm</a></li>
+<li><a href="http://ithaca.arpinum.org/2010/06/13/rvm-and-perlbrew.html">Rvm and Perlbrew</a></li>
+<li><a href="http://search.cpan.org/perldoc?local::lib">local::lib</a></li>
+<li><a href="http://search.cpan.org/perldoc?buildperl.pl">Devel-PPPort - buildperl.pl - build/install perl distributions</a></li>
+<li><a href="http://search.cpan.org/~mhx/Devel-PPPort-3.19_02/HACKERS#How_to_build_136_versions_of_Perl">How_to_build_136_versions_of_Perl</a></li>
+</ul>
+
+<p>
+&nbsp;
+</p>
+

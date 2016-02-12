@@ -1,0 +1,144 @@
+---
+layout: post
+title: Module::CoreList - welche Module werden eigentlich mit Perl ausgeliefert?
+date: '2012-07-16 21:45:08 +0000'
+mt_id: 231
+blog_id: 1
+post_id: 231
+permalink: /2012/07/modulecorelist_-_welche_module_werden_eigentlich_mit_perl_ausgeliefert.html
+categories:
+- '101'
+---
+<p>
+<a href="http://www.perl.org">Perl</a> wird mit einer ansehnlichen Anzahl an <a href="http://perldoc.perl.org/index-modules-A.html">Standardmodulen</a> ausgeliefert. 
+</p>
+<p>
+<a href="http://search.cpan.org/perldoc?Module::CoreList">Module::CoreList</a> und das mitgelieferte Kommandozeilentool
+<a href="http://search.cpan.org/perldoc?corelist">corelist - a commandline frontend to Module::CoreList</a> bieten eine einfache, aber effektive Schnittstelle, um diesen Fundus zu durchsuchen.    
+</p>
+
+<h2>Kommandozeile vs. Webinterface</h2>
+<p>
+In diesem Beitrag gehe ich kurz auf das Kommandozeilentool <i>corelist</i> ein. 
+</p>
+<p>
+Wer ein webbasiertes Interface bevorzugt, wird bei <a href="http://perlpunks.de/corelist">Webinterface: corelist - Find core modules in perl versions</a> von Tina M&uuml;ller (<a href="http://search.cpan.org/~tinita/">tinita</a>) f&uuml;ndig. 
+</p>
+
+<h2>Welche Perlversionen kennt die installierte Version von Module::Corelist?</h2>
+<p>
+Der Parameter <i>-v</i> zeigt ohne Angabe einer Perlversionsnummer eine Liste aller bekannten Perlversionen an.
+</p>
+<pre>
+$ corelist -v
+</pre>
+<p>
+Das liefert z.B. folgende (gek&uuml;rzte) Ausgabe:
+</p>
+<pre>
+Module::CoreList has info on the following perl versions:
+5
+5.000
+5.001
+5.002
+5.00307
+5.004
+5.00405
+5.005
+5.00503
+5.00504
+.........
+v5.15.2
+v5.15.3
+v5.15.4
+v5.15.5
+v5.15.6
+v5.15.7
+v5.15.8
+v5.15.9
+v5.16.0
+v5.17.0
+</pre>
+
+
+<h2>Alle Coremodule einer bestimmten Perl-Version</h2>
+<p>
+Wird dem Parameter <i>-v</i> eine Perlversionsnummer angegeben, so wird eine Liste der mitgelieferten Core-Module und deren Versionsnummer angezeigt:
+</p>
+<pre>
+$ corelist -v 5.014002 
+</pre>
+<p>
+oder
+</p>
+<pre>
+$ corelist -v 5.14.2
+</pre>
+<p>
+Das liefert z.B. folgende (gek&uuml;rzte) Ausgabe:
+</p>
+<pre>
+The following modules were in perl 5.014002 CORE
+AnyDBM_File                                      1.00
+App::Cpan                                        1.5701
+App::Prove                                       3.23
+App::Prove::State                                3.23
+App::Prove::State::Result                        3.23
+App::Prove::State::Result::Test                  3.23
+.........
+utf8                                             1.09
+vars                                             1.02
+version                                          0.88
+vmsish                                           1.02
+warnings                                         1.12
+warnings::register                               1.02
+</pre>
+
+<h2>Wann wurde ein Modul erstmals in den Core aufgenommen?</h2>
+<p>
+Dazu &uuml;bergibt man <i>corelist</i> einfach den Namen des gesuchten Moduls:  
+</p>
+<pre>
+$ corelist parent
+</pre>
+<p>
+Das liefert folgende Ausgabe:
+</p>
+<pre>
+parent was first released with perl v5.10.1
+</pre>
+<h2>In welchen Versionen liegt ein Core-Modul vor?</h2>
+<p>
+Der Parameter <i>-a Name-des-Moduls</i> liefert eine Liste der Perlversionen und der jeweils ausgelieferten Version des Coremodules 
+</p>
+<pre>
+$ corelist -a parent
+</pre>
+<p>
+Das liefert z.B. folgende (gek&uuml;rzte) Ausgabe:
+</p>
+<pre>
+parent was first released with perl v5.10.1
+  v5.10.1    0.221     
+  v5.11.0    0.223     
+  v5.11.1    0.223 
+  .........
+  v5.15.9    0.225     
+  v5.16.0    0.225     
+  v5.17.0    0.225   
+</pre>
+
+
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li>MetaCPAN: <a href="https://metacpan.org/module/Module::CoreList">Module::CoreList</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?Module::CoreList">Module::CoreList</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?corelist">corelist - a commandline frontend to Module::CoreList</a></li>
+<li>Tina M&uuml;ller (tinita): <a href="http://perlpunks.de/corelist">Webinterface: corelist - Find core modules in perl versions</a></li>
+<li>Tina M&uuml;ller (tinita) [blogs.perl.org] <a href="http://blogs.perl.org/users/tinita/2011/09/corelist-web-interface.html">corelist web interface</a></li>
+<li>PerlGeek: <a href="http://perlgeek.de/blog-en/perl-tips/small-helpers.writeback">Small Perl Helpers</a></li>
+<li>PerlMonks: <a href="http://www.perlmonks.org/?node_id=670914">Which core modules did Perl 5.x have?</a></li>
+<li>PsyberMonkey: <a href="http://scratching.psybermonkey.net/2011/02/perl-how-to-find-out-what-core-modules.html">Perl - How to find out what Core Modules installed </a></li>
+<li>Tyler Slijboom: <a href="http://blogs.perl.org/users/tyler_slijboom/2011/10/corelist-and-perlbrew---2-perl-command-line-tools-for-remote-perl-work.html">Corelist and Perlbrew - 2 Perl command line tools for remote Perl work</a></li>
+<li>CPAN: <a href="http://search.cpan.org/dist/Module-Metadata-CoreList/">Module-Metadata-CoreList</a></li>
+</ul>

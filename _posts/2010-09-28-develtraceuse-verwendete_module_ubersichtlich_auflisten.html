@@ -1,0 +1,150 @@
+---
+layout: post
+title: Devel::TraceUse - Verwendete Module übersichtlich auflisten
+date: '2010-09-28 21:42:00 +0000'
+mt_id: 201
+blog_id: 1
+post_id: 201
+permalink: /2010/09/develtraceuse-verwendete_module_ubersichtlich_auflisten.html
+categories:
+- '101'
+- profiler
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Devel::TraceUse">Devel::TraceUse</a> von <a href="http://search.cpan.org/~book/">Philippe Bruhat (BooK)</a> zeigt die Module, die von einem Perl-Programm genutzt werden, übersichtlich an.
+</p>
+
+<h2>Verwendete Module auflisten</h2>
+<p>
+Devel::TraceUse wird auf der Kommandozeile aufgerufen
+</p>
+<pre>
+$ perl -d:TraceUse your_program.pl
+</pre>
+<p>
+<a href="http://search.cpan.org/perldoc?Devel::TraceUse">Devel::TraceUse</a> erzeugt aus dem folgenden Beispielprogramm:
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">DBI</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+folgende Ausgabe:
+</p>
+<pre>
+Modules used from hierachy.pl:
+   1.  strict 1.04, hierachy.pl line 2 [main]
+   2.  warnings 1.09, hierachy.pl line 3 [main]
+   3.  DBI 1.615, hierachy.pl line 5 [main]
+   4.    Carp 1.17, DBI.pm line 159
+   5.      Exporter 5.64_01, Carp.pm line 11
+  11.        Exporter::Heavy 5.64_01, Exporter.pm line 16
+   6.    DynaLoader 1.10, DBI.pm line 160
+   7.      Config, DynaLoader.pm line 25
+   9.        Config_heavy.pl, Config.pm line 70
+  10.          Config_git.pl, Config_heavy.pl line 1224 [Config]
+   8.      AutoLoader 5.70, DynaLoader.pm line 22
+  12.    Scalar::Util 1.23, DBI.pm line 290
+  13.      vars 1.01, Scalar/Util.pm line 10
+  14.        warnings::register 1.01, vars.pm line 7
+  15.      List::Util 1.23, Scalar/Util.pm line 12
+  16.        XSLoader 0.10, List/Util.pm line 26
+</pre>
+<p>
+Die Ausgabe der Core-Module lässt sich über den Schalter <em>=hidecore</em> unterdrücken.
+</p>
+<pre>
+$ perl -d:TraceUse=hidcore your_program.pl
+</pre>
+<p>
+und erzeugt dann für o.g. Beispiel folgende Ausgabe:
+</p>
+<pre>
+Modules used from hierachy.pl:
+   3.  DBI 1.615, hierachy.pl line 5 [main]
+   9.    Config_heavy.pl, Config.pm line 70
+  10.      Config_git.pl, Config_heavy.pl line 1224 [Config]
+</pre>
+<p>
+&nbsp;
+</p>
+
+<h2>Visualisierung der verwendeten Module</h2>
+<p>
+Die Ausgabe von <a href="http://search.cpan.org/perldoc?Devel::TraceUse">Devel::TraceUse</a>  lässt sich mittels eines einfachen <a href="http://use.perl.org/~BooK/journal/34717">Hacks</a> mit <a href="http://search.cpan.org/dist/GraphViz/">GraphViz</a> visualisieren.
+</p>
+<pre>
+#!/usr/bin/env perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">GraphViz</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;">###########################################################</span>
+<span style="color: #228B22;"># Works for me Software(TM)</span>
+<span style="color: #228B22;">###########################################################</span>
+<span style="color: #228B22;"># Usage:</span>
+<span style="color: #228B22;"># Step 1:</span>
+<span style="color: #228B22;"># perl -d:TraceUse your-programm.pl 2&gt; TraceUse.out.txt</span>
+<span style="color: #228B22;"># or</span>
+<span style="color: #228B22;"># perl -d:TraceUse=hidecore your-programm.pl 2&gt; TraceUse.out.txt</span>
+<span style="color: #228B22;"># Step2:</span>
+<span style="color: #228B22;"># perl $0  TraceUse.out.txt </span>
+<span style="color: #228B22;">###########################################################</span>
+<span style="color: #228B22;"># Based on http://use.perl.org/~BooK/journal/34717</span>
+<span style="color: #228B22;">###########################################################</span>
+
+<span style="color: #228B22;">#my $png = shift || &#39;use.png&#39;;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$png</span> =  <span style="color: #CD5555;">&#39;trace-use.png&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$g</span> = <span style="color: #000000;">GraphViz</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span> <span style="color: #000000;">rankdir</span> <span style="color: #000000;">=&gt;</span> <span style="color: #B452CD;">1</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@stack</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">while</span> <span style="color: #000000;">(</span>&lt;&gt;<span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+
+    <span style="color: #228B22;"># Do not graph standard pragmas</span>
+    <span style="color: #8B008B; font-weight:bold;">next</span> <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #CD5555;">m/warnings\s+\d+/</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">next</span> <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #CD5555;">m/strict\s+\d+/</span><span style="color: #000000;">;</span>
+
+    <span style="color: #228B22;"># Remove leading line numbers</span>
+    <span style="color: #CD5555;">s/^\s+\d+\.//</span><span style="color: #000000;">;</span>
+	
+    <span style="color: #228B22;"># first node</span>
+    <span style="color: #CD5555;">/^Modules used from (.*):/</span> &amp;&amp; <span style="color: #8B008B; font-weight:bold;">do</span> <span style="color: #000000;">{</span>
+        <span style="color: #00688B;">$g</span><span style="color: #00688B;">-&gt;add_node</span><span style="color: #000000;">(</span><span style="color: #00688B;">$1</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+        <span style="color: #00688B;">@stack</span> = <span style="color: #000000;">(</span><span style="color: #00688B;">$1</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span><span style="color: #000000;">;</span>
+
+    <span style="color: #228B22;"># all other nodes</span>
+    <span style="color: #CD5555;">/^((?:  )+)(\S+).*,/</span> &amp;&amp; <span style="color: #8B008B; font-weight:bold;">do</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$idx</span> = <span style="color: #8B008B; font-weight:bold;">length</span><span style="color: #000000;">(</span><span style="color: #00688B;">$1</span><span style="color: #000000;">)</span> / <span style="color: #B452CD;">2</span><span style="color: #000000;">;</span>
+        <span style="color: #00688B;">$stack</span>[<span style="color: #00688B;">$idx</span>] = <span style="color: #00688B;">$2</span><span style="color: #000000;">;</span>
+        <span style="color: #00688B;">$g</span><span style="color: #00688B;">-&gt;add_node</span><span style="color: #000000;">(</span><span style="color: #00688B;">$2</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+        <span style="color: #00688B;">$g</span><span style="color: #00688B;">-&gt;add_edge</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$stack</span>[ <span style="color: #00688B;">$idx</span> - <span style="color: #B452CD;">1</span> ] <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$2</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span><span style="color: #000000;">;</span>
+
+    <span style="color: #228B22;"># ignore all other lines</span>
+<span style="color: #000000;">}</span>
+
+<span style="color: #00688B;">$g</span><span style="color: #00688B;">-&gt;as_png</span><span style="color: #000000;">(</span><span style="color: #00688B;">$png</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt mit o.g. Beispiel folgende Graphik: 
+</p>
+<form mt:asset-id="87" class="mt-enclosure mt-enclosure-image" style="display: inline;"><a href="{{ site.url }}/assets/images/trace-use.png"><img alt="trace-use-small.png" src="{{ site.url }}/assets/images/trace-use-small.png" width="658" height="174" border="0" style="text-align: center; display: block; margin: 0 auto 20px;" /></a></form>
+<p>
+&nbsp;
+</p>
+
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li>CPAN: <a href="http://search.cpan.org/perldoc?Devel::TraceUse">Devel::TraceUse</a></li>
+<li>CPAN: <a href="http://search.cpan.org/dist/GraphViz/">GraphViz</a></li>
+<li>Journal of BooK: <a href="http://use.perl.org/~BooK/journal/34717">Graphing module usage</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?Module::ScanDeps">Module::ScanDeps</a></li>
+</ul>

@@ -1,0 +1,159 @@
+---
+layout: post
+title: Crypt::SaltedHash - eine einfach zu bedienende Bibliothek zum Erzeugen und
+  Validieren gesalzener Hashes
+date: '2013-08-21 20:55:00 +0000'
+mt_id: 243
+blog_id: 1
+post_id: 243
+permalink: /2013/08/cryptsaltedhash-eine_einfach_zu_bedienende_bibliothek_zum_erzeugen_und_validieren_gesalzener_hashes.html
+categories:
+- kryptographie
+---
+<p>
+<a href="http://de.wikipedia.org/wiki/Salt_%28Kryptologie%29">Gesalzene Hashes</a> werden oft zur sicheren Speicherung von Passw&ouml;rtern verwendet. Nun gut - das Verfahren ist zu mindestens sicherer als die Verwendung <a href="http://www.heise.de/security/artikel/Gegenmassnahmen-270996.html">ungesalzener</a> Hashes.
+</p>
+<p>
+<a href="https://metacpan.org/module/Crypt::SaltedHash">Crypt::SaltedHash</a> von <a href="http://search.cpan.org/~esskar/">Sascha Kiefer</a> bzw. <a href="http://search.cpan.org/~gshank/">Gerda Shank</a> ist eine einfach zu bedienende Bibliothek zum Erzeugen und Validieren <a href="http://de.wikipedia.org/wiki/Salt_%28Kryptologie%29">gesalzener Hashes</a>.
+</p>
+
+<p>&nbsp;</p>
+
+<h2>Beispiel: Salted Passwort Hash erzeugen</h2>
+<p>
+Das folgende Beispiel erzeugt einen gesalzenen Hash f&uuml;r ein Klartextpasswort:
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Crypt::SaltedHash</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$csh</span> = <span style="color: #000000;">Crypt::SaltedHash</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span> <span style="color: #000000;">algorithm</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;SHA-1&#39;</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cleartext</span> = <span style="color: #CD5555;">&#39;secret&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">$csh</span><span style="color: #00688B;">-&gt;add</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$cleartext</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$salted</span> = <span style="color: #00688B;">$csh</span><span style="color: #00688B;">-&gt;generate</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Salted: $salted\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Salted: {SSHA}9GnzDgL3ChgeupyOkQtSrN/0/v8sGBf3 
+</pre>
+
+<p>&nbsp;</p>
+<h2>Beispiel: Salted Passwort Hash validieren</h2>
+<p>
+Die Methode <i>validate</i> kann einen vorgegebenen gesalzenen Hash validieren:
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Crypt::SaltedHash</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$csh</span> = <span style="color: #000000;">Crypt::SaltedHash</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span> <span style="color: #000000;">algorithm</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;SHA-1&#39;</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cleartext</span> = <span style="color: #CD5555;">&#39;secret&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$salted</span> = <span style="color: #CD5555;">&#39;{SSHA}9GnzDgL3ChgeupyOkQtSrN/0/v8sGBf3&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$valid</span> = <span style="color: #000000;">Crypt::SaltedHash</span><span style="color: #000000;">-&gt;validate</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$salted</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$cleartext</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span><span style="color: #00688B;">$valid</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;OK\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span> <span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Not OK\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>&nbsp;</p>
+<h2></h2>
+
+<p>
+<a href="http://search.cpan.org/perldoc?Crypt%3A%3ASaltedHash">Crypt::SaltedHash </a> kann nat&uuml;rlich auch die gesalzenen Hashes, die mit anderen Programmen, z.B. <a href="http://linux.die.net/man/8/slappasswd">slappasswd</a>, dem <a href="http://www.openldap.org/">OpenLDAP</a> Passwort Tool, erzeugt wurden, validieren.
+</p>
+<p>
+F&uuml;r das folgende Beispiel habe ich das Klartextpasswort <i>123456</i> ein paar Mal durch <i>slappasswd</i> laufen lassen, um die gesalzenen Hashes zu erzeugen.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Crypt::SaltedHash</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$csh</span> = <span style="color: #000000;">Crypt::SaltedHash</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span> <span style="color: #000000;">algorithm</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;SHA-1&#39;</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;">#$ slappasswd -s 123456</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@salted</span> = <span style="color: #CD5555;">qw!</span>
+  <span style="color: #CD5555;">{SSHA}jppWV0DCxDJeOtaSS434nv5WewNYZSCS</span>
+  <span style="color: #CD5555;">{SSHA}ilJ95JAFKS4TgDbjRkcYrBMBRp+4mmCE</span>
+  <span style="color: #CD5555;">{SSHA}vrPil747oBHVgriDBbE+04XAs6BhXis0</span>
+  <span style="color: #CD5555;">{SSHA}ew3Xf1C9vK+H0kNeJ12Gc1M4fpbT41+x</span>
+  <span style="color: #CD5555;">{SSHA}9bRacd1WzrrUTiav7QBkMrxHtKTbjhpi</span>
+  <span style="color: #CD5555;">{SSHA}4m91OtOLhIfL+xDlfO/L5YdYaABKF60U</span>
+  <span style="color: #CD5555;">{SSHA}b+8sUhnuy6gnmlpf5BD58pww8NiQDZ3S</span>
+  <span style="color: #CD5555;">{SSHA}SeN6Yubt+pFOfTYDPPQ8JVp7MSfBkr1l</span>
+  <span style="color: #CD5555;">{SSHA}oSX0fmh8wNPGaJgEGQHY28RMiawsmraB</span>
+  <span style="color: #CD5555;">{SSHA}K4+dl7hft3VY7gfjPOdz8OOyXflbxA1f</span>
+  <span style="color: #CD5555;">{SSHA}7X/z6qeaDP6NpKQM3PYUQrERTTTj+VPD</span>
+  <span style="color: #CD5555;">!</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cleartext</span> = <span style="color: #CD5555;">&#39;123456&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$salted</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@salted</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$valid</span> = <span style="color: #000000;">Crypt::SaltedHash</span><span style="color: #000000;">-&gt;validate</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$salted</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$cleartext</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span><span style="color: #00688B;">$valid</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;OK ($salted)\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span> <span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Not OK ($salted)\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+OK ({SSHA}jppWV0DCxDJeOtaSS434nv5WewNYZSCS)
+OK ({SSHA}ilJ95JAFKS4TgDbjRkcYrBMBRp+4mmCE)
+OK ({SSHA}vrPil747oBHVgriDBbE+04XAs6BhXis0)
+OK ({SSHA}ew3Xf1C9vK+H0kNeJ12Gc1M4fpbT41+x)
+OK ({SSHA}9bRacd1WzrrUTiav7QBkMrxHtKTbjhpi)
+OK ({SSHA}4m91OtOLhIfL+xDlfO/L5YdYaABKF60U)
+OK ({SSHA}b+8sUhnuy6gnmlpf5BD58pww8NiQDZ3S)
+OK ({SSHA}SeN6Yubt+pFOfTYDPPQ8JVp7MSfBkr1l)
+OK ({SSHA}oSX0fmh8wNPGaJgEGQHY28RMiawsmraB)
+OK ({SSHA}K4+dl7hft3VY7gfjPOdz8OOyXflbxA1f)
+OK ({SSHA}7X/z6qeaDP6NpKQM3PYUQrERTTTj+VPD)
+</pre>
+
+<p>&nbsp;</p>
+<h2>Sicherheitshinweis</h2>
+<p>Das <i>Salt</i> wird zusammen mit dem Hash (dem gehashten Passwort) in einem String gespeichert und kann, z.B. &uuml;ber die Methoden <i>salt_bin</i> oder <i>salt_hex</i>, jederzeit ausgelesen werden.</p>
+<p>
+Gesalzene Hashes erschweren einen <a href="http://de.wikipedia.org/wiki/W%C3%B6rterbuchangriff">W&ouml;rterbuchangriff</a> auf Passw&ouml;rter, macht diesen aber nicht unm&ouml;glich.
+</p>
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Crypt%3A%3ASaltedHash">Crypt::SaltedHash </a></li>
+<li><a href="http://de.wikipedia.org/wiki/Salt_%28Kryptologie%29">Salt (Kryptologie)</a></li>
+<li><a href="http://scientopia.org/blogs/goodmath/2013/03/02/passwords-hashing-and-salt/">Passwords, Hashing, and Salt</a></li>
+<li><a href="http://readwrite.com/2012/06/07/avoiding-password-breaches-101-salt-your-hash">Avoiding Password Breaches 101: Salt Your Hash</a></li>
+<li><a href="https://crackstation.net/hashing-security.htm">Salted Password Hashing - Doing it Right</a></li>
+<li><a href="http://linux.die.net/man/8/slappasswd">slappasswd(8) - Linux man page</a></li>
+<li><a href="http://www.heise.de/security/artikel/Von-Woerterbuechern-und-Regenboegen-270088.html">Kunterbuntes Schl&uuml;sselraten - Von W&ouml;rterb&uuml;chern und Regenb&ouml;gen</a></li>
+<li><a href="http://www.heise.de/security/artikel/Passwoerter-unknackbar-speichern-1253931.html">Cracker-Bremse - Passw&ouml;rter unknackbar speichern</a></li>
+</ul>
+<p>&nbsp;</p>

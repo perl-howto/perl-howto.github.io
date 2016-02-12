@@ -1,0 +1,76 @@
+---
+layout: post
+title: ' Lingua::EN::Fathom - Lesbarkeit bzw. Verständlichkeit eines englischen Textes
+  messen'
+date: '2013-07-23 21:45:00 +0000'
+mt_id: 241
+blog_id: 1
+post_id: 241
+permalink: /2013/07/linguaenfathom_-_lesbarkeit_bzw_verstandlichkeit_eines_englischen_textes_messen.html
+categories:
+- '101'
+---
+<p>
+<a href="https://metacpan.org/module/Lingua::EN::Fathom">Lingua::EN::Fathom - Measure readability of English text</a> von <a href="https://metacpan.org/author/KIMRYAN">Kim Ryan</a> misst die Lesbarkeit bzw. Verst&auml;ndlichkeit eines englischen Textes an Hand der drei Indizes:
+</p>
+<ul class="no-bullet">
+<li><a href="http://www.readabilityformulas.com/gunning-fog-readability-formula.php">The Gunning's Fog Index (or FOG) Readability Formula</a></li>
+<li><a href="http://www.readabilityformulas.com/flesch-reading-ease-readability-formula.php">The Flesch Reading Ease Readability Formula</a></li>
+<li><a href="http://www.readabilityformulas.com/flesch-grade-level-readability-formula.php">The Flesch Grade Level Readability Formula</a></li>
+</ul>
+<p>
+Alle statistischen Eigenschaften des Textes k&ouml;nnen &uuml;ber <a href="https://metacpan.org/module/Lingua::EN::Fathom">indivduelle Funktionen</a> ermittelt werden oder einfach als vorgefertigter Report (<i>report</i>) ausgegeben werden.  
+</p>
+<p>&nbsp;</p>
+<h2>Beispiel</h2>
+<p>
+Das folgende Beispiel untersucht die <a href="http://search.cpan.org/perldoc?perlartistic">Perl Artistic License</a> auf ihre Verst&auml;ndlichkeit. 
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Lingua::EN::Fathom</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$text</span> = <span style="color: #000000;">new</span> <span style="color: #000000;">Lingua::EN::Fathom</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">$text</span><span style="color: #00688B;">-&gt;analyse_file</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;perlartistic.txt&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">$text</span><span style="color: #00688B;">-&gt;report</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+File name                  : perlartistic.txt
+Number of characters       : 7429
+Number of words            : 1062
+Percent of complex words   : 19.77
+Average syllables per word : 1.7514
+Number of sentences        : 46
+Average words per sentence : 23.0870
+Number of text lines       : 125
+Number of blank lines      : 33
+Number of paragraphs       : 33
+
+
+READABILITY INDICES
+
+Fog                        : 17.1444
+Flesch                     : 35.2322
+Flesch-Kincaid             : 14.0806
+</pre>
+<p>
+Die Methode <i>analyse_file</i> liest eine Datei komplett ein - einzelne Abs&auml;tze k&ouml;nnen &uuml;ber die Methode <i>analyse_block</i> hinzugef&uuml;gt werden.
+</p>
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="https://metacpan.org/module/Lingua::EN::Fathom">Lingua::EN::Fathom - Measure readability of English text</a></li>
+<li><a href="http://www.mawode.com/~waltman/talks/nlp_ppw.pdf">Natural Language Processing in Perl - Walt Mankowski</a></li>
+<li><a href="http://iangow.wordpress.com/2013/05/29/calculating-fog-using-postgresql-and-perl/">Calculating fog using PostgreSQL and Perl</a></li>
+<li><a href="http://business.nd.edu/uploadedFiles/Academic_Centers/Study_of_Financial_Regulation/pdf_and_documents/Plain_English_v5.pdf">Measuring Readability in Financial Text</a></li>
+</ul>
+<p>&nbsp;</p>

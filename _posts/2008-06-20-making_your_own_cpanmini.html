@@ -1,0 +1,153 @@
+---
+layout: post
+title: Making your own CPAN-Mini
+date: '2008-06-20 14:20:00 +0000'
+mt_id: 71
+blog_id: 1
+post_id: 71
+permalink: /2008/06/making_your_own_cpanmini.html
+categories:
+- '101'
+---
+<p>
+Mit dem CPAN-Modul <a href="http://search.cpan.org/dist/CPAN-Mini/">CPAN::Mini</a> und dem dazugehörigen Kommandozeilen-Tool <a href="http://search.cpan.org/perldoc?minicpan">minicpan</a> von <a href="http://search.cpan.org/~rjbs/">Ricardo Signes</a> ist sehr einfach, eine CPAN Kopie, die nur die aktuellsten Versionen enthält, lokal auf der Festplatte zu erstellen.
+</p>
+
+<h2>Schritt 1: CPAN::Mini installieren</h2>
+<p>Entweder mit dem Modul <a href="http://search.cpan.org/perldoc?CPAN">CPAN</a>:
+<pre>
+$ sudo perl -MCPAN -e shell
+install CPAN::Mini
+</pre>
+<p>oder für Ubuntu und andere Debian-basierte Linuxe:</p>
+<pre>
+$ sudo apt-get install libcpan-mini-perl 
+</pre>
+<p>
+ <a href="http://search.cpan.org/perldoc?minicpan">minicpan</a> wird automatisch installiert.
+</p>
+
+<h2>Schritt 2: minicpan konfigurieren</h2>
+<p>minicpan sollte die Dateien nach Möglichkeit von einen nahegelegenen CPAN-Mirror holen.
+</p>
+<p>
+Einen nahegelegenen CPAN-Mirror findet man bei <a href="http://mirrors.cpan.org/">http://mirrors.cpan.org/</a>.
+</p>
+<p>
+Der gewählte Mirror und das lokale Verzeichnis (hier /opt/CPAN-Mini) werden in die Konfigurationsdatei .minicpanrc im Homeverzeichnis eingetragen.
+</p>
+<pre>
+$ cat ~/.minicpanrc
+local:  /opt/CPAN-Mini
+remote: http://nahe/gelegener/CPAN/Mirror
+exact_mirror: 1
+</pre>
+<p>
+Nun kann es auch schon losgehen.
+</p>
+<h2>Schritt 3: minicpan starten</h2>
+<p>
+Das mitgelieferte Tool minicpan holt und synchronisiert die Dateien vom CPAN.
+</p>
+<pre>
+$ time minicpan
+............... Ausgabe unterdrückt
+mkdir /opt/CPAN-Mini/authors/id/M/MA/MADGHOUL
+authors/id/M/MA/MADGHOUL/XML-OPML-0.26.tar.gz ... updated
+authors/id/M/MA/MADGHOUL/CHECKSUMS ... updated
+authors/id/M/MI/MIYAGAWA/XML-OPML-LibXML-0.03.tar.gz ... updated
+authors/id/S/ST/STEPHENCA/XML-OPML-SimpleGen-0.04.tar.gz ... updated
+authors/id/K/KA/KAWASAKI/XML-OverHTTP-0.08.tar.gz ... updated
+authors/id/M/MS/MSTROUT/XML-Overlay-0.01.tar.gz ... updated
+authors/id/M/MO/MORNI/XML-ParseDTD-0.1.4.tar.gz ... updated
+authors/id/M/MS/MSERGEANT/XML-Parser-2.36.tar.gz ... updated
+authors/id/E/EB/EBOHLMAN/XML-Parser-EasyTree-0.01.tar.gz ... updated
+authors/id/I/IA/IAMCAL/XML-Parser-Lite-Tree-0.03.tar.gz ... updated
+authors/id/I/IA/IAMCAL/XML-Parser-Lite-Tree-XPath-0.02.tar.gz ... updated
+authors/id/M/MS/MSERGEANT/XML-PYX-0.07.tar.gz ... updated
+authors/id/A/AW/AWIN/XML-Parser-Style-RDF-0.01.tar.gz ... updated
+authors/id/D/DO/DOWENS/XML-Parser-Wrapper-0.08.tar.gz ... updated
+authors/id/A/AH/AHICOX/XML-Parser-YahooRESTGeocode-0.2.tar.gz ... updated
+authors/id/M/MU/MURRAY/PPM-2.1.3.tar.gz ... updated
+authors/id/M/MS/MSERGEANT/XML-QL-0.07.tar.gz ... updated
+mkdir /opt/CPAN-Mini/authors/id/C/CO/CODEHELP
+authors/id/C/CO/CODEHELP/XML-QOFQSF-0.04.tar.gz ... updated
+............... Ausgabe unterdrückt
+
+real	77m39.156s
+user	2m54.787s
+sys	0m22.369s
+</pre>
+<p>
+Also knapp 1,5 h für den ersten vollständigen Durchlauf.
+</p>
+<p>
+Das neue MINI-CPAN belegt weniger als 1GB Plattenplatz. Das passt sogar auf einen kleinen USB-Stick.
+</p>
+<pre>
+$ du -hs CPAN-Mini/
+845M	CPAN-Mini/
+</pre>
+
+<h2>Schritt 4: Alle paar Tage CPAN-Mini aktualisieren. </h2>
+<pre>
+$ minicpan
+authors/01mailrc.txt.gz ... up to date
+modules/02packages.details.txt.gz ... updated
+modules/03modlist.data.gz ... up to date
+authors/id/C/CF/CFRANKS/Catalyst-Controller-HTML-FormFu-0.03000.tar.gz ... updated
+authors/id/C/CF/CFRANKS/CHECKSUMS ... updated
+authors/id/D/DD/DDUMONT/Config-Model-TkUI-0.201.tar.gz ... updated
+authors/id/D/DD/DDUMONT/CHECKSUMS ... updated
+authors/id/C/CF/CFRANKS/DBIx-Class-HTML-FormFu-0.01005.tar.gz ... updated
+authors/id/C/CF/CFRANKS/HTML-FormFu-0.03000.tar.gz ... updated
+authors/id/C/CF/CFRANKS/HTML-FormFu-Model-DBIC-0.03000.tar.gz ... updated
+authors/id/C/CL/CLIVE/Win32-EnvProcess-0.04.tar.gz ... updated
+authors/id/C/CL/CLIVE/CHECKSUMS ... updated
+cleaning /opt/CPAN-Mini/authors/id/C/CF/CFRANKS/DBIx-Class-HTML-FormFu-0.01004.tar.gz ...done
+cleaning /opt/CPAN-Mini/authors/id/C/CF/CFRANKS/HTML-FormFu-0.02004.tar.gz ...done
+cleaning /opt/CPAN-Mini/authors/id/C/CL/CLIVE/Win32-EnvProcess-0.03.tar.gz ...done
+cleaning /opt/CPAN-Mini/authors/id/D/DD/DDUMONT/Config-Model-TkUI-0.105.tar.gz ...done
+</pre>
+<p>
+mincpan aktualisiert den lokalen Mirror auf die jeweils neusten Modulversionen (updated) und löscht gleichzeitig (cleaning) alte Versionen.
+</p>
+
+<h2>Schritt 5: CPAN konfigurieren</h2>
+<p>
+Zum Schluss muss nur noch der Pfad zu MINI-CPAN  im Modul CPAN konfiguriert werden.
+</p>
+
+<pre>
+$ sudo perl -MCPAN -e shell
+
+cpan[1]> o conf urllist file:///opt/CPAN-Mini
+Please use 'o conf commit' to make the config permanent!
+
+cpan[2]> o conf commit
+commit: wrote '/home/tf/.cpan/CPAN/MyConfig.pm'
+
+cpan[3]> install Bundle::CPAN
+CPAN: Storable loaded ok (v2.18)
+CPAN: Time::HiRes loaded ok (v1.9711)
+Going to read <span class="k">/opt/CPAN-Mini/</span>authors/01mailrc.txt.gz
+...
+</pre>
+
+<p>
+Enjoy!
+</p>
+
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li><a href="http://www.stonehenge.com/merlyn/LinuxMag/col42.html">Randal Schwartz: Mirroring your own mini-CPAN</a></li>
+<li><a href="http://www.stonehenge.com/merlyn/LinuxMag/col90.html">Randal Schwartz: The Big Modules in the Mini-CPAN</a></li>
+<li><a href="http://perlbuzz.com/mechanix/2008/01/make-your-own-mini-cpan.html">Make your own mini CPAN</a></li>
+<li><a href="http://www.slideshare.net/brian_d_foy/mycpan-frozen-perl-lightning-talk">MyCPAN (Frozen Perl 2008 Lightning Talk)</a></li>
+<li><a href="http://www.perlcast.com/audio/Perlcast_Presentation_005.mp3">Making My Own CPAN (PerlCast)</a></li>
+<li><a href="http://www.oreillynet.com/onlamp/blog/2007/02/minicpan_and_grandperspective.html">MiniCPAN and GrandPerspective</a></li>
+<li><a href="http://perladvent.pm.org/2004/5th/">The 2004 Perl Advent Calendar: CPAN::Mini</a></li>
+<li><a href="http://search.cpan.org/perldoc?minicpan">minicpan</a></li>
+<li><a href="http://search.cpan.org/dist/CPAN-Mini/">CPAN-Mini</a></li>
+<li><a href="http://search.cpan.org/perldoc?CPAN::Mini::Extract">CPAN::Mini::Extract</a></li>
+</ul>

@@ -1,0 +1,212 @@
+---
+layout: post
+title: Shell-Aliase effektiv nutzen
+date: '2008-06-24 20:00:00 +0000'
+mt_id: 79
+blog_id: 1
+post_id: 79
+permalink: /2008/06/shellaliase_effektiv_nutzen.html
+categories:
+- linux
+---
+<p>
+Wenn Sie Ihre Perl-Programme unter Linux entwickeln und häufig die Kommandozeile nutzen, lohnt es sich ein paar Minuten in die Automatisierung vieler Aufgaben zu investieren.
+</p>
+<p>
+Hier bietet sich die Nutzung von <a href="http://de.wikipedia.org/wiki/Alias_(Unix)">Shell-Aliasen</a> an, die permanent in einer Datei (z.B.  ~/.perlaliases) gespeichert und bei jedem Login automatisch  zur Verfügung gestellt werden.
+</p>
+<h2>Zahlenbasis konvertieren (Base Conversion)</h2>
+<p>
+Die folgenden Aliase sind bei der Umrechnung von einem <a href="http://de.wikipedia.org/wiki/Zahlensystem">Zahlensystem</a> in ein anderes recht nützlich.
+</p>
+<pre>
+alias d2h="perl -e 'printf qq|%X\n|, int( shift )'"
+alias d2o="perl -e 'printf qq|%o\n|, int( shift )'"
+alias d2b="perl -e 'printf qq|%b\n|, int( shift )'"
+
+alias h2d="perl -e 'printf qq|%d\n|, hex( shift )'"
+alias h2o="perl -e 'printf qq|%o\n|, hex( shift )'"
+alias h2b="perl -e 'printf qq|%b\n|, hex( shift )'"
+
+alias o2h="perl -e 'printf qq|%X\n|, oct( shift )'"
+alias o2d="perl -e 'printf qq|%d\n|, oct( shift )'"
+alias o2b="perl -e 'printf qq|%b\n|, oct( shift )'"
+</pre>
+<p>
+Quelle: <a href="http://use.perl.org/~brian_d_foy/journal/36287">Journal of brian_d_foy : Base conversions</a>
+</p>
+<h2>Modulversionen ermitteln</h2>
+<p>
+Um die Version eines installierten Moduls muss man jedes Mal etwas wie 
+</p>
+<pre>
+        perl -MName::des::Moduls -le "print Name::des::Moduls->VERSION"
+</pre>
+<p>
+eingeben. Das lässt sich recht einfach verkürzen.
+</p>
+<pre>
+function pmver ( ) {
+        # Gibt die Version des (installierten) Perlmoduls aus
+        # Usage pmver Perlmodul
+        # Beispiel pmver CGI
+        perl -M$1 -le "print $1->VERSION"
+}
+</pre>
+<p>Beispiel</p>
+<pre>
+$ pmver CGI
+
+3.15
+</pre>
+<p>
+<strong>Quelle:</strong> Hack #4 in Perl Hacks (ISBN: 3897214741)
+</p>
+
+<h2>Perl Debugger</h2>
+<p>Den Perl Debugger verwende ich häufig (perl -d programm.pl args ) auch als Perl-Shell (perl -d -e 0).  Die Funktion debug erspart mir Tipparbeit.</p>
+
+<pre>
+function debug () {
+        if [ -z $1 ]
+        then
+                perl -d -e 0
+        else
+                perl -d $@
+        fi
+}
+</pre>
+<p>
+Wenn <em>debug</em> ohne Parameter aufgerufen wird, wird eine Perl-Shell geöffnet; beim Aufruf mit Parametern werden die Parameter einfach an den Debugger weitergereicht.
+</p>
+<pre>
+$ debug
+
+Loading DB routines from perl5db.pl version 1.28
+Editor support available.
+
+Enter h or `h h' for help, or `man perldebug' for more help.
+
+main::(-e:1):	0
+  DB<1> 
+</pre>
+<p>
+<pre>
+$ debug HalloWelt.pl
+
+Loading DB routines from perl5db.pl version 1.28
+Editor support available.
+
+Enter h or `h h' for help, or `man perldebug' for more help.
+
+main::(HalloWelt.pl:4):	print "Hallo Welt\n";
+</pre>
+
+<h2>Verschiedene Perlversionen</h2>
+<p>
+Häufig habe ich mehrere Perlversionen auf meinem Rechner. Für jede Perlversion, die nicht im Standardpfad ($PATH) aufgeführt ist, lege ich einen eigenen Alias an.
+</p>
+<pre>
+alias perl510="/opt/perl510/bin/perl"
+</pre>
+<p>
+Beispiel
+</p>
+<pre>
+$ perl -v 
+
+This is perl, v5.8.8 built for i486-linux-gnu-thread-multi
+...
+$ perl510 -v 
+
+This is perl, v5.10.0 built for i686-linux
+...
+</pre>
+
+<h2>Unterschiedliche Modulversionen</h2>
+<p>
+Manchmal muss ich meinen Code mit unterschiedlichen Modulversionen testen, z.B. nach Updates eines CPAN-Moduls. Das neue Modul wird dazu händisch in einen eigenen Ordner (z.B. /opt/devel/) installiert. Hier hilft der Schalter -I, der den @INC anpasst.
+</p>
+<pre>
+alias newmods="perl -I /opt/devel/"
+</pre>
+<p>
+Beispiel (inc.pl)
+</p>
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+<span class="k">print</span> <span class="k">join</span><span class="s">(</span><span class="q">&quot;\n&quot;</span><span class="cm">,</span> <span class="i">@INC</span><span class="s">)</span><span class="sc">;</span>
+</pre>
+<p>
+Wenn das Programm wie gewohnt aufgerufen wird, ergibt sich folgende Ausgabe.
+</p>
+<pre>
+$ perl inc.pl
+/etc/perl
+/usr/local/lib/perl/5.8.8
+....
+</pre>
+<p>
+Bei der Verwendung von  <em>newmods</em> werden die neueren Module aus <em>/opt/devel</em> zuerst geladen.
+</p>
+<pre>
+$  newmods inc.pl 
+/opt/devel/
+/etc/perl
+/usr/local/lib/perl/5.8.8
+....
+</pre>
+
+<h2>Alle aufgeführten Aliase in der Übersicht</h2>
+<p>
+Hier noch einmal alle angesprochenen Aliase und Funktionen in einer Übersicht.
+</p>
+<pre>
+alias d2h="perl -e 'printf qq|%X\n|, int( shift )'"
+alias d2o="perl -e 'printf qq|%o\n|, int( shift )'"
+alias d2b="perl -e 'printf qq|%b\n|, int( shift )'"
+
+alias h2d="perl -e 'printf qq|%d\n|, hex( shift )'"
+alias h2o="perl -e 'printf qq|%o\n|, hex( shift )'"
+alias h2b="perl -e 'printf qq|%b\n|, hex( shift )'"
+
+alias o2h="perl -e 'printf qq|%X\n|, oct( shift )'"
+alias o2d="perl -e 'printf qq|%d\n|, oct( shift )'"
+alias o2b="perl -e 'printf qq|%b\n|, oct( shift )'"
+
+alias perl510="/opt/perl510/bin/perl"
+
+alias newmods="perl -I /opt/devel/"
+
+function pmver ( ) {
+        # Gibt die Version des (installierten) Perlmoduls aus
+        # Usage pmver Perlmodul
+        # Beispiel pmver CGI
+        perl -M$1 -le "print $1->VERSION"
+}
+
+function debug () {
+       echo "Parameter $1"
+        if [ -z $1 ]
+        then
+                perl -d -e 0
+        else
+                perl -d $@
+        fi
+}
+</pre>
+
+<h2>Vorschläge bitte</h2>
+<p>
+Weitere produktive Shell-Aliase bitte in die Kommentare. Danke.
+</p>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://www.tldp.org/LDP/abs/html/">Advanced Bash-Scripting Guide</a></li>
+</ul>
+
+

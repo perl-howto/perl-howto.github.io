@@ -1,0 +1,67 @@
+---
+layout: post
+title: Sort::Key::Natural - Natürlich nach Zahlen und Buchstaben sortieren
+date: '2009-07-13 20:00:00 +0000'
+mt_id: 153
+blog_id: 1
+post_id: 153
+permalink: /2009/07/sortkeynatural_naturlich_nach_zahlen_und_buchstaben_sortieren.html
+categories:
+- '101'
+---
+<p>
+Praktisch <a href="http://hopl.murdoch.edu.au/">alle Programmiersprachen</a> sortieren Daten nach dem <a href="http://de.wikipedia.org/wiki/Ascii">ASCII</a>-Standard; so auch die Perl-Funktion <a href="http://perldoc.perl.org/functions/sort.html">sort</a>.
+</p>
+<p>
+Etwas wie <em>rfc1.txt, rfc2086.txt, rfc822.txt</em> sollte für Menschen eigentlich als <em>rfc1.txt, rfc822.txt, rfc2086.txt</em> sortiert werden.
+</p>
+<p>
+<a href="http://search.cpan.org/perldoc?Sort::Key::Natural">Sort::Key::Natural - fast natural sorting</a> von <a href="http://search.cpan.org/~salva/">Salvador Fandiño García</a> sortiert Daten, die sowohl Ziffern als auch Buchstaben enthalten, in der von Menschen erwarteten Reihenfolge (natural sorting).
+</p>
+<h2>Beispiel:</h2>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Sort::Key::Natural</span> <span style=" color: #CD5555;">qw(natsort)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@kapitel</span>  = <span style=" color: #000000;">(</span>
+        <span style=" color: #CD5555;">&quot;Kapitel 1&quot;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #CD5555;">&quot;Kapitel 11&quot;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #CD5555;">&quot;Kapitel 2&quot;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #CD5555;">&quot;Kapitel 5&quot;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #CD5555;">&quot;Kapitel 55&quot;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #CD5555;">&quot;Kapitel 16&quot;</span><span style=" color: #000000;">,</span>
+<span style=" color: #000000;">)</span><span style=" color: #000000;">;</span> 
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@nat_sorted</span> = <span style=" color: #000000;">natsort</span> <span style=" color: #00688B;">@kapitel</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #8B008B; font-weight:bold;">join</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">@nat_sorted</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Kapitel 1
+Kapitel 2
+Kapitel 5
+Kapitel 11
+Kapitel 16
+Kapitel 55
+</pre>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+	<li><a href="http://search.cpan.org/perldoc?Sort::Key::Natural">Sort::Key::Natural - fast natural sorting</a></li>
+	<li><a href="http://search.cpan.org/perldoc?Sort::Key">Sort::Key - the fastest way to sort anything in Perl</a></li>
+<li><a href="http://search.cpan.org/perldoc?Sort::Naturally">Sort::Naturally -- sort lexically, but sort numeral parts numerically</a></li>
+	<li>Perlmonks: <a href="http://www.perlmonks.org/?node_id=68185">How do I do a natural sort on an array?</a></li>
+<li><a href="http://www.codinghorror.com/blog/archives/001018.html">Coding Horror: Sorting for Humans : Natural Sort Order</a></li>
+<li><a href="http://sourcefrog.net/projects/natsort/">Martin Pool: Natural Order String Comparison</a></li>
+<li>Perldoc: <a href="http://perldoc.perl.org/functions/sort.html">sort</a></li>
+<li><a href="{{ site.url }}/2009/07/sortversions-versionsnummern-richtig-sortieren.html">Sort::Versions - Versionsnummern richtig sortieren</a></li>
+</ul>

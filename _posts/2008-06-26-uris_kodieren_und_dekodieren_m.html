@@ -1,0 +1,297 @@
+---
+layout: post
+title: URIs kodieren und dekodieren mit URI::Escape
+date: '2008-06-26 22:30:10 +0000'
+mt_id: 82
+blog_id: 1
+post_id: 82
+permalink: /2008/06/uris_kodieren_und_dekodieren_m.html
+categories:
+- lwp
+---
+<p>
+Bei einer <a href="http://de.wikipedia.org/wiki/Uniform_Resource_Locator">URL</a>- oder <a href="http://de.wikipedia.org/wiki/Uniform_Resource_Identifier">URI</a>-Kodierung geht es darum, bestimmte Zeichen in einer URL (URI) durch eine oder mehrere Gruppen aus speziellen anderen Zeichen zu ersetzen.
+</p>
+<p><a href="http://search.cpan.org/perldoc?URI::Escape">URI::Escape</a> von <a href="http://search.cpan.org/~gaas/">Gisle Aas</a> erleichtert das Kodieren bzw. Dekodieren von URIs erheblich und bietet neben UTF8-Unterstützung auch Sicherheitsfeatures.
+</p>
+<h2>Beispiel: URI kodieren und dekodieren</h2>
+
+<p>Die beiden <a href="http://perldoc.perl.org/functions/sub.html">Subroutinen</a> <span style=" color: #00688B;">uri_escape()</span> und <span style=" color: #00688B;">uri_unescape()</span>, die automatisch von <a href="http://search.cpan.org/perldoc?URI::Escape">URI::Escape</a> exportiert werden, übernehmen die Arbeit.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">URI::Escape</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$klartext</span> = <span style=" color: #CD5555;">qq~&quot;Dies ist Klartext mit Sonderzeichen!&quot;  10% mehr \$ ... ~</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$encoded</span>  = <span style=" color: #00688B;">uri_escape</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$klartext</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$decoded</span>  = <span style=" color: #00688B;">uri_unescape</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$encoded</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Encoded: $encoded \n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Decoded: $decoded \n&quot;</span><span style=" color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Encoded: %22Dies%20ist%20Klartext%20mit%20Sonderzeichen!%22%20%2010%25%20mehr%20%24%20...%20 
+Decoded: "Dies ist Klartext mit Sonderzeichen!"  10% mehr $ ...  
+</pre>
+
+<h2>UTF8</h2>
+
+<p>
+<span style=" color: #00688B;">uri_escape_utf8()</span> kann  <a href="http://de.wikipedia.org/wiki/UTF-8">UTF8 Strings</a> kodieren, <span style=" color: #00688B;">uri_unescape()</span> kann diese ebenfalls dekodieren.
+</p>
+
+<h2>CGI-Formulare</h2>
+
+<p>
+Das Modul <a href="http://search.cpan.org/perldoc?CGI">CGI</a> kodiert bzw. dekodiert Formulardaten automatisch richtig. Verwenden Sie daher <a href="http://search.cpan.org/perldoc?CGI">CGI</a> und <strong>nicht</strong> <a href="http://search.cpan.org/perldoc?URI::Escape">URI::Escape</a>.
+</p>
+
+<h2>Beispiel: GET-Query mit URI::Escape zusammensetzen</h2>
+
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">URI::Escape</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Basis URI zum Formular</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$url</span> = <span style=" color: #CD5555;">&#39;http://irgendwo.tld/cgi-bin/formular.pl&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Parameter und Werte</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$param1</span> = <span style=" color: #CD5555;">&#39;vorname&#39;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$param2</span> = <span style=" color: #CD5555;">&#39;nachname&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$value1</span> = <span style=" color: #CD5555;">&#39;Max&#39;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$value2</span> = <span style=" color: #CD5555;">&#39;M&uuml;ller&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Get Query schrittweise zusammenbauen</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$get_query</span> = <span style=" color: #CD5555;">&#39;&#39;</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #00688B;">$url</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #CD5555;">&#39;?&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$param1</span> = <span style=" color: #00688B;">uri_escape</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$param1</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #00688B;">$param1</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #CD5555;">&#39;=&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$value1</span> = <span style=" color: #00688B;">uri_escape</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$value1</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #00688B;">$value1</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #CD5555;">&#39;&amp;amp;&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$param2</span> = <span style=" color: #00688B;">uri_escape</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$param2</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #00688B;">$param2</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #CD5555;">&#39;=&#39;</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$value2</span> = <span style=" color: #00688B;">uri_escape</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$value2</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #00688B;">$value2</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;GET Query: $get_query\n&quot;</span><span style=" color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+GET Query: http://irgendwo.tld/cgi-bin/formular.pl?vorname=Max&amp;amp;nachname=M%C3%BCller
+</pre>
+
+<h2>Beispiel: GET-Query mit CGI zusammensetzen</h2>
+<p>
+Zum Vergleich die selben Schritte wie oben, jedoch mit <a href="http://search.cpan.org/perldoc?CGI">CGI</a>.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">CGI</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$q</span> = <span style=" color: #000000;">new</span> <span style=" color: #000000;">CGI</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #228B22;"># Basis URI zum Formular</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$url</span> = <span style=" color: #CD5555;">&#39;http://irgendwo.tld/cgi-bin/formular.pl&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Parameter und Werte</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$param1</span> = <span style=" color: #CD5555;">&#39;vorname&#39;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$param2</span> = <span style=" color: #CD5555;">&#39;nachname&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$value1</span> = <span style=" color: #CD5555;">&#39;Max&#39;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$value2</span> = <span style=" color: #CD5555;">&#39;M&uuml;ller&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Get Query schrittweise zusammenbauen</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$get_query</span> = <span style=" color: #CD5555;">&#39;&#39;</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #00688B;">$url</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #CD5555;">&#39;?&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$param1</span> = <span style=" color: #00688B;">$q</span><span style=" color: #00688B;">-&gt;escape</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$param1</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #00688B;">$param1</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #CD5555;">&#39;=&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$value1</span> = <span style=" color: #00688B;">$q</span><span style=" color: #00688B;">-&gt;escape</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$value1</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #00688B;">$value1</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #CD5555;">&#39;&amp;amp;&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$param2</span> = <span style=" color: #00688B;">$q</span><span style=" color: #00688B;">-&gt;escape</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$param2</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #00688B;">$param2</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #CD5555;">&#39;=&#39;</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$value2</span> = <span style=" color: #00688B;">$q</span><span style=" color: #00688B;">-&gt;escape</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$value2</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$get_query</span> .= <span style=" color: #00688B;">$value2</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;GET Query: $get_query\n&quot;</span><span style=" color: #000000;">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt die selbe Ausgabe wie oben:
+</p>
+<pre>
+GET Query: http://irgendwo.tld/cgi-bin/formular.pl?vorname=Max&amp;amp;nachname=M%C3%BCller
+</pre>
+
+<h2>Tabellarische Übersicht URL Escape Codes</h2>
+
+<table border="0" cellpadding="5" cellspacing="10">
+<tr>
+<td><b>Zeichen </b></td>
+<td><b>Escape Code</b></td>
+</tr>
+<tr>
+<td>Space</td>
+<td>%20</td>
+</tr>
+<tr>
+<td>"</td>
+<td>%22</td>
+</tr>
+<tr>
+<td>!</td>
+<td>%23</td>
+</tr>
+
+<tr>
+<td>.</td>
+<td>%2E</td>
+</tr>
+<tr>
+<td>,</td>
+<td>%2C</td>
+</tr>
+<tr>
+<td>&lt;</td>
+<td>%3C</td>
+</tr>
+<tr>
+<td>&gt;</td>
+<td>%3E</td>
+</tr>
+<tr>
+<td>&#35;</td>
+<td>%23</td>
+</tr>
+<tr>
+<td>%</td>
+<td>%25</td>
+</tr>
+<tr>
+<td>(</td>
+<td>%28</td>
+</tr>
+<tr>
+<td>)</td>
+<td>%29</td>
+</tr>
+<tr>
+<td>&#123;</td>
+<td>%7B</td>
+</tr>
+<tr>
+<td>&#125;</td>
+<td>%7D</td>
+</tr>
+<tr>
+<td>&#124;</td>
+<td>%7C</td>
+</tr>
+<tr>
+<td>&#92;</td>
+<td>%74</td>
+</tr>
+<tr>
+<td>&#94;</td>
+<td>%5E</td>
+</tr>
+<tr>
+<td>&#126;</td>
+<td>%7E</td>
+</tr>
+<tr>
+<td>&#91;</td>
+<td>%5B</td>
+</tr>
+<tr>
+<td>&#93;</td>
+<td>%5D</td>
+</tr>
+<tr>
+<td>&#39;</td>
+<td>%60</td>
+</tr>
+<tr>
+<td>&#59;</td>
+<td>%3B</td>
+</tr>
+<tr>
+<td>&#47;</td>
+<td>%2F</td>
+</tr>
+<tr>
+<td>&#63;</td>
+<td>%3F</td>
+</tr>
+<tr>
+<td>&#58;</td>
+<td>%3A</td>
+</tr>
+<tr>
+<td>&#64;</td>
+<td>%40</td>
+</tr>
+<tr>
+<td>&#61;</td>
+<td>%3D</td>
+</tr>
+<tr>
+<td>&amp;</td>
+<td>%26</td>
+</tr>
+<tr>
+<td>*</td>
+<td>%2A</td>
+</tr>
+
+</table>
+
+<p>&nbsp;</p>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?URI::Escape">URI::Escape</a></li>
+<li><a href="http://de.wikipedia.org/wiki/URL-Kodierung">URL Encoding</a></li>
+<li><a href="http://www.faqs.org/rfcs/rfc2397.html">RFC 2397 - The "data" URL scheme</a></li>
+<li><a href="http://www.faqs.org/rfcs/rfc2732.html">RFC 2732 - Format for Literal IPv6 Addresses in URL's</a></li>
+<li><a href="http://www.faqs.org/rfcs/rfc3986.html">rfc3986 - Uniform Resource Identifier (URI): Generic Syntax</a></li>
+<li><a href="http://netzreport.googlepages.com/online_tool_zur_url_kodierung_de.html">Online-Tool zur URL-Kodierung/Dekodierung</a></li>
+<li><a href="http://search.cpan.org/perldoc?CGI">CGI</a></li>
+</ul>

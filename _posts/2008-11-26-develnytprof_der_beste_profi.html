@@ -1,0 +1,196 @@
+---
+layout: post
+title: Devel::NYTProf - Der beste Profiler für Perl
+date: '2008-11-26 21:00:00 +0000'
+mt_id: 105
+blog_id: 1
+post_id: 105
+permalink: /2008/11/develnytprof_der_beste_profi.html
+categories:
+- profiler
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Devel::NYTProf">Devel::NYTProf</a> ist ein recht neuer, aber sehr leistungsfähiger Profiler für Perl, der von <a href="http://search.cpan.org/~akaplan/">Adam Kaplan</a> für die <a href="http://www.nytimes.com/">New York Times</a> (daher der Name) entwickelt wurde.
+<a href="http://search.cpan.org/~timb/">Tim Bunce</a>, bekannt als Enwickler der Datenbankschnittstelle <a href="http://search.cpan.org/dist/DBI/">DBI</a>, entwickelt <a href="http://search.cpan.org/perldoc?Devel::NYTProf">Devel::NYTProf</a> weiter.
+</p>
+<h2>Zeilen und Unterprogramme</h2>
+<p>
+<strong>Zeilenorientierte</strong> Profiler wie
+<a href="http://search.cpan.org/perldoc?Devel::SmallProf">Devel::SmallProf</a> bzw. 
+<a href="http://search.cpan.org/perldoc?Devel::FastProf">Devel::FastProf</a> von <a href="http://search.cpan.org/~salva/">Salvador Fandiño García</a> zeigen, welche <strong>Zeile</strong> eines Perl-Programms wie oft aufgerufen wurde und wieviel Zeit dafür benötigt wurde.
+</p>
+<p>
+<strong>Unterprogrammorientierte</strong> Profiler wie <a href="http://search.cpan.org/perldoc?Devel::DProf">Devel::DProf </a> von <a href="http://search.cpan.org/~ilyaz/">Ilya Zakharevich</a> zeigen, welches <strong>Unterprogramm</strong> eines Perl-Programms wie oft aufgerufen wurde und wieviel Zeit dafür benötigt wurde.
+</p>
+<p>
+<a href="http://search.cpan.org/perldoc?Devel::NYTProf">Devel::NYTProf</a> kann <strong>sowohl</strong> zeilen- als auch unterprogrammorientiert messen und läuft auf Linux/Unix und Windows. 
+</p>
+<p>
+</p>
+<p>
+Schauen wir uns den neuen Profiler mal etwas näher an.
+</p>
+<h2>Beispielprogramm: Fakul&auml;t berechnen</h2>
+<p>
+Das Beispielprogramm berechnet die <a href="http://de.wikipedia.org/wiki/Fakult%C3%A4t_(Mathematik)">Fakul&auml;t</a> einer Ganzzahl auf drei unterschiedliche Arten: rekursiv und zweimal iterativ. Die Variationen habe ich dem <a href="http://use.perl.org/~ambs/journal/37511">Journal of ambs: How would you write factorial?</a> entnommen. 
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Berechnung der Fakultaet n! </span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$n</span> = <span style=" color: #B452CD;">70</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">recursive</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$n</span><span style=" color: #000000;">)</span>  <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">iterativ</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$n</span><span style=" color: #000000;">)</span>   <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">iterativ2</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$n</span><span style=" color: #000000;">)</span>  <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+
+<a name="recursive"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">recursive</span> <span style=" color: #000000;">{</span>
+  <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$n</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span><span style=" color: #000000;">;</span>
+  <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$n</span> == <span style=" color: #B452CD;">1</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #00688B;">$n</span> == <span style=" color: #B452CD;">0</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+     <span style=" color: #8B008B; font-weight:bold;">return</span> <span style=" color: #B452CD;">1</span><span style=" color: #000000;">;</span>
+  <span style=" color: #000000;">}</span>
+  <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$total</span> = <span style=" color: #00688B;">$n</span> * <span style=" color: #00688B;">recursive</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$n</span>-<span style=" color: #B452CD;">1</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+  <span style=" color: #8B008B; font-weight:bold;">return</span> <span style=" color: #00688B;">$total</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<a name="iterativ"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">iterativ</span> <span style=" color: #000000;">{</span>
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$v</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$res</span> = <span style=" color: #B452CD;">1</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">while</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$v</span> &gt; <span style=" color: #B452CD;">1</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #00688B;">$res</span> *= <span style=" color: #00688B;">$v</span><span style=" color: #000000;">;</span>
+        <span style=" color: #00688B;">$v</span>--<span style=" color: #000000;">;</span>
+    <span style=" color: #000000;">}</span>
+    <span style=" color: #8B008B; font-weight:bold;">return</span> <span style=" color: #00688B;">$res</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<a name="iterativ2"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">iterativ2</span> <span style=" color: #000000;">{</span>
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$v</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$res</span> = <span style=" color: #B452CD;">1</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">grep</span> <span style=" color: #000000;">{</span><span style=" color: #00688B;">$res</span>*=<span style=" color: #00688B;">$_</span><span style=" color: #000000;">}</span> <span style=" color: #000000;">(</span><span style=" color: #B452CD;">1</span>..<span style=" color: #00688B;">$v</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">return</span> <span style=" color: #00688B;">$res</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #228B22;"># Quelle:</span>
+<span style=" color: #228B22;"># Journal of ambs: How would you write factorial?</span>
+<span style=" color: #228B22;"># http://use.perl.org/~ambs/journal/37511</span>
+</pre>
+<p>Das Programm erzeugt folgende Ausgabe:</p>
+<pre>
+$ perl factorial.pl
+1.19785716699699e+100
+1.19785716699699e+100
+1.19785716699699e+100
+</pre>
+<p>
+Das ist übrigens das selbe Beispielprogramm wie in den Beiträgen <a href="{{ site.url }}/2008/11/in-welcher-zeile-verbrat-mein.html">In welcher Zeile verbrät mein Programm die meiste Zeit? Devel::SmallProf und Devel::FastProf geben Antworten</a> bzw. <a href="{{ site.url }}/2008/11/in-welchem-unterprogramm-verbr.html">In welchem Unterprogramm verbrät mein Programm die meiste Zeit? Devel::DProf liefert Hinweise</a>. 
+</p>
+<h2>Devel::NYTProf</h2>
+<p>
+Das Beispielprogramm lässt sich mit <a href="http://search.cpan.org/perldoc?Devel::NYTProf">Devel::NYTProf</a> wie folgt untersuchen.
+</p>
+<pre>
+$ perl -d:NYTProf factorial.pl
+</pre>
+<p>
+<a href="http://search.cpan.org/perldoc?Devel::NYTProf">Devel::NYTProf</a> erzeugt im aktuellen Verzeichnis die Datei <em>nytprof.out</em>, die sich mit den mitgelieferten Werkzeugen <a href="http://search.cpan.org/perldoc?nytprofhtml">nytprofhtml</a>  bzw. <a href="http://search.cpan.org/perldoc?nytprofcsv">nytprofcsv</a> anzeigen lässt. 
+</p>
+<h3>nytprofcsv</h3>
+<p>
+<a href="http://search.cpan.org/perldoc?nytprofcsv">nytprofcsv</a> bereitet das Profiling in betriebssystem-unabhängigen <a href="http://de.wikipedia.org/wiki/CSV_(Dateiformat)">CSV</a>-Dateien, die bequem mit Excel oder Open-Office.org geöffnet werden können, auf.  Für jede Zeile Code werden die verbrauchte Zeit, die Anzahl Aufrufe und die Zeit/Aufruf angezeigt.
+</p>
+<pre>
+$ nytprofcsv 
+Generating CSV report...
+Reading nytprof.out
+Writing report to nytprof directory
+</pre>
+<p>
+<a href="http://search.cpan.org/perldoc?nytprofcsv">nytprofcsv</a> erzeugt einen Unterordner <em>nytprof</em>, in dem die Profiling-Ergebnisse abgelegt werden.
+</p>
+<pre>
+$ ls -1 nytprof
+factorial.pl-block.csv
+factorial.pl-line.csv
+factorial.pl-sub.csv
+strict.pm-block.csv
+strict.pm-line.csv
+strict.pm-sub.csv
+warnings.pm-block.csv
+warnings.pm-line.csv
+warnings.pm-sub.csv
+</pre>
+<p>
+Das muss man sich einfach mal in einer Tabellenkalkulation ansehen, dann weiß man sofort, wie es funktioniert.
+</p>
+
+<h3>nytprofhtml</h3>
+<p>
+<a href="http://search.cpan.org/perldoc?nytprofhtml">nytprofhtml</a> erzeugt ebenfalls einen Unterordner <em>nytprof</em>, in dem die Profiling-Ergebnisse als HTML-Dateien abgelegt werden.
+</p>
+<pre>
+$ nytprofhtml nytprof.out 
+Generating report...
+Reading nytprof.out
+Writing report to nytprof directory
+</pre>
+<pre>
+$ ls -1 nytprof
+factorial.pl-block.html
+factorial.pl-line.html
+factorial.pl-sub.html
+index.html
+index-subs-excl.html
+index-subs-incl.html
+jquery.min.js
+jquery.tablesorter.min.js
+strict.pm-block.html
+strict.pm-line.html
+strict.pm-sub.html
+style.css
+warnings.pm-block.html
+warnings.pm-line.html
+warnings.pm-sub.html
+</pre>
+<p>
+Die HTML-Ausgabe sieht zunächst einmal rattenscharf aus:
+</p>
+<p>
+<form mt:asset-id="16" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="NYTPP01_klein.png" src="{{ site.url }}/assets/images/nytpp/NYTPP01_klein.png" width="503" height="254"  style="" /></form>
+</p>
+<p>
+und enthält <strong>alle</strong> Details, die benötigt werden, um Zeitdiebe auf zu finden.
+</p>
+<p>
+</p>
+
+<h2>Mein Fazit</h2>
+<p>
+<a href="http://search.cpan.org/perldoc?Devel::NYTProf">Devel::NYTProf</a> ist der derzeit beste Profiler für Perl und gehört in den Werkzeugkasten eines jeden Entwicklers.
+</p>
+<p>
+</p>
+
+<h2>Danke New York Times</h2>
+<p>
+Ein ganz besonderen Dank an die  <a href="http://www.nytimes.com/">New York Times</a>, die ihren Angestellten erlaubt, ein derart <em>geiles</em> Tool als Open-Source zu veröffentlichen. 
+</p>
+<p>
+</p>
+
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Devel::NYTProf">Devel::NYTProf</a></li>
+<li><a href="http://blog.timbunce.org/2008/11/01/nytprof-207-even-better-and-now-for-windows-too/">NYTProf 2.07 - Even better, and now for Windows too</a></li>
+<li><a href="http://blog.timbunce.org/2008/07/12/devel-dprof-broken-by-the-passage-of-time/">Devel::DProf - broken by the passage of time</a></li>
+<li><a href="http://blog.timbunce.org/2008/07/16/nytprof-v2-the-background-story/">NYTProf v2 - the background story</a></li>
+<li><a href="http://open.blogs.nytimes.com/2008/07/17/develnytprof-version-2-released-marvel-at-its-greatness/">Devel::NYTProf Version 2 Released. Marvel at Its Greatness!</a></li>
+<li><a href="http://open.blogs.nytimes.com/2008/03/05/the-new-york-times-perl-profiler/">The New York Times Perl Profiler</a></li>
+<li><a href="http://perlbuzz.com/2008/11/develnytprof-continues-its-march-of-awesomeness.html">Devel::NYTProf continues its march of awesomeness</a></li>
+<li><a href="http://perlbuzz.com/mechanix/2008/03/develnytprof-is-the-hot-new-pr.html">Devel::NYTProf is the hot new profiler in town</a></li>
+<li><a href="http://www.linux-magazin.de/heft_abo/ausgaben/2008/12/laufzeit_tacho">Laufzeit-Tacho -  Profiler identifizieren Flaschenhälse in Perl-Programmen</a></li>
+<li><a href="http://www.slideshare.net/lokku/yapceurope-2008-mike-astle-profiling-presentation/">YAPC::Europe 2008 - Mike Astle - Profiling</a></li>
+<li><a href="{{ site.url }}/2008/11/in-welchem-unterprogramm-verbr.html">In welchem Unterprogramm verbrät mein Programm die meiste Zeit? Devel::DProf liefert Hinweise</a></li>
+<li><a href="{{ site.url }}/2008/11/in-welcher-zeile-verbrat-mein.html">In welcher Zeile verbrät mein Programm die meiste Zeit? Devel::SmallProf und Devel::FastProf geben Antworten</a></li>
+<li><a href="{{ site.url }}/2008/09/develsize-wieviel-speicher-b.html">Devel::Size - Wieviel Speicher belegt meine Datenstruktur?</a></li>
+</ul>

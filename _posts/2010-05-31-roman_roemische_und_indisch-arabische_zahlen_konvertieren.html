@@ -1,0 +1,165 @@
+---
+layout: post
+title: 'Roman: Römische und Indisch-Arabische Zahlen konvertieren'
+date: '2010-05-31 10:45:00 +0000'
+mt_id: 189
+blog_id: 1
+post_id: 189
+permalink: /2010/05/roman_roemische_und_indisch-arabische_zahlen_konvertieren.html
+categories:
+- '101'
+---
+<p>
+Das Modul <a href="http://search.cpan.org/perldoc?Roman">Roman</a> - <em>Perl module for conversion between Roman and Arabic numerals</em> - von <a href="http://search.cpan.org/~chorny/">Alexandr Ciornii</a> vereinfacht die Umrechnung von  <a href="http://de.wikipedia.org/wiki/R%C3%B6mische_Zahlen">Römische Zahlen</a> in <a href="http://de.wikipedia.org/wiki/Indische_Ziffern">Indisch-Arabische Zahlen</a> und umgekehrt.
+</p>
+
+<h2>Indisch-Arabische Zahlen in römische Zahlen umrechnen</h2>
+<p>
+Die automatisch exportierte Funktion <em>Roman</em> liefert römische Zahlen in Großbuchstaben. Wer kleine Buchstaben bevorzugt, verwendet statt dessen die (hier nicht gezeigte) Funktion <em>roman</em>.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Roman</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@arabic_numbers</span> = <span style="color: #000000;">(</span> <span style="color: #B452CD;">1</span> .. <span style="color: #B452CD;">10</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$arabic</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@arabic_numbers</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$roman</span> = <span style="color: #00688B;">Roman</span><span style="color: #000000;">(</span><span style="color: #00688B;">$arabic</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">printf</span><span style="color: #000000;">(</span> <span style="color: #CD5555;">&quot;%-5s %-5s\n&quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$arabic</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$roman</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+1     I    
+2     II   
+3     III  
+4     IV   
+5     V    
+6     VI   
+7     VII  
+8     VIII 
+9     IX   
+10    X  
+</pre>
+<p>
+&nbsp;
+</p>
+
+
+<h2>Römische Zahlen in Indisch-Arabische Zahlen umrechnen</h2>
+<p>
+Die ebenfalls automatisch exportiert Funktion <em>arabic</em> rechnet römische Zahlen in Indisch-Arabische Zahlen um. <em>isroman</em> prüft, ob es sich auch wirklich um eine gültige römische Zahl handelt.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Roman</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@roman_numbers</span> = <span style="color: #CD5555;">qw( X XX L C CM MCD )</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$roman</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@roman_numbers</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">isroman</span><span style="color: #000000;">(</span><span style="color: #00688B;">$roman</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$arabic</span> = <span style="color: #00688B;">arabic</span><span style="color: #000000;">(</span><span style="color: #00688B;">$roman</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">printf</span><span style="color: #000000;">(</span> <span style="color: #CD5555;">&quot;%-5s %5s\n&quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$roman</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$arabic</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">warn</span> <span style="color: #CD5555;">&quot;$roman ist keine gueltige roemische Zahl!\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+X        10
+XX       20
+L        50
+C       100
+CM      900
+MCD    1400
+</pre>
+<p>
+&nbsp;
+</p>
+
+<h2>Datum in römischen Zahlen</h2>
+<p>
+Das nachfolgende Snippet habe ich im <a href="http://blogs.perl.org/users/ovid/">Blog von Ovid</a> im Beitrag <a href="http://blogs.perl.org/users/ovid/2010/05/dates-in-latin.html">Dates in Latin</a> gefunden und als Grundlage für ein kleines Programm verwendet:
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Roman</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">DateTime</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$dt</span> = <span style="color: #000000;">DateTime</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span>
+    <span style="color: #000000;">year</span>      <span style="color: #000000;">=&gt;</span> <span style="color: #B452CD;">2010</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">month</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #B452CD;">06</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">day</span>       <span style="color: #000000;">=&gt;</span> <span style="color: #B452CD;">7</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">time_zone</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;Europe/Berlin&#39;</span><span style="color: #000000;">,</span>
+<span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$date</span>           = <span style="color: #00688B;">latin_date</span><span style="color: #000000;">(</span><span style="color: #00688B;">$dt</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$workshop_count</span> = <span style="color: #00688B;">Roman</span><span style="color: #000000;">(</span><span style="color: #B452CD;">12</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span>
+    <span style="color: #CD5555;">qq~Der $workshop_count. Deutsche Perl-Workshop in Schorndorf (bei Stuttgart)
+       startet am &quot;$date&quot;.\n~</span><span style="color: #000000;">;</span>
+
+<a name="latin_date"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">latin_date</span> <span style="color: #000000;">{</span>
+
+    <span style="color: #228B22;"># Quelle: http://blogs.perl.org/users/ovid/2010/05/dates-in-latin.html</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$datetime</span> = <span style="color: #8B008B; font-weight:bold;">shift</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@days</span>     = <span style="color: #000000;">(</span>
+        <span style="color: #CD5555;">&#39;Dies Dominica&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Dies Lunae&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Dies Martis&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Dies Mercurii&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Dies Iovis&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Dies Veneris&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Dies Saturni&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Dies Dominica&#39;</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@months</span> = <span style="color: #000000;">(</span>
+        <span style="color: #CD5555;">&#39;Januarius&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;Februarius&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;Martius&#39;</span><span style="color: #000000;">,</span>   <span style="color: #CD5555;">&#39;Aprilis&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Maius&#39;</span><span style="color: #000000;">,</span>     <span style="color: #CD5555;">&#39;Junius&#39;</span><span style="color: #000000;">,</span>     <span style="color: #CD5555;">&#39;Julius&#39;</span><span style="color: #000000;">,</span>    <span style="color: #CD5555;">&#39;Augustus&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;September&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;October&#39;</span><span style="color: #000000;">,</span>    <span style="color: #CD5555;">&#39;Novembris&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;December&#39;</span>
+    <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">return</span> <span style="color: #8B008B; font-weight:bold;">join</span> <span style="color: #CD5555;">&#39; &#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$days</span>[ <span style="color: #00688B;">$datetime</span><span style="color: #00688B;">-&gt;day_of_week</span> ]<span style="color: #000000;">,</span>
+        <span style="color: #00688B;">roman</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$datetime</span><span style="color: #00688B;">-&gt;day</span> <span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$months</span>[ <span style="color: #00688B;">$datetime</span><span style="color: #00688B;">-&gt;month</span> - <span style="color: #B452CD;">1</span> ]<span style="color: #000000;">,</span>
+        <span style="color: #8B008B; font-weight:bold;">uc</span><span style="color: #000000;">(</span> <span style="color: #00688B;">roman</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$datetime</span><span style="color: #00688B;">-&gt;year</span> <span style="color: #000000;">)</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+
+<pre>
+Der XII. Deutsche Perl-Workshop in Schorndorf (bei Stuttgart) 
+startet am "Dies Lunae vii Junius MMX".
+</pre>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li>Ovid: <a href="http://blogs.perl.org/users/ovid/2010/05/dates-in-latin.html">Dates in Latin</a></li>
+
+<li>CPAN: <a href="http://search.cpan.org/perldoc?DateTime">DateTime</a> - A date and time object</li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?Roman">Roman</a> - Perl module for conversion between Roman and Arabic numerals</li>
+<li>PLEAC-Perl: <a href="http://pleac.sourceforge.net/pleac_perl/numbers.html">Numbers</a> - Working with Roman Numerals</li>
+<li>Wikipedia: <a href="http://de.wikipedia.org/wiki/R%C3%B6mische_Zahlen">Römische Zahlen</a></li>
+<li> Wikipedia: <a href="http://de.wikipedia.org/wiki/Indische_Ziffern">Indisch-Arabische Zahlen</a></li>
+<li><a href="http://www.perl-workshop.de/de/index.html">Deutscher Perl-Workshop</a></li>
+</ul>

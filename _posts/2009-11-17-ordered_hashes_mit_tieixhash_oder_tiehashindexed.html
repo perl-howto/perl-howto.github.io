@@ -1,0 +1,139 @@
+---
+layout: post
+title: Ordered Hashes mit Tie::IxHash oder Tie::Hash::Indexed
+date: '2009-11-17 20:15:00 +0000'
+mt_id: 170
+blog_id: 1
+post_id: 170
+permalink: /2009/11/ordered_hashes_mit_tieixhash_oder_tiehashindexed.html
+categories:
+- '101'
+---
+<p>
+Wenn die Schlüssel und Werte eines Perl-Hashes genau in der Reihenfolge ausgegeben werden sollen, in der die Daten in den Hash eingefügt wurden, bieten sich die beiden CPAN-Module  <a href="http://search.cpan.org/perldoc?Tie::IxHash">Tie::IxHash</a> und <a href="http://search.cpan.org/perldoc?Tie::Hash::Indexed">Tie::Hash::Indexed</a> an.
+</p>
+
+<h2>Standardverhalten von Perl-Hashes bei der Ausgabe</h2>
+<p>
+Schlüssel und Wert werden in nicht vorhersagbarer Reihenfolge ausgegeben.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">%farbe</span> = <span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">$farbe</span>{<span style="color: #CD5555;">&#39;Banane&#39;</span>}  = <span style="color: #CD5555;">&#39;Gelb&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$farbe</span>{<span style="color: #CD5555;">&#39;Zitrone&#39;</span>} = <span style="color: #CD5555;">&#39;Gelb&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$farbe</span>{<span style="color: #CD5555;">&#39;Orange&#39;</span>}  = <span style="color: #CD5555;">&#39;Orange&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$farbe</span>{<span style="color: #CD5555;">&#39;Apfel&#39;</span>}   = <span style="color: #CD5555;">&#39;Rot&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$pattern</span> = <span style="color: #CD5555;">&quot;%-20s %-20s\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">printf</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$pattern</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;Obst:&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;Farbe:&#39;</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+	<span style="color: #228B22;"># Ausgabe in zufaelliger Reihenfolge</span>
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$obst</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">keys</span> <span style="color: #00688B;">%farbe</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+		<span style="color: #8B008B; font-weight:bold;">printf</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$pattern</span> <span style="color: #000000;">,</span> <span style="color: #00688B;">$obst</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$farbe</span>{<span style="color: #00688B;">$obst</span>} <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span> 
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Obst:                Farbe:              
+Banane               Gelb                
+Apfel                Rot                 
+Orange               Orange              
+Zitrone              Gelb  
+</pre>
+
+<h2>Tie::IxHash</h2>
+<p>
+<a href="http://search.cpan.org/perldoc?Tie::IxHash">Tie::IxHash</a> von <a href="http://search.cpan.org/~gsar/">Gurusamy Sarathy</a> gibt Schlüssel und Werte eines Hashes genau in der Reihenfolge wieder aus, in der die Schlüssel eingefügt wurden:
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Tie::IxHash</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">%farbe</span> = <span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">tie</span> <span style="color: #00688B;">%farbe</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;Tie::IxHash&quot;</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #00688B;">$!</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">$farbe</span>{<span style="color: #CD5555;">&#39;Banane&#39;</span>}  = <span style="color: #CD5555;">&#39;Gelb&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$farbe</span>{<span style="color: #CD5555;">&#39;Zitrone&#39;</span>} = <span style="color: #CD5555;">&#39;Gelb&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$farbe</span>{<span style="color: #CD5555;">&#39;Orange&#39;</span>}  = <span style="color: #CD5555;">&#39;Orange&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$farbe</span>{<span style="color: #CD5555;">&#39;Apfel&#39;</span>}   = <span style="color: #CD5555;">&#39;Rot&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$pattern</span> = <span style="color: #CD5555;">&quot;%-20s %-20s\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">printf</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$pattern</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;Obst:&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;Farbe:&#39;</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+        <span style="color: #228B22;"># Ausgabe in Einfuege-Reihenfolge</span>
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$obst</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">keys</span> <span style="color: #00688B;">%farbe</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+		<span style="color: #8B008B; font-weight:bold;">printf</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$pattern</span> <span style="color: #000000;">,</span> <span style="color: #00688B;">$obst</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$farbe</span>{<span style="color: #00688B;">$obst</span>} <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span> 
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Obst:                Farbe:              
+Banane               Gelb                
+Zitrone              Gelb                
+Orange               Orange              
+Apfel                Rot  
+</pre>
+
+<h2>Tie::Hash::Indexed</h2>
+<p>
+<a href="http://search.cpan.org/perldoc?Tie::Hash::Indexed">Tie::Hash::Indexed</a> von <a href="http://search.cpan.org/~mhx/">Marcus Holland-Moritz</a> erledigt die selbe Aufgabe deutlich schneller, da intern <a href="http://perldoc.perl.org/perlxs.html">XS </a> zum Einsatz kommt
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Tie::Hash::Indexed</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">%farbe</span> = <span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">tie</span> <span style="color: #00688B;">%farbe</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;Tie::Hash::Indexed&quot;</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #00688B;">$!</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">$farbe</span>{<span style="color: #CD5555;">&#39;Banane&#39;</span>}  = <span style="color: #CD5555;">&#39;Gelb&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$farbe</span>{<span style="color: #CD5555;">&#39;Zitrone&#39;</span>} = <span style="color: #CD5555;">&#39;Gelb&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$farbe</span>{<span style="color: #CD5555;">&#39;Orange&#39;</span>}  = <span style="color: #CD5555;">&#39;Orange&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$farbe</span>{<span style="color: #CD5555;">&#39;Apfel&#39;</span>}   = <span style="color: #CD5555;">&#39;Rot&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$pattern</span> = <span style="color: #CD5555;">&quot;%-20s %-20s\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">printf</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$pattern</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;Obst:&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;Farbe:&#39;</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+        <span style="color: #228B22;"># Ausgabe in Einfuege-Reihenfolge</span>
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$obst</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">keys</span> <span style="color: #00688B;">%farbe</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+		<span style="color: #8B008B; font-weight:bold;">printf</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$pattern</span> <span style="color: #000000;">,</span> <span style="color: #00688B;">$obst</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$farbe</span>{<span style="color: #00688B;">$obst</span>} <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span> 
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Obst:                Farbe:              
+Banane               Gelb                
+Zitrone              Gelb                
+Orange               Orange              
+Apfel                Rot        
+</pre>
+
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Tie::IxHash">Tie::IxHash</a></li>
+<li><a href="http://search.cpan.org/perldoc?Tie::Hash::Indexed">Tie::Hash::Indexed</a></li>
+<li><a href="http://search.cpan.org/perldoc?perlfaq4">perlfaq4</a> Data: Hashes (Associative Arrays)</li>
+<li>Perl Training Australia: <a href="http://perltraining.com.au/tips/2005-06-29.html">Ordered hashes</a></li>
+<li>Perl.com: <a href="http://www.perl.com/pub/a/2006/11/02/all-about-hashes.html">Hash Crash Course</a></li>
+<li>Perl.com: <a href="http://www.perl.com/lpt/a/679">How Hashes Really Work</a></li>
+</ul>

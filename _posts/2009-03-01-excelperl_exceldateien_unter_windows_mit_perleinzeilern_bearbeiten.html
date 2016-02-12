@@ -1,0 +1,44 @@
+---
+layout: post
+title: 'ExcelPerl: Excel-Dateien unter Windows mit Perl-Einzeilern bearbeiten'
+date: '2009-03-01 23:25:00 +0000'
+mt_id: 116
+blog_id: 1
+post_id: 116
+permalink: /2009/03/excelperl_exceldateien_unter_windows_mit_perleinzeilern_bearbeiten.html
+categories:
+- windows
+---
+<p>
+<a href="http://fabiani.net/downloads/index.shtml#excelPerl">ExelPerl</a> von <a href="http://www.fabiani.net/">Martin Fabiani (strat)</a> kann via <a href="http://search.cpan.org/search?query=Win32%3A%3AOLE;mode=module">Win32::OLE</a> Excel-Dateien direkt editieren (lesen und schreiben). 
+</p>
+<p>
+Das Tool ist somit zwar auf <a href="http://de.wikipedia.org/wiki/Microsoft_Windows">Windows-Betriebssysteme</a> mit installiertem <a href="http://de.wikipedia.org/wiki/Microsoft_Excel">Excel</a> beschränkt, allerdings steht der volle Funktionsumfang von Excel zur Verfügung.
+</p>
+<h2>Beispiele</h2>
+<p>
+Wie bei <a href="http://perldoc.perl.org/perlrun.html">perl -ane</a>, wird eine <a href="http://perldoc.perl.org/perlsyn.html">while-Schleife</a> um das Kommando gelegt. Das Kommando wird für jede Zeile ausgeführt, wobei die einzelnen Werte der Zeile im Array @F zur Verfügung gestellt werden. Da es sich dabei um ein <a href="http://perldoc.perl.org/functions/tie.html">tied</a> Array handelt, werden Änderungen an einem Element von @F auch direkt in der Excel-Datei geändert, z.B. die Spalte A in Großbuchstaben ändern:
+</p>
+<pre>
+excelPerl -ane "$F[0] = uc $F[0]" -f datei.xls
+</pre>
+<p>
+Zusätzlich steht das Array @C zur Verfügung, das die Win32::OLE-Objekte der einzelnen Zellen enthält und worüber der Zugriff auf die <strong>gesamte</strong> Funktionalität von Excel möglich ist, z.B. die Spalte B auf die Schriftart "<a href="http://de.wikipedia.org/wiki/Courier_(Schriftart)">Courier New</a>" setzen:
+</p>
+<pre>
+excelPerl -ane "$C[1]->{Font}->{Name} = 'Courier New'" -f datei.xls
+</pre>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://fabiani.net/downloads/index.shtml#excelPerl">ExelPerl</a></li>
+<li><a href="http://perl.jonallen.info/projects/xlstools">XLSperl</a></li>
+<li><a href="http://search.cpan.org/perldoc?Win32::OLE">Win32::OLE</a></li>
+<li><a href="http://search.cpan.org/perldoc?Spreadsheet::ParseExcel">Spreadsheet::ParseExcel</a></li>
+<li><a href="http://search.cpan.org/perldoc?Spreadsheet::WriteExcel">Spreadsheet::WriteExcel</a></li>
+<li><a href="http://www.ibm.com/developerworks/linux/library/l-pexcel/">Cultured Perl: Reading and writing Excel files with Perl</a></li>
+<li><a href="http://www.linuxjournal.com/content/generating-native-excel-files-perl">Generating Native Excel Files in Perl | Linux Journal</a></li>
+<li><a href="http://www.linuxjournal.com/content/reading-native-excel-files-perl">Reading Native Excel Files in Perl | Linux Journal</a></li>
+<li><a href="http://perl.jonallen.info/pub/Main/PerlTalks/Excel_on_the_Command_Line.pdf">Excel on the Command Line</a></li>
+<li><a href="http://www.perlmonks.org/?node_id=743574">xlsmerge - Merge worksheets from different Excel files into one Workbook</a></li>
+</ul>
+

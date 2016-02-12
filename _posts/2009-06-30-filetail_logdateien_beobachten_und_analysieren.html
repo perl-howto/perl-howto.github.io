@@ -1,0 +1,106 @@
+---
+layout: post
+title: File::Tail - Logdateien beobachten und analysieren
+date: '2009-06-30 14:05:00 +0000'
+mt_id: 150
+blog_id: 1
+post_id: 150
+permalink: /2009/06/filetail_logdateien_beobachten_und_analysieren.html
+categories:
+- linux
+---
+<p>
+Ein wesentlicher Teil der Arbeit eines <a href="http://de.wikipedia.org/wiki/Systemadministrator">Systemadministrators</a> ist die Analyse von <a href="http://de.wikipedia.org/wiki/Logdatei">Log-Dateien</a>.  Diese wichtige, aber auch oft langweilige und daher auch gern unterlassene Tätigkeit lässt sich mit <a href="http://search.cpan.org/perldoc?File::Tail">File::Tail</a> von <a href="http://search.cpan.org/~mgrabnar/">Matija Grabnar</a> automatisieren.
+</p>
+<p>
+<a href="http://search.cpan.org/perldoc?File::Tail">File::Tail</a> funktioniert so ähnlich wie das UNIX/Linux Tool <a href="http://de.wikipedia.org/wiki/Tail_(Unix)">tail -f</a>, daher auch der Name des Moduls.
+</p>
+
+<h2>Beispiel:</h2>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">File::Tail</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$logfile</span> = <span style=" color: #CD5555;">&#39;/var/log/messages&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;">### Defaults:</span>
+<span style=" color: #228B22;">### maxinterval = 60 Sekunden</span>
+<span style=" color: #228B22;">### interval = 10 Sekunden</span>
+<span style=" color: #228B22;">### adjustafter = 10 Sekunden</span>
+<span style=" color: #228B22;">### resetafter = adjustafter * maxinterval</span>
+<span style=" color: #228B22;">### tail = 0 Nach der letzten Zeile starten</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$tail</span> = <span style=" color: #000000;">File::Tail</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$logfile</span> <span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$line</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">while</span> <span style=" color: #000000;">(</span> <span style=" color: #8B008B; font-weight:bold;">defined</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$line</span> = <span style=" color: #00688B;">$tail</span><span style=" color: #00688B;">-&gt;read</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #00688B;">process_line</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$line</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+
+<a name="process_line"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">process_line</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$line</span><span style=" color: #000000;">)</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span> <span style=" color: #00688B;">@_</span><span style=" color: #000000;">;</span>
+		<span style=" color: #228B22;"># Machwas mit der Zeile</span>
+      	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$line&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Das Programm starten und anschließend ein 
+</p>
+<pre>
+$ logger  -i  'Hallo Welt'
+</pre>
+<p>
+in einem zweiten Terminal eingeben. Nach ca. 70 Sekunden (<em>interval + maxinterval</em>) sollte der neue Eintrag von File::Tail angezeigt werden.
+</p>
+
+<h2>Logrotate und File::Tail</h2>
+<p>
+<a href="http://search.cpan.org/perldoc?File::Tail">File::Tail</a> kann eigentlich gut damit umgehen, das die beobachtete Datei durch andere Programme, wie z.B. logrotate, verschoben und neu erstellt wird. Manchmal müssen dazu allerdings die Parameter  <em>maxintervall</em> und <em>adjustafter</em> eingestellt werden. Optimale Werte erhält man nur durch Ausprobieren.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">File::Tail</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$logfile</span> = <span style=" color: #CD5555;">&#39;/var/log/messages&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;">### Defaults:</span>
+<span style=" color: #228B22;">### maxinterval = 60 Sekunden</span>
+<span style=" color: #228B22;">### interval = 10 Sekunden</span>
+<span style=" color: #228B22;">### adjustafter = 10 Sekunden</span>
+<span style=" color: #228B22;">### resetafter = adjustafter * maxinterval</span>
+<span style=" color: #228B22;">### tail = 0 Nach der letzten Zeile starten</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$tail</span> = <span style=" color: #000000;">File::Tail</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">name</span> <span style=" color: #000000;">=&gt;</span>  <span style=" color: #00688B;">$logfile</span><span style=" color: #000000;">,</span>
+                                <span style=" color: #228B22;"># Die letzten 5 Zeilen beim Start ausgeben</span>
+                            <span style=" color: #000000;">tail</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">5</span><span style=" color: #000000;">,</span> 
+                                <span style=" color: #228B22;"># Datei alle 30 Sekunden pruefen </span>
+                            <span style=" color: #000000;">maxinterval</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">30</span><span style=" color: #000000;">,</span>
+ <span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$line</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">while</span> <span style=" color: #000000;">(</span> <span style=" color: #8B008B; font-weight:bold;">defined</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$line</span> = <span style=" color: #00688B;">$tail</span><span style=" color: #00688B;">-&gt;read</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #00688B;">process_line</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$line</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+
+<a name="process_line"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">process_line</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$line</span><span style=" color: #000000;">)</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span> <span style=" color: #00688B;">@_</span><span style=" color: #000000;">;</span>
+		<span style=" color: #228B22;"># Machwas mit der Zeile</span>
+      	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$line&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+
+
+<h2>Siehe auch:</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?File::Tail">File::Tail</a></li>
+<li><a href="http://perltraining.com.au/">Perltraining Australia</a>: Course Notes <a href="http://perltraining.com.au/notes/sysadmin.pdf">Perl for System Administration</a> S. 84 ff</li>
+<li>Perlmonks: <a href="http://www.perlmonks.org/?node_id=663274">Re: Man, File::Tail is just beating me down!</a></li>
+<li>Galileo Computing / &lt;openbook> / Linux: <a href="http://openbook.galileocomputing.de/linux/linux_kap09_004.htm">Logging</a></li>
+<li><a href="http://search.cpan.org/perldoc?POE::Wheel::FollowTail">POE::Wheel::FollowTail</a> (Eine Alternative)</li>
+<li><a href="http://www.stonehenge.com/merlyn/PerlJournal/col01.html">Perl Journal Column 01 (May 2003) Watching Logfiles</a></li>
+</ul>

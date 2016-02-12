@@ -1,0 +1,331 @@
+---
+layout: post
+title: Temporäre Dateien sicher erzeugen - File::Temp
+date: '2008-07-04 14:30:00 +0000'
+mt_id: 90
+blog_id: 1
+post_id: 90
+permalink: /2008/07/temporare_dateien_sicher_erzeugen.html
+categories:
+- '101'
+---
+<h2>Ooops</h2>
+<p>
+Etwas wie 
+</p>
+<pre>
+<span style=" color: #8B008B; font-weight:bold;">open</span> <span style=" color: #000000;">TMPFILE</span> <span style=" color: #CD5555;">&quot;&gt;/tmp/work.$$&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">TMPFILE</span> ...
+</pre>
+<p>
+ist praktisch immer ein Programmierfehler.  Hier wird zum Einen der unsichere Aufruf von <a href="http://perldoc.perl.org/functions/open.html">open()</a> mit zwei Argumenten statt der sichereren Form mit drei Argumenten verwendet und zum Anderen ist das Muster zur Erzeugung der temporären Datei viel zu einfach.
+</p>
+<h2>Bordmittel sind reichlich vorhanden</h2>
+<p>
+Perl stellt zur Erzeugung temporärer Dateien einige sichere Methoden zur Verfügung, z.B. anonyme temporäre Dateien und das Standardmodul <a href="http://search.cpan.org/perldoc?File::Temp">File::Temp</a>.
+</p>
+
+<h2>Anonyme temporäre Dateien</h2>
+<p>
+Seit Perl 5.8 besteht die Möglichkeit anonyme temporäre Dateien zu erzeugen, indem <a href="http://perldoc.perl.org/functions/open.html">open()</a> anstelle eines Dateinamens <a href="http://perldoc.perl.org/functions/undef.html">undef</a> als Parameter übergeben wird.
+</p>
+<p>
+Beispiel:
+</p>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$fh</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">open</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$fh</span><span style=" color: #000000;">,</span><span style=" color: #CD5555;">&quot;+&gt;&quot;</span><span style=" color: #000000;">,</span><span style=" color: #8B008B; font-weight:bold;">undef</span><span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #CD5555;">&quot;Could not open temp file - $!&quot;</span><span style=" color: #000000;">;</span>
+
+	<span style=" color: #228B22;"># Daten in Temp-Datei schreiben</span>
+
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$line</span> <span style=" color: #000000;">(</span> <span style=" color: #B452CD;">1</span> .. <span style=" color: #B452CD;">5</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$fh</span> <span style=" color: #CD5555;">&quot;$line\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+
+	<span style=" color: #228B22;"># Daten aus Temp-Datei lesen</span>
+
+	<span style=" color: #228B22;"># Zum Anfang der Datei</span>
+<span style=" color: #8B008B; font-weight:bold;">seek</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$fh</span><span style=" color: #000000;">,</span> <span style=" color: #B452CD;">0</span><span style=" color: #000000;">,</span> <span style=" color: #B452CD;">0</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">while</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&lt;$fh&gt;</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+
+<span style=" color: #8B008B; font-weight:bold;">close</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$fh</span><span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #CD5555;">&quot;Could not close temp file - $!&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">exit</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+
+<h2>File::Temp</h2>
+<p>
+<a href="http://search.cpan.org/perldoc?File::Temp">File::Temp</a> ist seit Perl 5.6.1 ein Standardmodul, d.h. es wird mit Perl ausgeliefert und läuft auf jeder Plattform, die von Perl unterstützt wird.
+</p>
+<p>Dokumentation und API werden selbst von sehr gutmütigen Menschen bestenfalls als verwirrend bezeichnet.
+</p>
+<p>
+Nachfolgend einige Beispiele, die Ihnen den Einstieg in <a href="http://search.cpan.org/perldoc?File::Temp">File::Temp</a> schrittweise erleichtern sollen.
+</p>
+
+<h2>Beispiel 1</h2>
+<p>
+Dieses Beispiel verwendet die Standardwerte von <a href="http://search.cpan.org/perldoc?File::Temp">File::Temp</a>.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">File::Temp</span> <span style=" color: #CD5555;">qw/ tempfile tempdir /</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$dir</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$fh</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$filename</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$line</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$dir</span> = <span style=" color: #00688B;">tempdir</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">CLEANUP</span> <span style=" color: #000000;">=&gt;</span>  <span style=" color: #B452CD;">1</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">(</span><span style=" color: #00688B;">$fh</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$filename</span><span style=" color: #000000;">)</span> = <span style=" color: #00688B;">tempfile</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">DIR</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$dir</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">binmode</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$fh</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Verzeichnis: $dir\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Datei:       $filename\n&quot;</span><span style=" color: #000000;">;</span>
+
+	<span style=" color: #228B22;"># Daten in Temp-Datei schreiben</span>
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #00688B;">$line</span> <span style=" color: #000000;">(</span> <span style=" color: #B452CD;">1</span> .. <span style=" color: #B452CD;">5</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$fh</span> <span style=" color: #CD5555;">&quot;$line\n&quot;</span><span style=" color: #000000;">;</span> 
+<span style=" color: #000000;">}</span>
+
+        <span style=" color: #228B22;"># Daten aus Temp-Datei lesen</span>
+        <span style=" color: #228B22;"># Zum Anfang der Datei</span>
+<span style=" color: #8B008B; font-weight:bold;">seek</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$fh</span><span style=" color: #000000;">,</span><span style=" color: #B452CD;">0</span><span style=" color: #000000;">,</span><span style=" color: #B452CD;">0</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">while</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$line</span> = <span style=" color: #CD5555;">&lt;$fh&gt;</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$line</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+
+<span style=" color: #8B008B; font-weight:bold;">exit</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+<p>
+Ausgabe unter Linux
+</p>
+<pre>
+Verzeichnis: /tmp/ZT4Udprbvy
+Datei:       /tmp/ZT4Udprbvy/4DOBscRn7o
+1
+2
+3
+4
+5
+</pre>
+<p>
+Ausgabe unter Windows
+</p>
+<pre>
+Verzeichnis: C:\DOKUME~1\tf\LOKALE~1\Temp\LzIqqKVIga
+Datei:       C:\DOKUME~1\tf\LOKALE~1\Temp\LzIqqKVIga\SL1tNeuIvV
+1
+2
+3
+4
+5
+</pre>
+<p>
+<a href="http://search.cpan.org/perldoc?File::Temp">File::Temp</a> schreibt nicht einfach in eine Datei mit zufällig gewähltem Dateinamen, sondern legt zunächst ein Verzeichnis mit zufällig gewähltem Namen an, in dem dann die Datei angelegt wird.
+</p>
+<p>
+Die Anweisung
+</p>
+<pre>
+<span style=" color: #00688B;">$dir</span> = <span style=" color: #00688B;">tempdir</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">CLEANUP</span> <span style=" color: #000000;">=&gt;</span>  <span style=" color: #B452CD;">1</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+<p>
+sorgt dafür, das das temporäre Verzeichnis einschließlich der darin enthaltenen Dateien beim Beenden des Programms komplett gelöscht wird. Dieses Verhalten kann abgeschaltet werden durch
+</p>
+<pre>
+<span style=" color: #00688B;">$dir</span> = <span style=" color: #00688B;">tempdir</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">CLEANUP</span> <span style=" color: #000000;">=&gt;</span>  <span style=" color: #B452CD;">0</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+<p>
+Aufräumen müssen Sie jetzt selbst.
+</p>
+
+<h2>Beispiel 2: Verzeichnis für temporäre Dateien festlegen</h2>
+
+<p>
+Wer vermeiden möchte, das <a href="http://search.cpan.org/perldoc?File::Temp">File::Temp</a> temporäre Dateien unterhalb der systemüblichen Verzeichnisse anlegt, z.B. wenn /tmp auf einer anderen Partition oder Festplatte liegt oder bei "Shared Webhosting", kann ein (bereits bestehendes) Verzeichnis über den Parameter <span style=" color: #000000;">DIR</span> als Speicherort festlegen.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">File::Temp</span> <span style=" color: #CD5555;">qw/ tempfile tempdir /</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$dir</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$mydir</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$fh</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$filename</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$mydir</span> = <span style=" color: #CD5555;">&#39;./mydir&#39;</span><span style=" color: #000000;">;</span> 
+<span style=" color: #8B008B; font-weight:bold;">mkdir</span> <span style=" color: #00688B;">$mydir</span> <span style=" color: #8B008B; font-weight:bold;">unless</span> <span style=" color: #8B008B; font-weight:bold;">-d</span> <span style=" color: #00688B;">$mydir</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$dir</span> = <span style=" color: #00688B;">tempdir</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">DIR</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$mydir</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">CLEANUP</span> <span style=" color: #000000;">=&gt;</span>  <span style=" color: #B452CD;">0</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #000000;">(</span><span style=" color: #00688B;">$fh</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$filename</span><span style=" color: #000000;">)</span> = <span style=" color: #00688B;">tempfile</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">DIR</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$dir</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Verzeichnis: $dir\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Datei:       $filename\n&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">exit</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Verzeichnis: mydir/2bQHkxZFqY
+Datei:       mydir/2bQHkxZFqY/lKyMkclvzR
+</pre>
+
+<h2>Beispiel 3: Extension für Dateinamen setzen</h2>
+<p>
+Dateiendungen lassen sich über den Parameter <span style=" color: #000000;">SUFFIX</span> festlegen.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">File::Temp</span> <span style=" color: #CD5555;">qw/ tempfile tempdir /</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$dir</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$mydir</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$fh</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$filename</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$suffix</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$mydir</span> = <span style=" color: #CD5555;">&#39;./mydir&#39;</span><span style=" color: #000000;">;</span> 
+<span style=" color: #8B008B; font-weight:bold;">mkdir</span> <span style=" color: #00688B;">$mydir</span> <span style=" color: #8B008B; font-weight:bold;">unless</span> <span style=" color: #8B008B; font-weight:bold;">-d</span> <span style=" color: #00688B;">$mydir</span><span style=" color: #000000;">;</span>
+
+	<span style=" color: #228B22;"># Dateiendung festlegen</span>
+<span style=" color: #00688B;">$suffix</span> = <span style=" color: #CD5555;">&#39;.tmp&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$dir</span> = <span style=" color: #00688B;">tempdir</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">DIR</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$mydir</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">CLEANUP</span> <span style=" color: #000000;">=&gt;</span>  <span style=" color: #B452CD;">0</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #000000;">(</span><span style=" color: #00688B;">$fh</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$filename</span><span style=" color: #000000;">)</span> = <span style=" color: #00688B;">tempfile</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">DIR</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$dir</span><span style=" color: #000000;">,</span>
+                             <span style=" color: #000000;">SUFFIX</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$suffix</span><span style=" color: #000000;">,</span>
+                           <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Verzeichnis: $dir\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Datei:       $filename\n&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">exit</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Verzeichnis: mydir/SmAZ7Dj9AO
+Datei:       mydir/SmAZ7Dj9AO/eyi7h7fT0l.tmp
+</pre>
+
+
+<h2>Beispiel 4: Länge des Dateinamens festlegen</h2>
+<p>
+<a href="http://search.cpan.org/perldoc?File::Temp">File::Temp</a> legt automatisch zufällige Dateinamen der Länge 10 an. Die Länge des Dateinames lässt sich durch Übergabe eines Templates als ersten Parameter an tempfile() ändern.  Der Großbuchstabe X wird als Platzhalter für zufällige, von <a href="http://search.cpan.org/perldoc?File::Temp">File::Temp</a> erzeugte Buchstaben, Ziffern und Sonderzeichen verwendet.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">File::Temp</span> <span style=" color: #CD5555;">qw/ tempfile tempdir /</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$dir</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$mydir</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$fh</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$filename</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$suffix</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$template</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$mydir</span> = <span style=" color: #CD5555;">&#39;./mydir&#39;</span><span style=" color: #000000;">;</span> 
+<span style=" color: #8B008B; font-weight:bold;">mkdir</span> <span style=" color: #00688B;">$mydir</span> <span style=" color: #8B008B; font-weight:bold;">unless</span> <span style=" color: #8B008B; font-weight:bold;">-d</span> <span style=" color: #00688B;">$mydir</span><span style=" color: #000000;">;</span>
+
+	<span style=" color: #228B22;"># Dateiendung festlegen</span>
+<span style=" color: #00688B;">$suffix</span> = <span style=" color: #CD5555;">&#39;.tmp&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Dateinamen anpassen</span>
+<span style=" color: #228B22;"># 12 zuf&auml;llige Elemente (X)</span>
+
+<span style=" color: #00688B;">$template</span> = <span style=" color: #CD5555;">&#39;tmp_XXXXXXXXXXX&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$dir</span> = <span style=" color: #00688B;">tempdir</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">DIR</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$mydir</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">CLEANUP</span> <span style=" color: #000000;">=&gt;</span>  <span style=" color: #B452CD;">1</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #000000;">(</span><span style=" color: #00688B;">$fh</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$filename</span><span style=" color: #000000;">)</span> = <span style=" color: #00688B;">tempfile</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$template</span><span style=" color: #000000;">,</span>
+                             <span style=" color: #000000;">DIR</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$dir</span><span style=" color: #000000;">,</span>
+                             <span style=" color: #000000;">SUFFIX</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$suffix</span><span style=" color: #000000;">,</span>
+                           <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Verzeichnis: $dir\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Datei:       $filename\n&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">exit</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Verzeichnis: mydir/73vWvvqRno
+Datei:       mydir/73vWvvqRno/tmp_qzbFzrot_fe.tmp
+</pre>
+
+<h2>Beispiel 5: Objektorientierung</h2>
+
+<p>
+<a href="http://search.cpan.org/perldoc?File::Temp">File::Temp</a> bietet neben der bereits gezeigten prozeduralen auch eine objektorientierte Schnittstelle an.
+</p>
+<p>
+Das oben gezeigte Beispiel 4 lässt sich wie folgt auch objektorientiert schreiben.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">File::Temp</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$dir</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$mydir</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$fh</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$filename</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$suffix</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$template</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$mydir</span> = <span style=" color: #CD5555;">&#39;./mydir&#39;</span><span style=" color: #000000;">;</span> 
+<span style=" color: #8B008B; font-weight:bold;">mkdir</span> <span style=" color: #00688B;">$mydir</span> <span style=" color: #8B008B; font-weight:bold;">unless</span> <span style=" color: #8B008B; font-weight:bold;">-d</span> <span style=" color: #00688B;">$mydir</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #228B22;"># Temp-Verzeichnis unterhalb von $mydir erzeugen </span>
+<span style=" color: #00688B;">$dir</span> = <span style=" color: #000000;">File::Temp</span><span style=" color: #000000;">-&gt;newdir</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">DIR</span>     <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$mydir</span><span style=" color: #000000;">,</span>
+                           <span style=" color: #000000;">CLEANUP</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">1</span><span style=" color: #000000;">,</span>
+                         <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+	<span style=" color: #228B22;"># Dateiendung festlegen</span>
+<span style=" color: #00688B;">$suffix</span> = <span style=" color: #CD5555;">&#39;.tmp&#39;</span><span style=" color: #000000;">;</span>
+<span style=" color: #228B22;"># Dateinamen anpassen</span>
+<span style=" color: #228B22;"># 12 zuf&auml;llige Elemente (X)</span>
+
+<span style=" color: #00688B;">$template</span> = <span style=" color: #CD5555;">&#39;tmp_XXXXXXXXXXX&#39;</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #00688B;">$fh</span> = <span style=" color: #000000;">File::Temp</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">TEMPLATE</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$template</span><span style=" color: #000000;">,</span>
+                        <span style=" color: #000000;">DIR</span>      <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$dir</span><span style=" color: #000000;">,</span>
+                        <span style=" color: #000000;">SUFFIX</span>   <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$suffix</span><span style=" color: #000000;">,</span>
+                      <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Verzeichnis: &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$dir</span><span style=" color: #00688B;">-&gt;dirname</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span>  <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Datei:       &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$fh</span><span style=" color: #00688B;">-&gt;filename</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">exit</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+
+<p>
+Ausgabe wie in Beispiel 4.
+</p>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+	<li><a href="http://sial.org/howto/perl/tmp-files/">Perl and Temporary Files</a></li>
+	<li><a href="http://search.cpan.org/perldoc?File::Temp">File::Temp</a></li>
+	<li><a href="http://perldoc.perl.org/perlfaq5.html#How-do-I-make-a-temporary-file-name%3f">perlfaq5: How do I make a temporary file name?</a></li>
+	<li><a href="http://perldoc.perl.org/perlopentut.html">perlopentut  - perldoc.perl.org</a></li>
+	<li><a href="http://perldoc.perl.org/functions/open.html">open  - perldoc.perl.org</a></li>
+        <li><a href="http://perldoc.perl.org/functions/seek.html">seek - perldoc.perl.org</a></li>
+	<li><a href="http://www.perl.com/pub/a/2003/05/29/treasures.html">Hidden Treasures of the Perl Core</a></li>
+</ul>

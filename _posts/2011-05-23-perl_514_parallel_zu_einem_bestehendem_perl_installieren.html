@@ -1,0 +1,223 @@
+---
+layout: post
+title: Perl 5.14 parallel zu einem bestehendem Perl installieren
+date: '2011-05-23 23:20:00 +0000'
+mt_id: 216
+blog_id: 1
+post_id: 216
+permalink: /2011/05/perl_514_parallel_zu_einem_bestehendem_perl_installieren.html
+categories:
+- '101'
+---
+<p>
+<a href="http://search.cpan.org/~jesse/perl-5.14.0/">Perl 5.14.0</a> ist bereits seit dem 15. Mai 2011 verf&uuml;gbar. Die Neuerungen sind ausf&uuml;hrlich in <a href="http://search.cpan.org/~jesse/perl-5.14.0/pod/perldelta.pod">perldelta</a> beschrieben.
+</p>
+
+<p>
+Wer die neue Version einfach einmal ausprobieren m&ouml;chte, kann Perl 5.14.0 aus den Sourcen parallel zu einem bestehenden Perl installieren.
+</p>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Vorbereitungen: C-Compiler und Bibliotheken installieren</h2>
+<p>
+Um Perl kompilieren zu k&ouml;nnen, werden neben einem C-Compiler weitere Werkzeuge und Bibliotheken ben&ouml;tigt.
+Unter Ubuntu 10.04 (LTS) installiert man dazu einfach folgende Pakete:
+</p>
+<pre>
+$ sudo apt-get install build-essential
+$ sudo apt-get install libdb-dev libdb4.7
+$ sudo apt-get install libgdbm-dev libgdbm3
+</pre>
+<p>
+Neuere Ubuntu-Versionen verwenden <i>libdb4.8</i>.
+</p>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Installation perl-5.14.0</h2>
+<p>
+<strong>Ziel:</strong> Perl 5.14.0 soll parallel zu dem bestehenden Perl 5.10.1 in das Verzeichnis<em> /opt/perl5.14.0</em> installiert werden.
+</p>
+<pre>
+$ sudo mkdir /opt/perl5.14.0
+
+$ cd /tmp/
+$ wget http://search.cpan.org/CPAN/authors/id/J/JE/JESSE/perl-5.14.0.tar.gz
+$ tar xzvf perl-5.14.0.tar.gz
+$ cd perl-5.14.0/
+
+$ ./Configure -des -Dprefix=/opt/perl-5.14.0 -Dusethreads
+$ make
+$ make test
+$ sudo make install
+</pre>
+<p>
+Jetzt sollten zwei verschiedene Perl-Versionen auf dem System vorhanden sein:
+</p>
+<pre>
+$ /opt/perl-5.14.0/bin/perl -v
+
+This is perl 5, version 14, subversion 0 (v5.14.0) built for i686-linux-thread-multi
+
+Copyright 1987-2011, Larry Wall
+
+Perl may be copied only under the terms of either the Artistic License or the
+GNU General Public License, which may be found in the Perl 5 source kit.
+
+Complete documentation for Perl, including FAQ lists, should be found on
+this system using "man perl" or "perldoc perl".  If you have access to the
+Internet, point your browser at http://www.perl.org/, the Perl Home Page.
+</pre>
+<p>
+und
+</p>
+<pre>
+$ /usr/bin/perl -v
+
+This is perl, v5.10.1 (*) built for i486-linux-gnu-thread-multi
+
+Copyright 1987-2009, Larry Wall
+
+Perl may be copied only under the terms of either the Artistic License or the
+GNU General Public License, which may be found in the Perl 5 source kit.
+
+Complete documentation for Perl, including FAQ lists, should be found on
+this system using "man perl" or "perldoc perl".  If you have access to the
+Internet, point your browser at http://www.perl.org/, the Perl Home Page.
+</pre>
+
+<h3>Die neue Version verwenden</h3>
+<p>
+F&uuml;r Perl 5.14.0 muss stets der volle Pfad angegeben werden. (Die Umgebungsvariable PATH bleibt unver&auml;ndert.)
+</p>
+<p>
+Entweder in der <a href="http://de.wikipedia.org/wiki/Shebang">Shebang-Zeile</a> 
+</p>
+<pre>
+<strong>#!/opt/perl-5.14.0/bin/perl</strong>
+use strict;
+use warnings;
+</pre>
+<p>
+oder auf der Kommandozeile:
+</p>
+<pre>
+$ <strong>/opt/perl-5.14.0/bin/perl</strong> meinprogramm.pl
+</pre>
+
+<h3>CPAN Module installieren</h3>
+<p>
+CPAN-Module lassen sich wie gehabt per <a href="http://search.cpan.org/perldoc?CPAN">CPAN-Shell</a> installieren.
+</p>
+<pre>
+$ /opt/perl-5.14.0/bin/cpan
+
+cpan shell -- CPAN exploration and modules installation (v1.9600)
+Enter 'h' for help.
+
+cpan[1]> install YAML
+....
+Appending installation info to 
+<strong>/opt/perl-5.14.0/lib/5.14.0/i686-linux-thread-multi/perllocal.pod</strong>
+</pre>
+<p>
+Leider steht noch keine aktuelle Version von <a href="http://search.cpan.org/perldoc?ExtUtils::MakeMaker">ExtUtils::MakeMaker</a> zur Verf&uuml;gung.
+Einige XS-Module lassen sich wegen der Abh&auml;ngigkeit auf <i>cc_runtime.h</i> nicht installieren. Abhilfe schafft die manuelle Installation des 
+Developer-Releases von ExtUtils::MakeMaker.
+</p>
+
+<pre>
+$ wget http://search.cpan.org/CPAN/authors/id/M/MS/MSCHWERN/ExtUtils-MakeMaker-6.57_11.tar.gz
+$ tar xzvf ExtUtils-MakeMaker-6.57_11.tar.gz
+$ cd ExtUtils-MakeMaker-6.57_11
+$ /opt/perl-5.14.0/bin/perl Makefile.PL
+$ make
+$ make test
+$ sudo make install
+</pre>
+<p>
+&nbsp;
+</p>
+<h2>Installation mit App-perlbrew</h2>
+<p>
+<a href="http://search.cpan.org/dist/App-perlbrew/">App-perlbrew</a>, ist ein Werkzeug, welches die Installation
+und Verwendung mehrerer Perl-Versionen erheblich vereinfacht. Root-Rechte werden nicht ben&ouml;tigt.
+</p>
+<pre>
+$ curl -LO http://xrl.us/perlbrew
+$ chmod +x perlbrew
+$ ./perlbrew init
+$ source ~/perl5/perlbrew/etc/bashrc
+$ ./perlbrew install perl-5.14.0 -D=usethreads
+....
+</pre>
+<h3>Die neue Version verwenden</h3>
+<p>
+App-perlbrew ver&auml;ndert &uuml;ber den Schalter <i>switch</i> die <a href="http://de.wikipedia.org/wiki/Umgebungsvariable">Umgebungsvariable</a> PATH
+</p>
+<pre>
+$ perlbrew switch perl-5.14.0
+$ perl -v
+
+This is perl 5, version 14, subversion 0 (v5.14.0) built for i686-linux-thread-multi
+
+Copyright 1987-2011, Larry Wall
+
+Perl may be copied only under the terms of either the Artistic License or the
+GNU General Public License, which may be found in the Perl 5 source kit.
+
+Complete documentation for Perl, including FAQ lists, should be found on
+this system using "man perl" or "perldoc perl".  If you have access to the
+Internet, point your browser at http://www.perl.org/, the Perl Home Page.
+
+$ which perl
+/home/tf/perl5/perlbrew/perls/perl-5.14.0/bin/perl
+</pre>
+<p>
+Dank der Pfadmanipulation wird nun das <i>passende</i> Perl auf der Kommandozeile gefunden.
+</p>
+<pre>
+$ perl  meinprogramm.pl
+</pre>
+<p>
+Im Programm selbst bietet sich <a href="http://perldoc.perl.org/perlrun.html">folgende Shebang-Zeile</a> an:
+</p>
+<pre>
+<strong>#!/usr/bin/env perl</strong>
+use strict;
+use warnings;
+
+print "Perl-Version: $]\n";
+</pre>
+
+
+<h3>CPAN Module installieren</h3>
+<p>
+Das <i>passende</i> Kommandozeilentool <a href="http://search.cpan.org/perldoc?App::Cpan">cpan</a> liegt im Pfad.
+</p>
+<pre>
+$ perlbrew switch perl-5.14.0
+$ cpan
+cpan[1]> install YAML
+....
+Appending installation info to 
+<strong>/home/tf/perl5/perlbrew/perls/perl-5.14.0/lib/5.14.0/i686-linux-thread-multi/perllocal.pod</strong>
+</pre>
+
+<p>
+&nbsp;
+</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li>CPAN: <a href="http://search.cpan.org/~jesse/perl-5.14.0/">Perl 5.14.0</a></li>
+<li>Perl News: <a href="http://perl-nachrichten.de/index.cgi/details/901">Perl 5.14.0 ver&ouml;ffentlicht - IPv6-Support verbessert uvm.</a></li>
+<li>Heise Developer: <a href="http://www.heise.de/developer/meldung/Perl-5-14-Fleissrelease-fuer-einen-sanften-Wandel-1225865.html">Perl 5.14: Fleißrelease f&uuml;r einen sanften Wandel</a></li>
+<li><a href="{{ site.url }}/2010/07/appperlbrew-mehrere-perl-installationen-im-heimatverzeichnis.html">App::perlbrew - Mehrere Perl-Installationen im Heimatverzeichnis</a></li>
+<li>CPAN: <a href="http://search.cpan.org/dist/App-perlbrew/">App-perlbrew</a></li>
+<li>Perldoc: <a href="http://perldoc.perl.org/perlrun.html">perlrun</a></li>
+</ul>

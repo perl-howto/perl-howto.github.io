@@ -1,0 +1,95 @@
+---
+layout: post
+title: Welche Perl-Module sind eigentlich auf dem System installiert?
+date: '2008-12-21 21:32:00 +0000'
+mt_id: 112
+blog_id: 1
+post_id: 112
+permalink: /2008/12/welche_perlmodule_sind_eigentlich_auf_dem_system_installiert.html
+categories:
+- '101'
+---
+<p>
+<a href="http://www.perl.com/">Perl</a> wird bereits mit vielen, häufig genutzten, <a href="http://perldoc.perl.org/perlmodlib.html">Standardmodulen</a> ausgeliefert. Noch viel mehr nützliche Module findet man auf <a href="http://www.cpan.org/">CPAN</a>.
+</p>
+<p>
+Manchmal möchte man etwas genauer wissen, welche Module in welcher Version auf dem System installiert sind.
+</p>
+<p>
+Eine einfache Methode ist der Aufruf von <em>perldoc perllocal</em> auf der Kommandozeile, dessen Ausgabe sich auch <a href="http://www.perlmonks.org/?node_id=483020">irgendwie parsen</a> lässt.
+</p>
+<p>
+Aber, mehr Licht ins Dunkel bringt das CPAN-Modul <a href="http://search.cpan.org/search?query=CPANPLUS%3A%3ABackend&mode=module">CPANPLUS::Backend</a> von <a href="http://search.cpan.org/~kane/">Jos Boumans</a>.
+</p>
+<h2>Statt vieler Worte ein einfaches Beispiel:</h2>
+<p>
+Das nachfolgende kleine Programm ermittelt die Namen, Versionen und Beschreibungen der installierten Perl-Module auf einem Linux-System.
+</p>
+<pre>
+#!/usr/bin/perl
+#
+# perl-module.pl
+#
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">CPANPLUS::Backend</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$sep</span> = <span style=" color: #CD5555;">'|'</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$cb</span> = <span style=" color: #000000;">CPANPLUS::Backend</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@modules</span> = <span style=" color: #00688B;">$cb</span><span style=" color: #00688B;">-&gt;installed</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$module</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">@modules</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #228B22;"># $module is a CPANPLUS::Module object</span>
+                <span style=" color: #228B22;"># get the module's information</span>
+        <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$module</span><span style=" color: #00688B;">-&gt;module</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+                <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$module</span><span style=" color: #00688B;">-&gt;module</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+        <span style=" color: #000000;">}</span> <span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+                <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$module</span><span style=" color: #00688B;">-&gt;name</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+        <span style=" color: #000000;">}</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$sep</span><span style=" color: #000000;">;</span> <span style=" color: #228B22;">#Record Separator </span>
+
+                <span style=" color: #228B22;"># get the module's description</span>
+        <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$module</span><span style=" color: #00688B;">-&gt;description</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+                <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$module</span><span style=" color: #00688B;">-&gt;description</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+        <span style=" color: #000000;">}</span> <span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+                <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Missing description&quot;</span><span style=" color: #000000;">;</span>
+        <span style=" color: #000000;">}</span>
+
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$sep</span><span style=" color: #000000;">;</span> <span style=" color: #228B22;">#Record Separator </span>
+
+                <span style=" color: #228B22;"># get the module's version</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$module</span><span style=" color: #00688B;">-&gt;version</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span> <span style=" color: #228B22;"># automatically returns 0.0 if undef</span>
+
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #000000;">}</span> <span style=" color: #228B22;">## foreach</span>
+
+<a name="__END__"></a><span style=" color: #8B008B; font-weight:bold;">__END__</span>
+</pre>
+<p>
+Das erzeugt in etwa folgende Ausgabe (gekürzt):
+</p>
+<pre>
+XML::Simple|Easy API to maintain XML (esp config files)|2.16
+XML::Twig|A module for easy processing of XML|3.29
+XML::Twig::XPath|Missing description|0.02
+</pre>
+<p>
+Also eine Tabelle mit drei Spalten, jeweils getrennt durch einen senkrechten Strich (|).
+</p>
+<h2>Weiterverarbeitung der Daten</h2>
+</p>
+Wenn man den Texttrenner (Separator) vernünftig wählt, lässt sich die Ausgabe auch in <a href="http://de.openoffice.org/product/calc.html">OpenOffice Calc</a> oder in <a href="http://de.wikipedia.org/wiki/Microsoft_Excel">Microsoft Excel</a> weiterverarbeiten. Einfach als Textdatei importieren, den gewünschten Texttrenner wählen, und schon ist der Bericht weitgehend geschäftsführergeeignet.
+</p>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/search?query=CPANPLUS%3A%3ABackend&mode=module">CPANPLUS::Backend</a> </li>
+<li><a href="http://search.cpan.org/perldoc?CPANPLUS">CPANPLUS</a></li>
+<li>Alvar Freude: <a href="http://www.perl-blog.de/2008/12/cpan-module-entfernen-deinstallieren.html">CPAN Module entfernen / deinstallieren</a></li>
+</ul>
+

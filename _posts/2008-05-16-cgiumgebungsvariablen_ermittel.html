@@ -1,0 +1,304 @@
+---
+layout: post
+title: CGI-Umgebungsvariablen ermitteln
+date: '2008-05-16 11:33:28 +0000'
+mt_id: 47
+blog_id: 1
+post_id: 47
+permalink: /2008/05/cgiumgebungsvariablen_ermittel.html
+categories:
+- cgi
+---
+<h2>Umgebungsvariablen ermitteln</h2>
+<p>Perl stellt Umgebungsvariablen im <a href="http://perldoc.perl.org/Env.html">%ENV</a> zur Verfügung.</p>
+<p>
+Nachfolgend ein kleines Programm mit dessen Hilfe die <a href="http://de.wikipedia.org/wiki/Umgebungsvariable">Umgebungsvariablen</a> auf einem Webserver ermittelt werden können.
+</p>
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+<span class="k">print</span> <span class="q">&quot;Content-type: text/html\n\n&quot;</span><span class="sc">;</span>
+
+
+<span class="k">print</span> <span class="q">qq~&lt;html&gt;</span>
+<span class="q">&lt;head&gt;&lt;title&gt;printenv&lt;/title&gt;&lt;/head&gt;</span>
+<span class="q">&lt;body&gt;</span>
+<span class="q">&lt;pre&gt;~</span><span class="sc">;</span>
+
+<span class="k">print</span> <span class="q">qq~PerlVersion: $]</span>
+
+<span class="q">Umgebungsvariablen:\n~</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="s">(</span><span class="i">$key</span><span class="cm">,</span><span class="i">$value</span><span class="s">)</span><span class="sc">;</span>
+
+<span class="k">while</span> <span class="s">(</span> <span class="s">(</span><span class="i">$key</span><span class="cm">,</span><span class="i">$value</span><span class="s">)</span>  = <span class="k">each</span> <span class="i">%ENV</span> <span class="s">)</span> <span class="s">{</span>
+        <span class="k">print</span> <span class="q">qq~$key : $value\n~</span><span class="sc">;</span>
+<span class="s">}</span>
+
+<span class="k">print</span> <span class="q">qq~&lt;/pre&gt;&lt;/body&gt;&lt;/html&gt;~</span><span class="sc">;</span>
+<span class="k">exit</span><span class="sc">;</span>
+</pre>
+<p>
+Das Programm im cgi-bin Verzeichnis des Webservers z.B. als printenv.pl abspeichern und anschließend im Browser aufrufen: <em>http://beispiel.tld/cgi-bin/printenv.pl</em>.
+</p>
+
+<h2>Übersicht CGI-Umgebungsvariablen</h2>
+<p>&nbsp;</p>
+<h3>Standardvariablen</h3>
+<table border="0" cellpadding="5">
+
+<tr>
+<td valign="top">SERVER_SOFTWARE</td>
+<td valign="top">
+Der Name und die Versionsnummer der verwendeten Serversoftware.
+</td>
+</tr>
+
+<tr>
+<td valign="top">SERVER_NAME</td>
+<td valign="top">Der Hostname der Website.</td>
+</tr>
+
+<tr>
+<td valign="top">GATEWAY_INTERFACE</td>
+<td valign="top">
+Die Versionsnummer des CGI, welches der Webserver verwendet.
+</td>
+</tr>
+
+<tr>
+<td valign="top">SERVER_PROTOCOL</td>
+<td valign="top">Der Name und die Versionsnummer des verwendeten Protokolls.</td>
+</tr>
+
+<tr>
+<td valign="top">REQUEST_METHOD</td>
+<td valign="top">Die HTTP-Methode der Client-Anfrage.</td>
+</tr>
+
+<tr>
+<td valign="top">PATH_INFO</td>
+<td valign="top">Pfadinformation (URL)</td>
+</tr>
+
+<tr>
+<td valign="top">PATH_TRANSLATED</td>
+<td valign="top">Pfadinformation (Dateipfad)</td>
+</tr>
+
+<tr>
+<td valign="top">SCRIPT_NAME</td>
+<td valign="top">URL-Pfad des Skripts, das aufgerufen wurde.</td>
+</tr>
+
+<tr>
+<td valign="top">QUERY_STRING</td><td valign="top">Die Parameter, die an ein CGI-Skript gesendet wurden.</td>
+</tr>
+
+<tr>
+<td valign="top">REMOTE_HOST</td><td valign="top">Der Hostname des Client- bzw. Proxy-Rechners.
+Der Rechner muss einen DNS-Eintrag besitzen und HostNameLookup aktiviert sein.</td>
+</tr>
+
+<tr>
+<td valign="top">REMOTE_ADDR</td>
+<td valign="top">Die IP-Adresse des Client- bzw. Proxy-Rechners.</td>
+</tr>
+
+<tr>
+<td valign="top">AUTH_TYPE</td>
+<td valign="top">Die Art des verwendeten Authentifizierungsverfahrens.</td>
+</tr>
+
+<tr>
+<td valign="top">REMOTE_USER</td>
+<td valign="top">Die User-ID, die bei der Authentifizierung verwendet wurde.</td>
+</tr>
+
+<tr>
+<td valign="top">REMOTE_IDENT</td><td valign="top">Das Ergebnis der IDENT-Anfrage an den Client. Wird nur gesetzt, wenn IdentyCheck aktiviert ist.</td>
+</tr>
+
+<tr>
+<td valign="top">CONTENT_TYPE</td>
+<td valign="top">Diese Variable enthält den MIME-Typ, wenn eine Anfrage (POST, PUT) weitere Daten enthält.</td>
+</tr>
+
+<tr>
+<td valign="top">CONTENT_LENGTH</td>
+<td valign="top">Die Länge der Daten in Bytes, wenn eine Anfrage weitere Daten enthält.</td>
+</tr>
+
+</table>
+
+<h3>Headervariablen</h3>
+<table border="0" cellpadding="5">
+
+<tr>
+<td valign="top">HTTP_ACCEPT</td>
+<td valign="top">Eine Liste der MIME-Typen, die der Client verarbeiten kann.</td>
+</tr>
+
+<tr>
+<td valign="top">HTTP_ACCEPT_CHARSET</td>
+<td valign="top">Eine Liste der Zeichensätze, die der Client verarbeiten kann.</td>
+</tr>
+
+<tr>
+<td valign="top">HTTP_ACCEPT_ENCODING</td>
+<td valign="top">Eine Liste der Kodierungen, die der Client verarbeiten kann.</td>
+</tr>
+
+<tr>
+<td valign="top">HTTP_ACCEPT_LANGUAGE</td>
+
+<td valign="top">Die Sprachen, die der Client verarbeiten (verstehen) kann.</td>
+</tr>
+
+<tr>
+<td valign="top">HTTP_AUTHORIZATION</td>
+<td valign="top">Die Daten einer WWW-Authentifzierung</td>
+</tr>
+
+<tr>
+<td valign="top">HTTP_CACHE_CONTROL</td>
+<td valign="top">Enthält Informationen, ob und wie ein Objekt gespeichert werden kann und ob ein Cache ein gespeichertes Objekt liefern darf.</td>
+</tr>
+
+<tr>
+<td valign="top">HTTP_COOKIE</td>
+<td valign="top">Cookie, sofern akzeptiert.</td>
+</tr>
+
+<tr>
+<td valign="top">HTTP_FROM</td>
+<td valign="top">Die E-Mail-Adresse des Clients. Sie wird aber nur in sehr wenigen Fällen übermittelt.</td>
+</tr>
+
+<tr>
+<td valign="top">HTTP_HOST</td>
+<td valign="top">Der Name des Webservers, den der Client angesprochen hat.</td>
+</tr>
+
+<tr>
+<td valign="top">HTTP_PRAGMA</td>
+<td valign="top">HTTP/1.0-Variante von HTTP_CACHE_CONTROL</td>
+</tr>
+
+<tr>
+<td valign="top">HTTP_REFERER</td>
+
+<td valign="top">Die URL der Seite, von der aus der Link verfolgt wurde.</td>
+</tr>
+
+<tr>
+<td valign="top">HTTP_USER_AGENT</td>
+<td valign="top">Der Name und die Versionsnummers des Clients.</td></tr>
+
+<tr>
+<td valign="top">HTTP_VIA</td>
+<td valign="top">Informationen über den Proxy, über den die Anfrage gestellt wurde.</td>
+</tr>
+
+<tr>
+<td valign="top">HTTP_FORWARDED</td>
+<td valign="top">HTTP/1.0-Variante von HTTP_VIA.</td>
+</tr>
+
+</table>
+
+
+<h3>Zusätzliche Variablen</h3>
+<p>
+Diese zusätzlichen Variablen sind server-abhängig: Die folgende Tabelle bezieht sich auf den <a href="http://httpd.apache.org/">Apache Webserver</a>.
+</p>
+<table border="0" cellpadding="5">
+
+<tr>
+<td valign="top">DATE_LOCAL</td>
+<td valign="top">Lokales Datum und Uhrzeit. Lokal bezieht sich meist auf den geographischen Serverstandort ;).</td>
+</tr>
+
+<tr>
+<td valign="top">DATE_GMT</td>
+<td valign="top">Datum und Uhrzeit in GMT (Greenwich Mean Time).</td>
+</tr>
+
+<tr>
+<td valign="top">DOCUMENT_NAME</td>
+<td valign="top">Der Dateiname des angeforderten Dokuments ohne zusätzliche Pfadangabe.</td>
+</tr>
+
+<tr>
+<td valign="top">DOCUMENT_PATH_INFO</td>
+<td valign="top">Die Pfadangabe zum angeforderten Dokument.</td>
+</tr>
+
+<tr>
+<td valign="top">DOCUMENT_ROOT</td>
+<td valign="top">Der Pfad, der als DocumentRoot gesetzt wurde.</td>
+</tr>
+
+<tr>
+<td valign="top">DOCUMENT_URI</td>
+<td valign="top">URI des angeforderten Dokuments.</td>
+</tr>
+
+<tr>
+<td valign="top">LAST_MODIFIED</td>
+<td valign="top">Datum und Uhrzeit der letzten Änderung des angeforderten Dokuments.</td>
+</tr>
+
+<tr>
+<td valign="top">PATH</td>
+<td valign="top">Entspricht der Shell-Variablen PATH.</td>
+</tr>
+
+<tr>
+<td valign="top">REMOTE_PORT</td>
+<td valign="top">Der auf der Client-Seite verwendete Port.</td>
+</tr>
+
+<tr>
+<td valign="top">REQUEST_URI</td>
+<td valign="top">URL der angeforderten Datei.</td>
+</tr>
+
+<tr>
+<td valign="top">SCRIPT_NAME</td>
+<td valign="top">Relativer Dateipfad des aufgerufenen Scripts.</td>
+</tr>
+
+<tr>
+<td valign="top">SCRIPT_FILENAME</td>
+<td valign="top">Absoluter Dateipfad des aufgerufenen Scripts.</td>
+</tr>
+
+<tr>
+<td valign="top">SCRIPT_URI</td>
+<td valign="top">Absolute URL incl. Hostname des aufgerufenen Scripts.</td>
+</tr>
+
+<tr>
+<td valign="top">SERVER_ADMIN</td>
+<td valign="top">Die E-Mail-Adresse des ServerAdmin, sofern gesetzt.</td>
+</tr>
+
+<tr>
+<td valign="top">USER_NAME</td>
+<td valign="top">Der Name des Users, der den Apache gestartet hat. Wird vom Apache-Include-Modul gesetzt.</td>
+</tr>
+
+</table>
+
+
+
+<h2>Siehe auch</h2>
+<p></p>
+
+<ul class="no-bullet">
+	<li><a href="http://de.wikipedia.org/wiki/Common_Gateway_Interface">Wikipedia: Common Gateway Interface</a></li>
+	<li><a href="http://de.selfhtml.org/servercgi/">SELFHTML: Webserver/CGI</a></li>
+	<li><a href="http://www.worldmusic.de/perl/dclpc-faq.html">Volker Rattels FAQ für die newsgroup de.comp.lang.perl.cgi -Häufig gestellte Fragen zum Einsatz von Perl in CGI-Programmen</a></li>
+<li><a href="http://www.faqs.org/rfcs/rfc2068.html">Siehe auch RFC 2068</a>.</li>
+</ul>

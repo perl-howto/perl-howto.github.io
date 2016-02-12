@@ -1,0 +1,92 @@
+---
+layout: post
+title: Devel::Size - Wieviel Speicher belegt meine Datenstruktur?
+date: '2008-09-22 15:36:26 +0000'
+mt_id: 100
+blog_id: 1
+post_id: 100
+permalink: /2008/09/develsize_wieviel_speicher_b.html
+categories:
+- profiler
+---
+<p>
+Das CPAN-Modul <a href="http://search.cpan.org/perldoc?Devel::Size">Devel::Size</a> beantwortet die Frage nach dem Speicherverbrauch (<a href="http://de.wikipedia.org/wiki/Random_Access_Memory">RAM</a>) einer Perl-Datenstruktur.
+</p>
+<p>
+<a href="http://search.cpan.org/perldoc?Devel::Size">Devel::Size</a> exportiert zwei Funktionen: <em>size()</em> und <em>total_size()</em>.
+</p>
+<p>
+<em>size()</em> ermittelt die Größe der Datenstruktur in <a href="http://de.wikipedia.org/wiki/Byte">Bytes</a> <strong>ohne</strong> den Inhalt der Datenstruktur.
+</p>
+<p>
+<em>total_size()</em> ermittelt die Größe der Datenstruktur in Bytes unter Berücksichtigung des Inhalts der Datenstruktur.
+</p>
+<p>
+Beide Funktionen erwarten eine Referenz (\) auf die Datenstruktur als Parameter.
+</p>
+
+<h2>Beispiel:</h2>
+
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Devel::Size</span> <span style=" color: #CD5555;">qw(size total_size)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$string</span> = <span style=" color: #CD5555;">&#39;1234567890&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Size string:      &#39;</span> <span style=" color: #000000;">,</span> <span style=" color: #00688B;">size</span><span style=" color: #000000;">(</span>\<span style=" color: #00688B;">$string</span><span style=" color: #000000;">)</span>       <span style=" color: #000000;">,</span><span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span> 
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;TotalSize string: &#39;</span> <span style=" color: #000000;">,</span> <span style=" color: #00688B;">total_size</span><span style=" color: #000000;">(</span>\<span style=" color: #00688B;">$string</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span> 
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@array</span> = <span style=" color: #CD5555;">qw( 1 2 3 4 5 6 7 8 9 0)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Size array:       &#39;</span> <span style=" color: #000000;">,</span> <span style=" color: #00688B;">size</span><span style=" color: #000000;">(</span>\<span style=" color: #00688B;">@array</span><span style=" color: #000000;">)</span>       <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span> 
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;TotalSize array:  &#39;</span> <span style=" color: #000000;">,</span> <span style=" color: #00688B;">total_size</span><span style=" color: #000000;">(</span>\<span style=" color: #00688B;">@array</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span> 
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">%hash</span> = <span style=" color: #000000;">(</span> <span style=" color: #B452CD;">1</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">1</span><span style=" color: #000000;">,</span> <span style=" color: #B452CD;">2</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">2</span><span style=" color: #000000;">,</span> <span style=" color: #B452CD;">3</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">3</span><span style=" color: #000000;">,</span>
+             <span style=" color: #B452CD;">4</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">4</span><span style=" color: #000000;">,</span> <span style=" color: #B452CD;">5</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">5</span><span style=" color: #000000;">,</span> <span style=" color: #B452CD;">6</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">6</span><span style=" color: #000000;">,</span>
+             <span style=" color: #B452CD;">7</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">7</span><span style=" color: #000000;">,</span> <span style=" color: #B452CD;">8</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">8</span><span style=" color: #000000;">,</span> <span style=" color: #B452CD;">9</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">9</span><span style=" color: #000000;">,</span> <span style=" color: #B452CD;">0</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">0</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Size hash:        &#39;</span> <span style=" color: #000000;">,</span> <span style=" color: #00688B;">size</span><span style=" color: #000000;">(</span>\<span style=" color: #00688B;">%hash</span><span style=" color: #000000;">)</span>       <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span> 
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;TotalSize hash:   &#39;</span> <span style=" color: #000000;">,</span> <span style=" color: #00688B;">total_size</span><span style=" color: #000000;">(</span>\<span style=" color: #00688B;">%hash</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span> 
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+      <span style=" color: #228B22;"># Array of Arrays</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@AoA</span> = <span style=" color: #000000;">(</span>
+        <span style=" color: #000000;">[</span> <span style=" color: #CD5555;">&quot;fred&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;barney&quot;</span> <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">[</span> <span style=" color: #CD5555;">&quot;george&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;jane&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;elroy&quot;</span> <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">[</span> <span style=" color: #CD5555;">&quot;homer&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;marge&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;bart&quot;</span> <span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+      <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;Size AoA:         &#39;</span> <span style=" color: #000000;">,</span> <span style=" color: #00688B;">size</span><span style=" color: #000000;">(</span>\<span style=" color: #00688B;">@AoA</span><span style=" color: #000000;">)</span>       <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span> 
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;TotalSize AoA:    &#39;</span> <span style=" color: #000000;">,</span> <span style=" color: #00688B;">total_size</span><span style=" color: #000000;">(</span>\<span style=" color: #00688B;">@AoA</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span> 
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Size string:      36
+TotalSize string: 36
+
+Size array:       96
+TotalSize array:  376
+
+Size hash:        354
+TotalSize hash:   514
+
+Size AoA:         72
+TotalSize AoA:    576
+</pre>
+
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Devel::Size">Devel::Size</a></li>
+<li><a href="http://www.perladvent.org/2002/6th/">Perl 2002 Advent Calendar: Devel::Size</a></li>
+<li><a href="http://jeremy.zawodny.com/blog/archives/000526.html">Perl Hashes and stuff... (by Jeremy Zawodny)</a></li>
+<li><a href="http://www.slideshare.net/brian_d_foy/benchmarking-perl-lightning-talk">Benchmarking Perl Lightning Talk (NPW 2007)</a></li>
+</ul>

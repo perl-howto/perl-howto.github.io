@@ -1,0 +1,103 @@
+---
+layout: post
+title: File::Which - portables (p)which
+date: '2009-09-16 18:15:00 +0000'
+mt_id: 164
+blog_id: 1
+post_id: 164
+permalink: /2009/09/file-which-portables_pwhich.html
+categories:
+- '101'
+---
+<p>
+<a href="http://search.cpan.org/perldoc?File::Which">File::Which</a> von <a href="http://search.cpan.org/~adamk/">Adam Kennedy</a> bietet ein portables <a href="http://linux.die.net/man/1/which">which</a>, auch für Betriebssysteme, auf denen dieses Tool nicht verfügbar ist.
+</p>
+<p>
+<a href="http://www.flickr.com/photos/urville_djasim/3885392690/">
+<img src="http://farm3.static.flickr.com/2580/3885392690_8925a48314.jpg" alt="Which Way" /></a>
+</p>
+<p>
+&nbsp;
+</p>
+<h2>which</h2>
+<p>
+Das which utility zeigt unter <a href="http://de.wikipedia.org/wiki/Linux">Linux</a> den vollen Pfad zu einer ausführbaren Datei an:
+</p>
+<pre>
+$ which perldoc
+/usr/local/bin/perldoc
+
+$ which -a perldoc
+/usr/local/bin/perldoc
+/usr/bin/perldoc
+</pre>
+<p>
+&nbsp;
+</p>
+<h2>pwhich</h2>
+<p>
+Ein vergleichbares Ergebnis erzielt das Perl-Programm <a href="http://search.cpan.org/perldoc?pwhich">pwhich</a>, das zum Lieferumfang von <a href="http://search.cpan.org/perldoc?File::Which">File::Which</a> gehört:
+</p>
+<pre>
+$ pwhich perldoc
+/usr/local/bin/perldoc
+
+$ pwhich -a perldoc
+/usr/local/bin/perldoc
+/usr/bin/perldoc
+</pre>
+<p>
+&nbsp;
+</p>
+<h2>Beispiel: File::Which</h2>
+<p>
+Ein einfaches Beispiel für die Einbindung in eigene Programme:
+</p>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">File::Which</span><span style=" color: #000000;">;</span>   <span style=" color: #228B22;"># exports which()</span>
+
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$what</span> = <span style=" color: #CD5555;">&#39;perldoc&#39;</span><span style=" color: #000000;">;</span>  <span style=" color: #228B22;"># executable ohne Pfad, nach dem gesucht wird</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$path</span>     = <span style=" color: #00688B;">$ENV</span>{<span style=" color: #000000;">PATH</span>}<span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$exe_path</span> = <span style=" color: #00688B;">which</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$what</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span> <span style=" color: #228B22;"># skalaler Kontext - Liefert den ersten Treffer in $path</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@paths</span>    = <span style=" color: #00688B;">which</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$what</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span> <span style=" color: #228B22;"># Listenkontext - Liefert alle Treffer in $path </span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;PATH Enviroment:          $path\n&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span> <span style=" color: #8B008B; font-weight:bold;">defined</span> <span style=" color: #00688B;">$exe_path</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>  <span style=" color: #228B22;"># Mindestens ein Treffer</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Executable (First Match): $exe_path\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Alle Executables:         &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #8B008B; font-weight:bold;">join</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;, &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">@paths</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span> <span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Kein Treffer fuer $what\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt unter <a href="http://de.wikipedia.org/wiki/Windows">Windows</a> folgende Ausgabe:
+</p>
+<pre>
+X:\>perl which.pl
+PATH Enviroment:          C:\Perl\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\cygwin\bin;C:\Programme\jEdit;C:\WINDOWS\system32\WindowsPowerShell\v1.0
+Executable (First Match): C:\Perl\bin\perldoc.BAT
+Alle Executables:         C:\Perl\bin\perldoc.BAT
+</pre>
+
+
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+	<li><a href="http://search.cpan.org/perldoc?File::Which">File::Which - Portable implementation of the `which' utility</a></li>
+	<li><a href="http://search.cpan.org/perldoc?pwhich">pwhich - Perl-only `which'</a></li>
+	<li><a href="http://linux.die.net/man/1/which">which - shows the full path of (shell) commands</a></li>
+	<li><a href="http://search.cpan.org/perldoc?File::Which::Cached">File::Which::Cached - faster subsequent which lookups</a></li>
+<li><a href="http://ppt.sourceforge.net/">Perl Power Tools</a></li>
+<li><a href="http://search.cpan.org/dist/ppt/">Perl Tools Projekt</a></li>
+</ul>
+
+<h2>Bildnachweis</h2>
+<p>
+<a href="http://www.flickr.com/photos/urville_djasim/3885392690/">Which Way?</a> von  <a href="http://www.flickr.com/photos/urville_djasim/">Urville Djasim</a>.
+</p>

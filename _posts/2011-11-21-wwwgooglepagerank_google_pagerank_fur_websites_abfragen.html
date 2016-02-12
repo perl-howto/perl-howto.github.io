@@ -1,0 +1,118 @@
+---
+layout: post
+title: WWW::Google::PageRank - Google Pagerank für Websites abfragen
+date: '2011-11-21 18:17:53 +0000'
+mt_id: 224
+blog_id: 1
+post_id: 224
+permalink: /2011/11/wwwgooglepagerank_google_pagerank_fur_websites_abfragen.html
+categories:
+- lwp
+---
+<p>
+<a href="http://search.cpan.org/perldoc?WWW::Google::PageRank">WWW::Google::PageRank</a> von <a href="http://search.cpan.org/~ykar/">Yuri Karaban</a> ermittelt den <a href="http://www.google.com/about/corporate/company/">Google </a> <a href="http://de.wikipedia.org/wiki/PageRank">Pagerank</a> f&uuml;r Websites.
+</p>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Pagerank ermitteln: get()</h2>
+<p>
+Die Methode <i>get()</i> liefert im <b>skalaren Kontext</b> den Pagerank, im <b>Listenkontext</b> den Pagerank und zus&auml;tzlich ein <a href="http://search.cpan.org/perldoc?HTTP::Response">HTTP::Response Objekt</a> zum Debuggen zur&uuml;ck.
+</p>
+
+<p>
+&nbsp;
+</p>
+
+<h3>Beispiel: get() im skalaren Kontext</h3>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">WWW::Google::PageRank</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$pr</span> = <span style="color: #000000;">WWW::Google::PageRank</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span> <span style="color: #000000;">host</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;toolbarqueries.google.de&#39;</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@urls</span> = <span style="color: #CD5555;">qw!</span>
+  <span style="color: #CD5555;">http://perl-howto.de</span>
+  <span style="color: #CD5555;">http://yahoo.de</span>
+  <span style="color: #CD5555;">http://web.de</span>
+  <span style="color: #CD5555;">!</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$url</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@urls</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;URL: $url &quot;</span><span style="color: #000000;">,</span> <span style="color: #8B008B; font-weight:bold;">scalar</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$pr</span><span style="color: #00688B;">-&gt;get</span><span style="color: #000000;">(</span><span style="color: #00688B;">$url</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm liefert folgende Ausgabe:
+</p>
+<pre>
+URL: http://perl-howto.de 4
+URL: http://yahoo.de 8
+URL: http://web.de 7
+</pre>
+<p>
+&nbsp;
+</p>
+
+<h3>Beispiel: get() im Listenkontext</h3>
+
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">WWW::Google::PageRank</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$pr</span> = <span style="color: #000000;">WWW::Google::PageRank</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span> <span style="color: #000000;">host</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;toolbarqueries.google.de&#39;</span> <span style="color: #000000;">)</span>
+  <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #00688B;">$!</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@urls</span> = <span style="color: #CD5555;">qw!</span>
+  <span style="color: #CD5555;">http://perl-howto.de</span>
+  <span style="color: #CD5555;">http://yahoo.de</span>
+  <span style="color: #CD5555;">http://web.de</span>
+  <span style="color: #CD5555;">http://example.tld</span>
+  <span style="color: #CD5555;">!</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Debug</span>
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$url</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@urls</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;URL: $url &quot;</span><span style="color: #000000;">;</span>
+
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$pagerank</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$response</span> <span style="color: #000000;">)</span> = <span style="color: #00688B;">$pr</span><span style="color: #00688B;">-&gt;get</span><span style="color: #000000;">(</span><span style="color: #00688B;">$url</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+    <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">defined</span> <span style="color: #00688B;">$pagerank</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;PageRank: $pagerank\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Fehler: &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$response</span><span style="color: #00688B;">-&gt;status_line</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">warn</span> <span style="color: #00688B;">$response</span><span style="color: #00688B;">-&gt;as_string</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm liefert folgende Ausgabe (die lange XML-Ausgabe des <i>as_string()</i> habe ich weggelassen):
+</p>
+<pre>
+URL: http://perl-howto.de PageRank: 4
+URL: http://yahoo.de PageRank: 8
+URL: http://web.de PageRank: 7
+URL: http://example.tld Fehler: 403 Forbidden
+</pre>
+<p>
+&nbsp;
+</p>
+
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?WWW::Google::PageRank">WWW::Google::PageRank - Query google pagerank of page</a></li>
+<li><a href="http://www.perl-uwe.com/2010/12/day-5-check-your-google-pagerank-with.html">Perl-Uwe.com: Day 5: Check your Google PageRank with WWW::Google::PageRank </li>
+<li><a href="http://search.cpan.org/perldoc?LWP::UserAgent">LWP::UserAgent - Web user agent class</a></li>
+<li><a href="http://search.cpan.org/perldoc?HTTP::Response">HTTP::Response - HTTP style response message</a></li>
+<li><a href="http://perldoc.perl.org/perldata.html#List-value-constructors">Perldoc - List value constructors</a></li>
+<li><a href="http://search.cpan.org/perldoc?AnyEvent::Google::PageRank">AnyEvent::Google::PageRank - Non-blocking wrapper for WWW::Google::PageRank</a></li>
+<li><a href="http://search.cpan.org/perldoc?POE::Component::WWW::Google::PageRank">POE::Component::WWW::Google::PageRank - A non-blocking wrapper for WWW::Google::PageRank</a></li>
+</ul>

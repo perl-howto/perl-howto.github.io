@@ -1,0 +1,12 @@
+---
+layout: default
+title: Archiv - Perl HowTo - Tipps, Tricks und Anleitungen
+---
+
+  <h1>Archiv</h1>
+  <ul class="no-bullet">
+    {% for post in site.posts %}
+      <li>{{ post.date | date: "%Y-%m-%d" }} - <a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a></li>
+    {% endfor %}
+  </ul>
+

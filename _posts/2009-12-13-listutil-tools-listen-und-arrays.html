@@ -1,0 +1,152 @@
+---
+layout: post
+title: List::Util - Häufig benötigte Tools für Listen und Arrays
+date: '2009-12-13 20:30:00 +0000'
+mt_id: 173
+blog_id: 1
+post_id: 173
+permalink: /2009/12/listutil-tools-listen-und-arrays.html
+categories:
+- '101'
+---
+<p>
+<a href="http://search.cpan.org/perldoc?List::Util">List::Util</a> von <a href="http://search.cpan.org/~gbarr/">Graham Barr</a>, das seit Perl 5.8.0  zu den <a href="http://perldoc.perl.org/index-modules-L.html">Core-Modulen</a> gehört,  stellt eine Reihe von häufig gebrauchten Funktionen rund um <a href="http://perldoc.perl.org/perlfaq4.html#What-is-the-difference-between-a-list-and-an-array%3F">Listen bzw. Arrays</a> zur Verfügung. 
+</p>
+
+<h2>Minimum, Maximum und Summe einer Liste</h2>
+<p>
+Die Funktionen <em>min()</em> und max()<em></em>, liefern die kleinste bzw. größte Zahl einer Liste; <em>sum() </em>liefert die Summe aller Zahlen der Liste:
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">List::Util</span> <span style="color: #CD5555;">qw/max min sum/</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@zahlen</span> = <span style="color: #CD5555;">qw/ 5 10 15 20 42 25 30 4 35 17 2 8 13 /</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$min</span> = <span style="color: #00688B;">min</span><span style="color: #000000;">(</span><span style="color: #00688B;">@zahlen</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$max</span> = <span style="color: #00688B;">max</span><span style="color: #000000;">(</span><span style="color: #00688B;">@zahlen</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$sum</span> = <span style="color: #00688B;">sum</span><span style="color: #000000;">(</span><span style="color: #00688B;">@zahlen</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Minimum: $min\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Maximum: $max\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Summe:   $sum\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Minimum: 2
+Maximum: 42
+Summe:   226
+</pre>
+<p>
+Für Strings stehen die Funktionen <em>maxstr()</em> und <em>minstr()</em> zur Verfügung.
+</p>
+
+<h2>Mischen einer Liste</h2>
+<p>
+Die Funktion <em>shuffle()</em> vermengt die Element der Liste in zufälliger Reihenfolge:
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">List::Util</span> <span style="color: #CD5555;">qw/shuffle/</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@zahlen</span> = <span style="color: #CD5555;">qw/ 5 10 15 20 42 25 30 4 35 /</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Zahlen in Ursprungsreihenfolge:    @zahlen\n&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">@zahlen</span> = <span style="color: #000000;">shuffle</span> <span style="color: #00688B;">@zahlen</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Zahlen in zufaelliger Reihenfolge: @zahlen\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt (z.B.) folgende Ausgabe:
+</p>
+<pre>
+Zahlen in Ursprungsreihenfolge:    5 10 15 20 42 25 30 4 35
+Zahlen in zufaelliger Reihenfolge: 20 4 35 5 25 10 30 42 15
+</pre>
+<h2>Das erste Element einer Liste, welches einem bestimmtem Kriterium entspricht</h2>
+<p>
+Die Funktion <em>first()</em> liefert das erste Element einer Liste, welches einem bestimmtem Kriterium entspricht:
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">List::Util</span> <span style="color: #CD5555;">qw/first/</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@zahlen</span> = <span style="color: #CD5555;">qw/ 5 10 15 20 42 25 30 4 35 /</span><span style="color: #000000;">;</span>
+
+	<span style="color: #228B22;"># Erstes Element des Array zahlen, das groesser als 10 ist</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$first</span> = <span style="color: #00688B;">first</span> <span style="color: #000000;">{</span> <span style="color: #00688B;">$_</span> &gt; <span style="color: #B452CD;">10</span> <span style="color: #000000;">}</span> <span style="color: #00688B;">@zahlen</span> <span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;First:   $first\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt  folgende Ausgabe:
+</p>
+<pre>
+First:    15
+</pre>
+<h2>Reduce - Eine Liste auf einen einzelnen Wert reduzieren</h2>
+<p>
+Die Funktion <em>reduce()</em> erzeugt aus einer Liste einen einzelnen Wert.
+</p>
+<p>
+Den beiden speziellen Variablen <span style="color: #00688B;">$a</span> und <span style="color: #00688B;">$b</span> wird im ersten Durchlauf von <em>reduce()</em> die ersten beiden Elemente der Liste zugeordnet. In jedem weiteren Lauf wird das Ergebnis des vorherigen Laufs der Variablen <span style="color: #00688B;">$a</span> zugeordnet und das nächste Element der Liste der Variablen<span style="color: #00688B;"> $b</span>.
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">List::Util</span> <span style="color: #CD5555;">qw/reduce/</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@zahlen</span> = <span style="color: #CD5555;">qw/ 5 10 15 20 42 25 30 4 35 /</span><span style="color: #000000;">;</span>
+
+<span style="color: #000000;">{</span>
+	<span style="color: #8B008B; font-weight:bold;">no</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span> <span style="color: #228B22;"># Keine Warnungen in diesem Block</span>
+	<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$produkt</span> = <span style="color: #00688B;">reduce</span> <span style="color: #000000;">{</span> <span style="color: #00688B;">$a</span> * <span style="color: #00688B;">$b</span> <span style="color: #000000;">}</span> <span style="color: #00688B;">@zahlen</span><span style="color: #000000;">;</span>
+	<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Produkt 1: $produkt\n&quot;</span><span style="color: #000000;">;</span>
+	<span style="color: #00688B;">$produkt</span> = <span style="color: #B452CD;">5</span> * <span style="color: #B452CD;">10</span> * <span style="color: #B452CD;">15</span> * <span style="color: #B452CD;">20</span> * <span style="color: #B452CD;">42</span> * <span style="color: #B452CD;">25</span> * <span style="color: #B452CD;">30</span> * <span style="color: #B452CD;">4</span> * <span style="color: #B452CD;">35</span><span style="color: #000000;">;</span>
+	<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Produkt 2: $produkt\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+
+<p>
+Um die gut gemeinten Warnungen bzzgl. <span style="color: #00688B;">$a</span> und <span style="color: #00688B;">$b</span> zu unterdrücken, werden Warnungen innerhalb  eines <a href="http://www.perl.com/pub/a/2004/06/18/variables.html">nackten Blocks</a> begrenzt unterdrückt.
+</p>
+
+<p>
+Das Programm erzeugt  folgende Ausgabe:
+</p>
+<pre>
+Produkt 1: 66150000000
+Produkt 2: 66150000000
+</pre>
+
+<h2>MoreUtils</h2>
+<p>
+Weitere hilfreiche Tools für Listen stellen <a href="http://search.cpan.org/perldoc?List::MoreUtils">List::MoreUtils</a> und 
+<a href="http://search.cpan.org/perldoc?List::AllUtils">List::AllUtils</a> bereit.
+</p>
+
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li>CPAN: <a href="http://search.cpan.org/perldoc?List::Util">List::Util</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?List::MoreUtils">List::MoreUtils</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?List::AllUtils">List::AllUtils</a></li>
+<li>Perl Training Australia: <a href="http://perltraining.com.au/tips/2005-05-12.html">List::Util</a></li>
+<li>devshed: <a href="http://www.devshed.com/c/a/Perl/Perl-Lists-Utilizing-ListUtil/">Perl Lists: Utilizing List::Util</a></li>
+<li>Perl 2001 Advent Calendar: <a href="http://www.perladvent.org/2001/8th/">List::Util</a></li>
+<li><a href="http://perldoc.perl.org/perlfaq4.html">perlfaq4</a> - perldoc.perl.org</li>
+<li><a href="http://www.stonehenge.com/merlyn/LinuxMag/col58.html">Linux Magazine Column 58 (Apr 2004)</a></li>
+<li>perl.com: <a href="http://www.perl.com/pub/a/2003/06/19/treasures.html">Hidden Treasures of the Perl Core, part II</a></li>
+</ul>

@@ -1,0 +1,196 @@
+---
+layout: post
+title: Array::Utils - Arrays von Strings schnell vergleichen
+date: '2015-02-23 16:15:00 +0000'
+mt_id: 258
+blog_id: 1
+post_id: 258
+permalink: /2015/02/arrayutils-arrays-von-strings-schnell-vergleichen.html
+categories:
+- '101'
+---
+<p>
+<img alt="3603549564_6042a3df87_m.jpg" src="{{ site.url }}/assets/images/3603549564_6042a3df87_m.jpg" width="164" height="240" style="float: left; margin: 0 20px 20px 0;" />
+</p>
+
+<p>
+<a href="https://metacpan.org/pod/Array::Utils">Array::Utils</a> von <a href="https://metacpan.org/author/ZMIJ">Sergei A. Fedorov</a> erlaubt es schnell und einfach Arrays von <b>Zeichenketten</b> (Strings) zu vergleichen.
+</p>
+<p>&nbsp;</p>
+<p>
+F&uuml;r andere Datentypen ist dieses Modul, trotz seines eher generischen Namens, <b>nicht</b>  geeignet.
+</p>
+<p>&nbsp;</p>
+
+<p>
+<a href="https://metacpan.org/pod/Array::Utils">Array::Utils</a> stellt folgende Funktionen zur Verf&uuml;gung:
+</p>
+
+<ul class="no-bullet">
+<li>Symmetrische Differenz zweier Arrays</li>
+<li>Schnittmenge zweier Arrays</li>
+<li>Vereinigungsmenge zweier Arrays</li>
+<li>Subtraktion zweier Arrays</li>
+</ul>
+
+
+<p>&nbsp;</p>
+<h2>Symmetrische Differenz</h2>
+<p>
+Es handelt sich um die Menge aller Elemente, die jeweils in einer, aber nicht in beiden Mengen liegen.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Array::Utils</span> <span style="color: #CD5555;">qw(:all)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@list_01</span> = <span style="color: #CD5555;">qw/Hans Otto Fritz/</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@list_02</span> = <span style="color: #CD5555;">qw/Wilhelm Otto/</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># symmetric difference</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@diff</span> = <span style="color: #00688B;">array_diff</span><span style="color: #000000;">(</span><span style="color: #00688B;">@list_01</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@list_02</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #8B008B; font-weight:bold;">join</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;, &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@list_01</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #8B008B; font-weight:bold;">join</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;, &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@list_02</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #8B008B; font-weight:bold;">join</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;, &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@diff</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Hans, Otto, Fritz
+Wilhelm, Otto
+Hans, Fritz, Wilhelm
+</pre>
+
+<p>&nbsp;</p>
+<h2>Intersection</h2>
+<p>
+Die Schnittmenge (Durchschnittsmenge) zweier Mengen A und B ist die Menge aller Elemente, die sowohl zu A als auch zu B geh&ouml;ren.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Array::Utils</span> <span style="color: #CD5555;">qw(:all)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@list_01</span> = <span style="color: #CD5555;">qw/Hans Otto Fritz/</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@list_02</span> = <span style="color: #CD5555;">qw/Wilhelm Otto/</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># intersection</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@intersect</span> = <span style="color: #00688B;">intersect</span><span style="color: #000000;">(</span><span style="color: #00688B;">@list_01</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@list_02</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #8B008B; font-weight:bold;">join</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;, &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@list_01</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #8B008B; font-weight:bold;">join</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;, &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@list_02</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #8B008B; font-weight:bold;">join</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;, &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@intersect</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Hans, Otto, Fritz
+Wilhelm, Otto
+Otto
+</pre>
+
+<p>&nbsp;</p>
+<h2>Union</h2>
+<p>
+Die Vereinigungsmenge zweier Mengen A und B ist die Menge aller Elemente, die zu A oder zu B oder zu beiden Mengen geh&ouml;ren.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Array::Utils</span> <span style="color: #CD5555;">qw(:all)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@list_01</span> = <span style="color: #CD5555;">qw/Hans Otto Fritz/</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@list_02</span> = <span style="color: #CD5555;">qw/Wilhelm Otto/</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># unique union</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@unique</span> = <span style="color: #00688B;">unique</span><span style="color: #000000;">(</span><span style="color: #00688B;">@list_01</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@list_02</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #8B008B; font-weight:bold;">join</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;, &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@list_01</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #8B008B; font-weight:bold;">join</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;, &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@list_02</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #8B008B; font-weight:bold;">join</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;, &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@unique</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Hans, Otto, Fritz
+Wilhelm, Otto
+Otto, Wilhelm, Hans, Fritz
+</pre>
+<p>
+Durch das Aussortieren der doppelten Elemente, <a href="https://rt.cpan.org/Public/Bug/Display.html?id=75847">&auml;ndert sich auch die Reihenfolge</a> der Elemente im <i>@unique</i>.
+</p>
+
+<p>&nbsp;</p>
+<h2>Subtraktion</h2>
+<p>
+Die Subtraktion liefert die Elemente, die nur zu der einen Menge, aber nicht zu der anderen Menge geh&ouml;ren.  
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Array::Utils</span> <span style="color: #CD5555;">qw(:all)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@list_01</span> = <span style="color: #CD5555;">qw/Hans Otto Fritz/</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@list_02</span> = <span style="color: #CD5555;">qw/Wilhelm Otto/</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># get items from array @list_01 that are not in array @list_02</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@minus</span> = <span style="color: #00688B;">array_minus</span><span style="color: #000000;">(</span><span style="color: #00688B;">@list_01</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@list_02</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #8B008B; font-weight:bold;">join</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;, &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@list_01</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #8B008B; font-weight:bold;">join</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;, &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@list_02</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #8B008B; font-weight:bold;">join</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;, &quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@minus</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Hans, Otto, Fritz
+Wilhelm, Otto
+Hans, Fritz
+</pre>
+
+<p>&nbsp;</p>
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li><a href="https://metacpan.org/pod/Array::Utils">Array::Utils</a></li>
+<li><a href="http://cpanratings.perl.org/dist/Array-Utils">Array::Utils Reviews</a></li>
+<li><a href="http://perldoc.perl.org/perlfaq4.html">perlfaq4</a></li>
+<li><a href="https://metacpan.org/pod/List::Compare">List::Compare</a></li>
+<li><a href="https://metacpan.org/pod/Array::Compare">Array::Compare</a></li>
+<li><a href="https://metacpan.org/pod/Data::Compare">Data::Compare</a></li>
+<li><a href="https://metacpan.org/pod/Test::Deep">Test::Deep</a></li>
+<li><a href="http://stackoverflow.com/questions/2591747/how-can-i-compare-arrays-in-perl">How can I compare arrays in Perl?</a></li>
+<li><a href="http://stackoverflow.com/questions/1609467/in-perl-is-there-a-built-in-way-to-compare-two-arrays-for-equality">In Perl, is there a built in way to compare two arrays for equality?</a></li>
+<li><a href="http://stackoverflow.com/questions/2933347/comparing-two-arrays-using-perl">Comparing Two Arrays Using Perl</a></li>
+<li><a href="http://www.perlmonks.org/?node_id=335034">Re: How do I compare two arrays?</a></li>
+<li><a href="http://www.mathebibel.de/symmetrische-differenz">Symmetrische Differenz</a></li>
+<li><a href="http://www.mathebibel.de/schnittmenge">Scnittmenge</a></li>
+<li><a href="http://www.mathebibel.de/vereinigungsmenge">Vereinigungsmenge</a></li>
+</ul>
+
+<p>&nbsp;</p>
+<h2>Bildnachweis</h2>
+<p>
+photo credit: <a href="http://www.flickr.com/photos/73645804@N00/3603549564">myth of homogeneity</a> via <a href="http://photopin.com">photopin</a> <a href="https://creativecommons.org/licenses/by/2.0/">(license)</a>
+</p>
+<p>&nbsp;</p>
+

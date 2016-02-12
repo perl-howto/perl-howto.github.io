@@ -1,0 +1,98 @@
+---
+layout: post
+title: String::Dump - Was genau ist in einem String enthalten
+date: '2013-02-28 11:45:00 +0000'
+mt_id: 237
+blog_id: 1
+post_id: 237
+permalink: /2013/02/stringdump_-_was_genau_ist_in_einem_string_enthalten.html
+categories:
+- '101'
+---
+<p>
+Manchmal steckt in einem String nicht das drin, was man erwartet, z.B. nicht druckbare oder UTF Zeichen.
+</p>
+<p>
+<a href="http://search.cpan.org/perldoc?String%3A%3ADump">String::Dump - Dump strings of characters (or bytes) for printing and debugging</a> von <a href="http://search.cpan.org/~patch/">Nick Patch</a> vereinfacht das Debuggen solcher Probleme erheblich.
+</p>
+<p>
+Bei Byte-Strings wird jedes Byte, bei  <a href="http://perldoc.perl.org/perlunicode.html">Unicode-Strings</a> wird jeder <a href="http://de.wikipedia.org/wiki/Unicode#Codepunkte_und_Zeichen">Codepoint</a> ausgegeben.  
+</p>
+
+<p>
+<a href="http://search.cpan.org/perldoc?String%3A%3ADump">String::Dump</a> stellt <b>sechs</b> unterschiedliche Ausgabeformate &uuml;ber folgende Funktionen zur Verf&uuml;gung.
+</p>
+<ul class="no-bullet">
+ <li>dump_hex($string): Hexadecimal (base 16) mode</li>
+ <li>dump_dec($string): Decimal (base 10) mode</li>
+ <li>dump_oct($string): Octal (base 8) mode</li>
+ <li>dump_bin($string): Binary (base 2) mode</li>
+ <li>dump_names($string): Unicode character name mode</li>
+ <li>dump_codes($string): Unicode code point mode</li>
+</ul>
+
+<p>
+Freunde der Kommandozeile sollten einen Blick auf mitgelieferte Tool <a href="http://search.cpan.org/perldoc?dumpstr">dumpstr</a> werfen.
+</p>
+
+<p>&nbsp;</p>
+
+<h2>Beispiel</h2>
+<p>
+Statt vieler Worte ein einfaches Beispiel:
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">utf8</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">String::Dump</span> <span style="color: #CD5555;">qw( :all )</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$string</span> = <span style="color: #CD5555;">&#39;F&#248;&#248; B&#257;r&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">dump_hex</span><span style="color: #000000;">(</span><span style="color: #00688B;">$string</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">dump_dec</span><span style="color: #000000;">(</span><span style="color: #00688B;">$string</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">dump_oct</span><span style="color: #000000;">(</span><span style="color: #00688B;">$string</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">dump_bin</span><span style="color: #000000;">(</span><span style="color: #00688B;">$string</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">dump_names</span><span style="color: #000000;">(</span><span style="color: #00688B;">$string</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">dump_codes</span><span style="color: #000000;">(</span><span style="color: #00688B;">$string</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+46 F8 F8 20 42 101 72
+
+70 248 248 32 66 257 114
+
+106 370 370 40 102 401 162
+
+1000110 11111000 11111000 100000 1000010 100000001 1110010
+
+LATIN CAPITAL LETTER F, LATIN SMALL LETTER O WITH STROKE, LATIN SMALL LETTER O WITH STROKE, SPACE, LATIN CAPITAL LETTER B, LATIN SMALL LETTER A WITH MACRON, LATIN SMALL LETTER R
+
+U+0046 U+00F8 U+00F8 U+0020 U+0042 U+0101 U+0072
+</pre>
+
+
+<p>&nbsp;</p>
+
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?String%3A%3ADump">String::Dump</a></li>
+<li><a href="http://search.cpan.org/perldoc?dumpstr">dumpstr</a></li>
+<li><a href="http://search.cpan.org/perldoc?String%3A%3ADump%3A%3ADebugging">String::Dump::Debugging</a></li>
+<li><a href="http://search.cpan.org/perldoc?Template%3A%3APlugin%3A%3AStringDump">Template::Plugin::StringDump</a></li>
+<li><a href="http://perldoc.perl.org/perlunicode.html">perlunicode</a></li>
+<li><a href="http://search.cpan.org/perldoc?Data%3A%3AHexDump">Data::HexDump</a></li>
+<li><a href="http://search.cpan.org/perldoc?Data%3A%3AHexdumper">Data::Hexdumper</a></li>
+</ul>
+
+<p>&nbsp;</p>

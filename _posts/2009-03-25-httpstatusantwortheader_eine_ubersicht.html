@@ -1,0 +1,285 @@
+---
+layout: post
+title: 'HTTP-Status-Antwort-Header: Eine Übersicht'
+date: '2009-03-25 13:23:10 +0000'
+mt_id: 127
+blog_id: 1
+post_id: 127
+permalink: /2009/03/httpstatusantwortheader_eine_ubersicht.html
+published: false
+categories:
+- lwp
+---
+<p>
+Die Status-Antwort-Header des HTTP-Protokolls in einer tabellarischen Übersicht mit kurzen Erklärungen.
+</p>
+
+<h2>Grundlagen</h2>
+<p>
+Der Status-Antwortheader zeigt die Version des laufenden Servers zusammen mit einem Ergebniscode und einer optionalen Meldung an.
+</p>
+<p>
+Beispiel:
+</p>
+<pre>
+ HTTP/1.0 200 OK
+</pre>
+HTTP/1.0 ist die HTTP-Version, 200 der Ergebniscode und OK die Meldung, die den Ergebniscode beschreibt.
+</p>
+<p>
+Die Ergebniscodes sind in fünf Gruppen eingeteilt:
+</p>
+<ol>
+	<li>Informative Meldungen für den Client 1xx</li>
+	<li>Erfolg 2xx</li>
+	<li>Umleitung 3xx</li>
+	<li>Client-Fehler 4xx</li>
+	<li>Server-Fehler 5xx</li>
+</ol>
+<p>
+Die erste Stelle/Ziffer des dreistelligen Ergebniscodes zeigen die Hauptgruppe an, die beiden folgenden Stellen die Details.
+</p>
+
+<h2>Informative Meldungen für den Client 1xx</h2>
+<p>
+</p>
+<table border="0" cellpadding="5">
+<tr>
+<td valign="top">100 CONTINUE</td>
+
+<td valign="top">
+Ein Teil der Anfrage wurde bereits bearbeitet. Der Client kann seine Anfrage beenden, wenn er möchte.
+</td>
+</tr>
+<tr>
+<td valign="top">101 SWITCHING PROTOCOLS</td>
+<td valign="top">Der Server möchte zu dem Protokoll wechseln, das im Upgrade-Header angegeben ist.
+</td>
+</tr>
+</table>
+
+<h2>Erfolg 2xx</h2>
+<p>
+</p>
+<table border="0" cellpadding="5">
+<tr>
+<td valign="top">200 OK</td>
+<td valign="top">Die Anforderung war erfolgreich.
+</td>
+</tr>
+<tr>
+<td valign="top">201 CREATED</td>
+<td valign="top">Nach einem POST-Befehl Erfolg; der Textteil der Antwort zeigt
+den URI, unter dem das neu erstellte Dokument erkannt wird.
+</td>
+</tr>
+<tr>
+<td valign="top">202 ACCEPTED</td>
+<td valign="top">Die Anforderung wurde zur Bearbeitung angenommen, doch wurde die Bearbeitung nicht abgeschlossen.
+</td>
+</tr>
+<tr>
+<td valign="top">203 PARTIAL INFORMATION<br>
+203 NON-AUTHORITIVE INFORMATION</td>
+<td valign="top">
+Als Antwort auf einen GET-Befehl zeigt dieser Code, daß die zurückgegebene Metainformation kein endgültiges SET des Objekts vom Server ist, sondern von einem privaten, überlagertem Web kommt.  
+</td>
+</tr>
+<tr>
+<td valign="top">204 NO RESPONSE<br>
+204 NO CONTENT</td>
+<td valign="top">
+Der Server hat die Anforderung erhalten, doch gibt es keine Information, die zurückgeben werden kann.  Der Client sollte in derselben Dokumentenansicht bleiben. Dies wird hauptsächlich zur Zulassung von Eingaben in Scripts ohne Änderung des Dokuments verwendet.
+</td>
+</tr>
+<tr>
+<td valign="top">205 RESET CONTENT</td>
+<td valign="top">Der Client soll die Werte des aktuellen HTML-Formulars auf die Defaultwerte zurücksetzen.
+</td>
+</tr>
+<tr>
+<td valign="top">206 PARTIAL CONTENT</td>
+<td valign="top">Ein Teil des gewünschten Objektes wird nach einer Anfrage mit Range-Header zurückgegeben.
+</td>
+</tr>
+</table>
+
+<h2>Umleitung 3xx</h2>
+<p>
+</p>
+<table border="0" cellpadding="5">
+<tr>
+<td valign="top">300 MULTIPLE CHOICES</td>
+<td valign="top">
+Die angeforderte URL verweist auf mehr als ein Objekt. Weitere Informationen werden dem Entity-Body entnommen.
+</td>
+</tr>
+<tr>
+<td valign="top">301 MOVED PERMANENTLY</td>
+<td valign="top">
+Den angeforderten Daten wurde ein neuer URI zugeordnet. Die Änderung ist von Dauer. Die Antwort enthält eine Zeile, die die alternative Adresse des Dokuments angibt.
+</td>
+</tr>
+<tr>
+<td valign="top">302 MOVED TEMPORARILY</td>
+<td valign="top"> Die angeforderten Daten befinden sich tatsächlich unter einem anderem URI. Die Änderung ist nicht von Dauer. Die Antwort enthält eine Headerzeile, die die alternative Adresse des Dokumentes angibt.
+</td>
+</tr>
+<tr>
+<td valign="top">303 METHOD<br>
+303 SEE OTHER</td>
+<td valign="top">
+Diese Antwort teilt dem Client mit, das er eine andere Netzwerkadresse probieren soll. Eine Best&auml;stigung des Nutzers sollte eingeholt werden.<br>
+Es kann auch eine andere Methode als GET verwendet werden. Der zurückgegebene Rumpfabschnitt (Entity-Body) enth&auml;lt die zu verwendende Methode und deren Parameter.
+</td>
+</tr>
+<tr>
+<td valign="top">304 NOT MODIFIED<br>
+304 USE LOCAL COPY</td>
+<td valign="top">
+Falls der Client eine bedingte GET-Anfrage, z.B 'If-Modified-Since', startet und das Dokument nicht geändert wurde, wird diese Antwort generiert.
+</td>
+</tr>
+<tr>
+<td valign="top">305 USE PROXY</td>
+<td valign="top">
+Auf die gewünschte URL kann nur über den im Location-Header angegeben Proxy zugegriffen werden.
+</td>
+</tr>
+</table>
+
+<h2>Client-Fehler 4xx</h2>
+<p>
+</p>
+<table border="0" cellpadding="5">
+<tr>
+<td valign="top">400 BAD REQUEST</td>
+<td valign="top">Die Anforderung hat eine falsche Syntax oder konnte nicht bedient werden.
+</td>
+</tr>
+<tr>
+<td valign="top">401 UNAUTHORIZED</td>
+<td valign="top">Unzulässige Zugriffsberechtigung. Der Client sollte die Anfrage mit einem passendem (Authenticate)-Header wiederholen.
+</td>
+</tr>
+<tr>
+<td valign="top">402 PAYMENT REQUIRED</td>
+<td valign="top">Ungültiges Verrechnungsschema. Für zukünftige Protokolle reserviert.
+</td>
+</tr>
+<tr>
+<td valign="top">403 FORBIDDEN</td>
+<td valign="top">
+Die Anforderung bezieht sich auf etwas Verbotenes, da hilft auch keine Zugangsberechtigung.
+</td>
+</tr>
+<tr>
+<td valign="top">404 NOT FOUND</td>
+<td valign="top">Der Server hat nichts gefunden, was mit der Anforderung übereinstimmt.
+</td>
+</tr>
+<tr>
+<td valign="top">405 METHOD NOT ALLOWED</td>
+<td valign="top">Die verwendete Methode ist nicht erlaubt.
+</td>
+</tr>
+<tr>
+<td valign="top">406 NOT ACCEPTABLE</td>
+<td valign="top">Bei einer Content-Negotiation wurde keine passende Variante gefunden.
+</td>
+</tr>
+<tr>
+<td valign="top">407 PROXY AUTHENTICATION REQUIRED</td>
+<td valign="top">Der Proxy-Server vermisst den Authenticate-Header.
+</td>
+</tr>
+<tr>
+<td valign="top">408 REQUEST TIME-OUT</td>
+<td valign="top">Die Anfrage konnte nicht innerhalb eines bestimmten Zeitlimits bearbeitet werden.
+</td>
+</tr>
+<tr>
+<td valign="top">409 CONFLICT</td>
+<td valign="top">Der Server hat einen Konflikt bzzgl. einer anderen Anfrage oder seiner eigenen Konfiguration festgestellt. Weitere Informationen befinden sich im Entity-Body.
+</td>
+</tr>
+<tr>
+<td valign="top">410 GONE</td>
+<td valign="top">Das angeforderte Objekt ist nicht mehr vorhanden. Es ist auch kein neuer URI bekannt.
+</td>
+</tr>
+<tr>
+<td valign="top">411 LENGTH REQUIRED</td>
+<td valign="top">Der Content-Length-Header fehlt.
+</td>
+</tr>
+<tr>
+<td valign="top">412 PRECONDITION FAILED</td>
+<td valign="top">Die Bedingungen, die in einem if-Header spezifiziert wurden, konnten nicht erfüllt werden.
+</td>
+</tr>
+<tr>
+<td valign="top">413 REQUEST ENTITY TOO LARGE</td>
+<td valign="top">Der Server kann die Anfrage nicht bearbeiten, da der Entity-Body zu lang ist.
+</td>
+</tr>
+<tr>
+<td valign="top">414 REQUEST URI TOO LARGE</td>
+<td valign="top">Der Server kann die Anfrage nicht bearbeiten, da der Request-URI zu lang ist.
+</td>
+</tr>
+<tr>
+<td valign="top">415 UNSUPPORTED MEDIA TYPE</td>
+<td valign="top">Der Server kann die Anfrage nicht bearbeiten, da die Daten im Entity-Body in einem unbekannten Format vorliegen.
+</td>
+</tr>
+</table>
+
+<h2>Server-Fehler 5xx</h2>
+<p>
+</p>
+<table border="0" cellpadding="5">
+<tr>
+<td valign="top">500 INTERNAL SERVER ERROR</td>
+<td valign="top">Der Server hat eine unerwartete Bedingung angetroffen, die ihn von der Erfüllung der Anforderung abhält. Eine genaue Fehlerangabe entfällt. :-(<br>Diese Meldung erscheint z.B. bei CGI-Script-Fehlern oder wenn der Server nicht genügend Ressourcen bereitstellen kann.
+</td>
+</tr>
+<tr>
+<td valign="top">501 NOT IMPLEMENTED</td>
+<td valign="top">Der Server unterstützt diese Anforderung nicht.
+</td>
+</tr>
+<tr>
+<td valign="top">502 BAD GATEWAY</td>
+<td valign="top">
+Der Server hat von einem Gateway oder einem anderen Server eine ungültige Antwort erhalten.
+</td>
+</tr>
+<tr>
+<td valign="top">503 SERVICE UNAVAILABLE</td>
+<td valign="top">Der Server kann die Anfrage wegen Überlastung oder laufender Pflege nicht bedienen.
+</td>
+</tr>
+<tr>
+<td valign="top">504 GATEWAY TIMEOUT</td>
+<td valign="top">Die Antwort kam nicht innerhalb der Zeit, die das Gateway gewillt war zu warten. Wie 503, jedoch mehr Diagnose-Information.
+</td>
+</tr>
+<tr>
+<td valign="top">505 HTTP VERSION NOT SUPPORTED</td>
+<td valign="top">Der Server kann die Anfrage nicht bearbeiten, da die verwendete HTTP-Version nicht unterstützt wird.
+</td>
+</tr>
+<tr>
+<td valign="top">506 VARIANT ALSO VARIES</td>
+<td valign="top">Content-Negotiation-Fehler. Es konnte keine gültige Variante ermittelt werden.
+</td>
+</tr>
+</table>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://de.wikipedia.org/wiki/Hypertext_Transfer_Protocol">Wikipedia Hypertext Transfer Protocol</a></li>
+<li><a href="http://de.wikipedia.org/wiki/HTTP-Statuscode">Wikipedia HTTP-Statuscode</a></li>
+</ul>

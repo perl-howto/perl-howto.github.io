@@ -1,0 +1,84 @@
+---
+layout: post
+title: Parse::Syslog - Syslogdateien einfach parsen
+date: '2009-07-09 09:45:00 +0000'
+mt_id: 152
+blog_id: 1
+post_id: 152
+permalink: /2009/07/parsesyslog-syslogdateien_einfach_parsen.html
+categories:
+- linux
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Parse::Syslog">Parse::Syslog</a>
+von <a href="http://search.cpan.org/~dschwei/">David Schweiker</a> vereinfacht das <a href="http://de.wikipedia.org/wiki/Parser">parsen</a> der Log-Einträge in <a href="http://de.wikipedia.org/wiki/Syslog">Syslog</a>-<a href="http://de.wikipedia.org/wiki/Logdatei">Dateien</a> erheblich.
+</p>
+
+<h2>Beispiel:</h2>
+
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Parse::Syslog</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$syslog_parser</span> = <span style=" color: #000000;">Parse::Syslog</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span> <span style=" color: #CD5555;">&#39;/var/log/syslog&#39;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">while</span> <span style=" color: #000000;">(</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$entry</span> = <span style=" color: #00688B;">$syslog_parser</span><span style=" color: #00688B;">-&gt;next</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$entry</span>-&gt;{<span style=" color: #000000;">host</span>}<span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;|&#39;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$entry</span>-&gt;{<span style=" color: #000000;">program</span>}<span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;|&#39;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$entry</span>-&gt;{<span style=" color: #000000;">timestamp</span>}<span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;|&#39;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #8B008B; font-weight:bold;">scalar</span> <span style=" color: #8B008B; font-weight:bold;">localtime</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$entry</span>-&gt;{<span style=" color: #000000;">timestamp</span>} <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;|&#39;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$entry</span>-&gt;{<span style=" color: #000000;">text</span>}<span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+&nbsp;
+</p>
+
+<h2>Beispiel: Kombination mit File::Tail</h2>
+<p>
+<a href="http://search.cpan.org/perldoc?Parse::Syslog">Parse::Syslog</a> kann auch in Kombination mit <a href="http://search.cpan.org/perldoc?File::Tail">File::Tail</a> eingesetzt werden.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">File::Tail</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Parse::Syslog</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$file</span> = <span style=" color: #000000;">File::Tail</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">name</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;/var/log/syslog&#39;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$syslog_parser</span> = <span style=" color: #000000;">Parse::Syslog</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$file</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">while</span> <span style=" color: #000000;">(</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$entry</span> = <span style=" color: #00688B;">$syslog_parser</span><span style=" color: #00688B;">-&gt;next</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$entry</span>-&gt;{<span style=" color: #000000;">host</span>}<span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;|&#39;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$entry</span>-&gt;{<span style=" color: #000000;">program</span>}<span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;|&#39;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$entry</span>-&gt;{<span style=" color: #000000;">timestamp</span>}<span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;|&#39;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #8B008B; font-weight:bold;">scalar</span> <span style=" color: #8B008B; font-weight:bold;">localtime</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$entry</span>-&gt;{<span style=" color: #000000;">timestamp</span>} <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39;|&#39;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$entry</span>-&gt;{<span style=" color: #000000;">text</span>}<span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+&nbsp;
+</p>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+	<li><a href="http://search.cpan.org/perldoc?Parse::Syslog">Parse::Syslog</a></li>
+	<li><a href="http://search.cpan.org/perldoc?File::Tail">File::Tail</a></li>
+	<li><a href="{{ site.url }}/2009/06/filetail-logdateien-beobachten-und-analysieren.html">File::Tail - Logdateien beobachten und analysieren</a></li>
+</ul>

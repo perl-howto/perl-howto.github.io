@@ -1,0 +1,161 @@
+---
+layout: post
+title: 'nmake: Make für Windows'
+date: '2009-03-18 20:15:00 +0000'
+mt_id: 125
+blog_id: 1
+post_id: 125
+permalink: /2009/03/nmake_make_fur_windows.html
+categories:
+- windows
+---
+<p>
+<a href="http://de.wikipedia.org/wiki/Make">make</a>, ein Tool, das zum Zusammenbauen von Software aus verschiedenen Dateien genutzt wird, steht unter <a href="http://de.wikipedia.org/wiki/Windows">Windows</a> standardmäßig nicht  zur Verfügung. Stattdessen gibt es von <a href="http://de.wikipedia.org/wiki/Microsoft">Microsoft</a> das kostenlose Tool <strong>nmake</strong>, das im Wesentlichen wie make funktioniert.
+</p>
+<p>
+<strong>Achtung:</strong> nmake ist nur ein make-Programm für Windows und kein <a href="http://de.wikipedia.org/wiki/C_(Programmiersprache)">C</a>-Compiler. Daher können mit nmake keine <a href="http://perldoc.perl.org/perlxs.html">XS</a>-Module übersetzt werden. Dazu benötigt man einen C-Compiler.
+</p>
+
+<h2>nmake installieren</h2>
+
+<h3>Schritt 1: Download</h3>
+<p>
+<a href="ftp://ftp.microsoft.com/softlib/mslfiles/nmake15.exe">ftp://ftp.microsoft.com/softlib/mslfiles/nmake15.exe</a>
+</p>
+<h3>Schritt 2: <em>nmake15.exe</em> auspacken</h3>
+<p>
+<em>nmake15.exe</em> ist ein selbstextrahierendes Archiv, welches drei Dateien enthält:
+</p>
+<ul class="no-bullet">
+<li>nmake.exe</li>
+<li>nmake.err</li>
+<li>readme.txt</li>
+</ul>
+<h3>Schritt 3: nmake Dateien in ein geeignetes Verzeichnis verschieben</h3>
+<p>
+Die drei Dateien in das Perl-Bin Verzeichnis verschieben, meist <em>C:\perl\bin\</em>.
+</p>
+<p>
+<strong>Fertig.</strong>
+</p>
+
+<h2>CPAN Module installieren</h2>
+<p>
+Die übliche Vier-Befehle-Sequenz 
+</p>
+<pre>
+perl Makefile.PL
+make
+make test
+make install
+</pre>
+<p>
+wird nun zu
+</p>
+<pre>
+perl Makefile.PL
+<strong>n</strong>make
+<strong>n</strong>make test
+<strong>n</strong>make install
+</pre>
+
+<h3>Beispiel</h3>
+<p>
+Das gewünschte CPAN Modul downloaden, hier <a href="http://search.cpan.org/CPAN/authors/id/L/LD/LDS/CGI.pm-3.42.tar.gz">CGI.pm Version 3.42</a>, und mit <a href="http://www.7-zip.org/">7-Zip</a> entpacken, dann in der Windows Eingabe-Aufforderung (<a href="http://de.wikipedia.org/wiki/Cmd.exe">cmd.exe</a>) in das Verzeichnis wechseln, in welches das Modul ausgepackt wurde.
+</p>
+<pre>
+C:\Dokumente und Einstellungen\tf\Eigene Dateien\CGI.pm-3.42>perl Makefile.PL
+Set up gcc environment - 3.4.4 (cygming special, gdc 0.12, using dmd 0.125)
+Checking if your kit is complete...
+Looks good
+Writing Makefile for CGI
+
+C:\Dokumente und Einstellungen\tf\Eigene Dateien\CGI.pm-3.42><strong>nmake</strong>
+
+Microsoft (R) Program Maintenance Utility   Version 1.50
+Copyright (c) Microsoft Corp 1988-94. All rights reserved.
+
+cp CGI/Carp.pm blib\lib\CGI\Carp.pm
+cp CGI/Push.pm blib\lib\CGI\Push.pm
+cp CGI/Switch.pm blib\lib\CGI\Switch.pm
+cp CGI/Fast.pm blib\lib\CGI\Fast.pm
+cp CGI/Util.pm blib\lib\CGI\Util.pm
+cp CGI/Apache.pm blib\lib\CGI\Apache.pm
+cp CGI.pm blib\lib\CGI.pm
+cp CGI/Pretty.pm blib\lib\CGI\Pretty.pm
+cp CGI/Cookie.pm blib\lib\CGI\Cookie.pm
+
+C:\Dokumente und Einstellungen\tf\Eigene Dateien\CGI.pm-3.42><strong>nmake test
+</strong>
+Microsoft (R) Program Maintenance Utility   Version 1.50
+Copyright (c) Microsoft Corp 1988-94. All rights reserved.
+
+C:\Perl\bin\perl.exe "-MExtUtils::Command::MM" "-e" "test_harness(0, 'blib\lib', blib\arch')" t/*.t
+t/apache................ok
+t/can...................ok
+t/carp..................ok
+t/cookie................ok
+t/fast..................ok
+        7/7 skipped: various reasons
+t/form..................ok
+t/function..............ok
+        2/32 skipped: various reasons
+t/html..................ok
+t/no_tabindex...........ok
+t/pretty................ok
+t/push..................ok
+        1/12 skipped: various reasons
+t/request...............ok
+        3/34 skipped: various reasons
+t/start_end_asterisk....ok
+t/start_end_end.........ok
+t/start_end_start.......ok
+t/switch................ok
+t/upload................ok
+t/uploadInfo............ok
+t/util-58...............ok
+t/util..................ok
+All tests successful, 13 subtests skipped.
+Files=20, Tests=521,  5 wallclock secs ( 0.00 cusr +  0.00 csys =  0.00 CPU)
+
+C:\Dokumente und Einstellungen\tf\Eigene Dateien\CGI.pm-3.42><strong>nmake install</strong>
+
+Microsoft (R) Program Maintenance Utility   Version 1.50
+Copyright (c) Microsoft Corp 1988-94. All rights reserved.
+
+Installing C:\Perl\html\lib\CGI.html
+Installing C:\Perl\html\lib\CGI\Carp.html
+Installing C:\Perl\html\lib\CGI\Cookie.html
+Installing C:\Perl\html\lib\CGI\Fast.html
+Installing C:\Perl\html\lib\CGI\Pretty.html
+Installing C:\Perl\html\lib\CGI\Push.html
+Installing C:\Perl\html\lib\CGI\Util.html
+Installing C:\Perl\lib\CGI.pm
+Installing C:\Perl\lib\CGI\Apache.pm
+Installing C:\Perl\lib\CGI\Carp.pm
+Installing C:\Perl\lib\CGI\Cookie.pm
+Installing C:\Perl\lib\CGI\Fast.pm
+Installing C:\Perl\lib\CGI\Pretty.pm
+Installing C:\Perl\lib\CGI\Push.pm
+Installing C:\Perl\lib\CGI\Switch.pm
+Installing C:\Perl\lib\CGI\Util.pm
+Appending installation info to C:\Perl\lib/perllocal.pod
+
+C:\Dokumente und Einstellungen\tf\Eigene Dateien\CGI.pm-3.42>
+perl -MCGI -e "print $CGI::VERSION"
+3.42
+</pre>
+
+<p>
+That's it.
+</p>
+
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://perl.grolmsnet.de/faq/">Achims Perl FAQ</a></li>
+<li><a href="http://johnbokma.com/perl/make-for-windows.html">John Bokma: Make for Windows: NMake</a></li>
+<li><a href="http://msdn.microsoft.com/en-us/library/ms930369.aspx">MSDN: Nmake Tool</a></li>
+<li><a href="http://strawberryperl.com/">Strawberry Perl</a></li>
+<li><a href="http://win32.perl.org/">Win32 Perl Wiki </a></li>
+</ul>

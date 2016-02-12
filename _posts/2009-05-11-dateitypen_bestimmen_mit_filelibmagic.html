@@ -1,0 +1,73 @@
+---
+layout: post
+title: Dateitypen bestimmen mit File::LibMagic
+date: '2009-05-11 11:30:00 +0000'
+mt_id: 141
+blog_id: 1
+post_id: 141
+permalink: /2009/05/dateitypen_bestimmen_mit_filelibmagic.html
+categories:
+- linux
+---
+<p>
+<a href="http://search.cpan.org/perldoc?File::LibMagic">File::LibMagic</a>
+von <a href="http://search.cpan.org/~fitzner/">Andreas Fitzner</a> ermöglicht die Bestimmung des Typs oder <a href="http://de.wikipedia.org/wiki/MIME">MIME</a>-Typs einer Datei. Dazu nutzt es die Bibliothek <em>libmagic</em> des  bekannten Unix/Linux-Tools <a href="http://de.wikipedia.org/wiki/File">file</a>.
+</p>
+
+<h2>Beispiel</h2>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">File::LibMagic</span> <span style=" color: #CD5555;">&#39;:easy&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@files</span> = <span style=" color: #CD5555;">qw(</span>
+        <span style=" color: #CD5555;">/bin/ls</span>
+        <span style=" color: #CD5555;">/etc/localtime</span>
+        <span style=" color: #CD5555;">/etc/timezone</span>
+        <span style=" color: #CD5555;">/etc/motd</span>
+<span style=" color: #CD5555;">)</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$file</span> <span style=" color: #000000;">(</span> <span style=" color: #00688B;">@files</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$file:\n\t&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">MagicFile</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$file</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">,</span><span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm erzeugt auf meinem System (Ubuntu 8.04) folgende Ausgabe:
+</p>
+<pre>
+/bin/ls:
+        ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), for GNU/Linux 2.6.8, dynamically linked (uses shared libs), stripped
+/etc/localtime:
+        timezone data
+/etc/timezone:
+        ASCII text
+/etc/motd:
+        symbolic link to `/var/run/motd'
+</pre>
+
+
+<h2>Ubuntu Installationstipps</h2>
+<p>
+<a href="http://search.cpan.org/perldoc?File::LibMagic">File::LibMagic</a> benötigt <a href="ftp://ftp.astron.com/pub/file/">libmagic</a>. 
+</p>
+<pre>
+$ sudo apt-get install libmagic1
+$ sudo apt-get install libmagic-dev
+</pre>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?File::LibMagic">File::LibMagic</a> Perlwrapper for libmagic (file-4.x or file-5.x)</li>
+<li><a href="http://search.cpan.org/perldoc?File::MMagic">File::MMagic</a></li>
+<li><a href="http://search.cpan.org/perldoc?File::MimeInfo::Magic">File::MimeInfo::Magic</a></li>
+<li><a href="http://linux.die.net/man/1/file">man file</a></li>
+<li><a href="http://www.perlmonks.org/?node_id=693367">Perlmonks: File::MMagic vs File::MimeInfo</a></li>
+<li><a href="http://www.perlmonks.org/?node_id=396524">Perlmonks: Distinguishing text from binary data</a></li>
+<li><a href="http://search.cpan.org/dist/ppt/bin/file">Perl Tools Projekt: file</a></li>
+</ul>

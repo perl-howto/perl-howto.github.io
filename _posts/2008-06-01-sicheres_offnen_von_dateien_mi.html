@@ -1,0 +1,247 @@
+---
+layout: post
+title: Sicheres Öffnen von Dateien mit sysopen() und flock()
+date: '2008-06-01 20:40:00 +0000'
+mt_id: 73
+blog_id: 1
+post_id: 73
+permalink: /2008/06/sicheres_offnen_von_dateien_mi.html
+categories:
+- '101'
+---
+<p><a href="http://perldoc.perl.org/functions/sysopen.html">sysopen()</a> und <a href="http://perldoc.perl.org/functions/flock.html">flock()</a> ermöglichen den sicheren Zugriff auf Dateien aus Perlprogrammen. 
+</p>
+<p>
+Sie finden hier eine ausführliche Beschreibung der Funktionen und ein Beispiel.
+</p>
+ 
+<h2>Race Conditions beim Öffnen von Dateien vermeiden </h2>
+<p>
+Etwas wie
+</p>
+<pre>
+<span class="k">if</span> <span class="s">(</span><span class="k">-e</span> <span class="i">$file</span><span class="s">)</span> <span class="s">{</span>
+        <span class="k">open</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span><span class="q">&quot;&gt;$file&quot;</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+<span class="s">}</span>
+</pre>
+<p>
+ist praktisch immer ein Programmierfehler. Hier werden zwei Dinge nacheinander getan, die gleichzeitig getan werden müssen. Weiterhin wird der unsichere Aufruf von <a href="http://perldoc.perl.org/perlopentut.html">open()</a> mit zwei Argumenten statt der sichereren Form mit drei Argumenten verwendet.
+</p>
+
+<p>
+<b>Eine sichere Methode zum Öffnen von Dateien ist sysopen().</b>
+</p>
+<p>
+Verwenden Sie also:
+</p>
+<pre>
+<span class="k">use</span> <span class="w">Fcntl</span><span class="sc">;</span>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FILEHANDLE</span><span class="cm">,</span> <span class="i">$FileName</span><span class="cm">,</span> <span class="i">$Modus</span><span class="s">)</span><span class="sc">;</span>
+</pre>
+<p>
+oder
+</p>
+<pre>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FILEHANDLE</span><span class="cm">,</span> <span class="i">$FileName</span><span class="cm">,</span> <span class="i">$Modus</span><span class="cm">,</span> <span class="i">$permission</span><span class="s">)</span><span class="sc">;</span>
+</pre>
+<p>
+statt open(). 
+</p>
+
+<p>
+<a href="http://perldoc.perl.org/functions/fcntl.html">
+Fcntl</a> importiert u.a. folgende <b>Modi</b>:
+</p>
+
+<dl>
+<dt>O_RDONLY</dt>
+	<dd>Lesezugriff</dd>
+<dt>O_WRONLY</dt>
+	<dd>Schreibzugriff</dd>
+<dt>O_RDWR</dt>
+	<dd>Lesen und Schreiben</dd>
+</dl>
+
+<p>
+Diese Modi können mit folgenden <b>flags</b> durch ein bitweises OR verknüpft
+werden.
+</p>
+<dl>
+<dt>O_CREAT</dt>
+	<dd>Datei erzeugen, falls nicht vorhanden</dd>
+<dt>O_EXCL</dt>
+	<dd>In Verbindung mit O_CREAT: Fehler zurückgeben, falls Datei bereits existiert</dd>
+<dt>O_APPEND</dt>
+	<dd>Append, "Anhängen": der Datei-Pointer wird auf das Ende der Datei gesetzt</dd>
+<dt>O_TRUNC</dt>
+	<dd>Truncate: wenn die Datei besteht, wird sie überschrieben</dd>
+<dt>O_NONBLOCK</dt>
+	<dd>Non-blocking access</dd>
+<dt>O_NDELAY</dt>
+	<dd>Nicht warten</dd>
+<dt>O_SYNC</dt>
+	<dd>Die Datei wird im  "synchron  I/O  Modus"  geöffnet.<br />
+            Jeder  Schreibzugriff wird den aufrufenden Prozess solange  anhalten, bis die Daten auf die angesprochene Hardware geschrieben sind.</dd>
+</dl>
+
+<h2>open() und sysopen() im Vergleich</h2>
+
+<dl>
+<dt>Datei zum Lesen öffnen</dt>
+<dd>
+<pre>
+<span class="k">open</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="q">&quot;&lt;&quot;</span><span class="cm">,</span> <span class="i">$file</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_RDONLY</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+</pre>
+</dd>
+
+<dt>Datei zum Schreiben öffnen, erzeugen falls nötig, ansonsten trunkieren</dt>
+<dd>
+<pre>
+<span class="k">open</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="q">&quot;&gt;&quot;</span><span class="cm">,</span> <span class="i">$file</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_WRONLY</span>|<span class="w">O_TRUNC</span>|<span class="w">O_CREAT</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_WRONLY</span>|<span class="w">O_TRUNC</span>|<span class="w">O_CREAT</span><span class="cm">,</span> <span class="n">0600</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+</pre>
+</dd>
+
+<dt>Datei zum Schreiben öffnen, neue Datei erzeugen, Datei darf noch nicht
+existieren</dt>
+<dd>
+<pre>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_WRONLY</span>|<span class="w">O_EXCL</span>|<span class="w">O_CREAT</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_WRONLY</span>|<span class="w">O_EXCL</span>|<span class="w">O_CREAT</span><span class="cm">,</span> <span class="n">0600</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+</pre>
+</dd>
+
+<dt>Datei Öffen zum Anhängen, ggf. erzeugen</dt>
+<dd>
+<pre>
+<span class="k">open</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="q">&quot;&gt;&gt;&quot;</span><span class="cm">,</span> <span class="i">$file</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_WRONLY</span>|<span class="w">O_APPEND</span>|<span class="w">O_CREAT</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_WRONLY</span>|<span class="w">O_APPEND</span>|<span class="w">O_CREAT</span><span class="cm">,</span> <span class="n">0600</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+</pre>
+</dd>
+
+<dt>Datei Öffen zum Anhängen, Datei muss existieren</dt>
+<dd>
+<pre>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_WRONLY</span>|<span class="w">O_APPEND</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+</pre>
+</dd>
+
+<dt>Datei öffnen für Aktualisierungen (Lesen und Schreiben), Datei muss existieren</dt>
+<dd>
+<pre>
+<span class="k">open</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="q">&quot;+&lt;&quot;</span><span class="cm">,</span> <span class="i">$file</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_RDWR</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+</pre>
+</dd>
+
+<dt>Datei öffnen für Aktualisierungen, Datei darf noch nicht existieren</dt>
+<dd>
+<pre>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_RDWR</span>|<span class="w">O_EXCL</span>|<span class="w">O_CREAT</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_RDWR</span>|<span class="w">O_EXCL</span>|<span class="w">O_CREAT</span><span class="cm">,</span> <span class="n">0600</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+</pre>
+</dd>
+
+<dt>Datei öffnen für Aktualisierungen, Datei ggf. erzeugen</dt>
+<dd>
+<pre>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_RDWR</span>|<span class="w">O_CREAT</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_RDWR</span>|<span class="w">O_CREAT</span><span class="cm">,</span> <span class="n">0600</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+</pre>
+</dd>
+</dl>
+
+<h2>Sperren der Datei für andere Instanzen Ihres Programms</h2>
+<p>
+Verwenden Sie einfach <a href="http://perldoc.perl.org/functions/sysopen.html">sysopen()</a> in Kombination mit <a href="http://perldoc.perl.org/functions/flock.html">flock()</a>.
+</p>
+
+<pre>
+<span class="k">use</span> <span class="w">Fcntl</span> <span class="q">qw/:DEFAULT :flock/</span><span class="sc">;</span>
+</pre>
+<p>
+<a href="http://perldoc.perl.org/functions/fcntl.html">
+Fcntl</a> importiert nun zusätzlich folgende Konstanten:
+</p>
+
+<dl>
+<dt>LOCK_SH</dt>
+<dd>Shared Lock (Lesezugriff)</dd>
+<dt>LOCK_EX</dt>
+<dd>Exclusive Lock (Schreibzugriff)</dd>
+<dt>LOCK_NB</dt>
+<dd>Non-Blocking Request( don't stall)</dd>
+<dt>LOCK_UN</dt>
+<dd>Lock wieder freigeben</dd>
+</dl>
+
+<p>
+Beispiel:
+</p>
+
+<pre>
+<span class="k">use</span> <span class="w">Fcntl</span> <span class="q">qw/:DEFAULT :flock/</span><span class="sc">;</span>  <span class="c"># importiert die Konstanten f&uuml;r sysopen() und flock()</span>
+       ...
+<span class="k">flock</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span><span class="w">LOCK_EX</span><span class="s">)</span><span class="sc">;</span> <span class="c"># Exklusiver Lock</span>
+       ...
+<span class="k">flock</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span><span class="w">LOCK_UN</span><span class="s">)</span><span class="sc">;</span> <span class="c"># Lock wieder freigeben</span>
+</pre>
+<p>
+Der Lock verfällt, wenn Sie ihn explizit wieder freigeben oder wenn Sie die Datei mit close() schliessen.<br />
+Innerhalb einer kritischen Operation darf die Datei also keinesfalls, auch nur kurzfristig, geschlossen werden.
+</p>
+
+<p>
+flock() wird Schwierigkeiten bereiten, wenn Sie versuchen Dateien über ein Netzwerk, z.B. NFS, zu flocken.
+</p>
+
+<h2>Permissions</h2>
+<p>
+Wenn Sie eine Datei neu anlegen und keinen Wert für $permission angeben verwendet Perl 0666 als Datei-Permission. Der Wert für die Dateirechte wird von der aktuellen <b>umask</b> Ihres Prozesses beeinflusst. <a href="http://perldoc.perl.org/functions/umask.html">umask()</a> gibt daher an, welche Rechte <b>nicht</b> gesetzt werden sollen.
+</p>
+
+<h2>Beispiel Logdatei:</h2>
+<p>
+Schauen wir uns das Ganze am Beispiel einer Logdatei an.
+</p>
+<p>
+Die Datei soll zum Schreiben geöffnet werden, neue Daten am Ende der Datei hinzugefügt werden. Falls die Datei nicht existiert, soll sie erstellt werden. Die Datei soll nur für den Besitzer Lese- und Schreibrechte besitzen (0600). Gleichzeitig darf immer nur eine Instanz des Programmes auf die Logdatei zugreifen (flock).
+</p>
+<pre>
+<span class="k">use</span> <span class="w">Fcntl</span> <span class="q">qw/:DEFAULT :flock/</span><span class="sc">;</span>
+
+<span class="k">local</span> <span class="i">*LOG</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$file</span> = <span class="q">&#39;/pfad/zur/LogDatei&#39;</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$old_umask</span> = <span class="k">umask</span><span class="s">(</span><span class="n">0</span><span class="s">)</span><span class="sc">;</span> <span class="c"># umask zur&uuml;cksetzen und alten Wert speichern</span>
+
+        <span class="c"># Sicheres &Ouml;ffnen der Datei        </span>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">LOG</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_WRONLY</span>|<span class="w">O_APPEND</span>|<span class="w">O_CREAT</span><span class="cm">,</span> <span class="n">0600</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+
+         <span class="c"># Exlusives Locking</span>
+<span class="k">flock</span><span class="s">(</span><span class="w">LOG</span><span class="cm">,</span> <span class="w">LOCK_EX</span><span class="s">)</span> || <span class="k">die</span> <span class="q">&quot;flock failed $file $!&quot;</span><span class="sc">;</span>
+
+<span class="k">print</span> <span class="i">LOG</span> <span class="q">&quot;.........\n&quot;</span><span class="sc">;</span>
+
+<span class="k">close</span><span class="s">(</span><span class="w">LOG</span><span class="s">)</span> <span class="k">or</span> <span class="k">warn</span> <span class="q">&quot;close failed $file $!&quot;</span><span class="sc">;</span>
+
+        <span class="c"># Seit Perl 5.004 wird mit close() der I/O Puffer geleert.</span>
+        <span class="c"># Vorher mussten Sie den Puffer selbst leeren.</span>
+        <span class="c"># Das Locking wird ebenfalls aufgehoben.           </span>
+
+<span class="k">umask</span><span class="s">(</span><span class="i">$old_umask</span><span class="s">)</span><span class="sc">;</span> <span class="c"># umask wieder auf urspr&uuml;nglichen Wert zur&uuml;cksetzen</span>
+</pre>
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://perldoc.perl.org/perlfaq5.html">perldoc perlfaq5</a></li>
+<li><a href="http://perldoc.perl.org/perlopentut.html">perldoc perlopentut</a></li>
+<li><a href="http://perldoc.perl.org/functions/sysopen.html">perldoc -f sysopen</a></li>
+<li><a href="http://perldoc.perl.org/functions/flock.html">perldoc -f flock</a></li>
+<li><a href="http://perldoc.perl.org/functions/open.html">perldoc -f open</a></li>
+<li><a href="http://perldoc.perl.org/functions/fcntl.html">perldoc Fcntl</a></li>
+</ul>

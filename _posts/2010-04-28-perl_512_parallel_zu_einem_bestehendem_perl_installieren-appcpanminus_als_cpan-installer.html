@@ -1,0 +1,132 @@
+---
+layout: post
+title: Perl 5.12 parallel zu einem bestehendem Perl installieren - App::cpanminus
+  als CPAN-Installer
+date: '2010-04-28 21:50:00 +0000'
+mt_id: 186
+blog_id: 1
+post_id: 186
+permalink: /2010/04/perl_512_parallel_zu_einem_bestehendem_perl_installieren-appcpanminus_als_cpan-installer.html
+categories:
+- '101'
+---
+<p>
+<a href="http://search.cpan.org/dist/perl-5.12.0/">Perl 5.12.</a> ist bereits seit dem 13. April  2010 verfügbar. Die Neuerungen sind ausführlich in <a href="http://search.cpan.org/perldoc?perl5120delta">perl5120delta</a> beschrieben.
+</p>
+<p>
+Wer die neue Version einfach einmal ausprobieren möchte, kann Perl 5.12 aus den Sourcen parallel zu einem bestehenden Perl installieren.
+</p>
+<p>
+Bei dieser Gelegenheit kann auch gleich der <a href="{{ site.url }}/2010/03/appcpanminus-zero-conf-installer-fur-cpan-module.html">coole neue CPAN-Installer</a> <a href="http://search.cpan.org/perldoc?App::cpanminus">App::cpanminus</a> ausgiebig an getestet werden. 
+</p>
+
+<h2>Installation perl-5.12</h2>
+<p>
+<strong>Ziel:</strong> Perl 5.12 soll parallel zu dem bestehenden Perl 5.8.8 in das Verzeichnis<em> /opt/perl512</em> installiert werden.
+</p>
+<pre>
+$ sudo mkdir /opt/perl512
+
+$ cd /tmp/
+$ wget http://search.cpan.org/CPAN/authors/id/J/JE/JESSE/perl-5.12.0.tar.gz
+$ tar xzvf perl-5.12.0.tar.gz
+$ cd perl-5.12.0/
+
+$ ./Configure -des -Dprefix=/opt/perl512 -Dusethreads
+$ make
+$ make test
+$ sudo make install
+</pre>
+<p>
+Jetzt sollten zwei verschiedene Perl-Versionen auf dem System vorhanden sein:
+</p>
+<pre>
+$ /opt/perl512/bin/perl -v
+
+This is perl 5, version 12, subversion 0 (v5.12.0) built for i686-linux-thread-multi
+
+Copyright 1987-2010, Larry Wall
+
+Perl may be copied only under the terms of either the Artistic License or the
+GNU General Public License, which may be found in the Perl 5 source kit.
+
+Complete documentation for Perl, including FAQ lists, should be found on
+this system using "man perl" or "perldoc perl".  If you have access to the
+Internet, point your browser at http://www.perl.org/, the Perl Home Page.
+
+</pre>
+<p>
+und
+</p>
+<pre>
+$ perl -v
+
+This is perl, v5.8.8 built for i486-linux-gnu-thread-multi
+
+Copyright 1987-2006, Larry Wall
+
+Perl may be copied only under the terms of either the Artistic License or the
+GNU General Public License, which may be found in the Perl 5 source kit.
+
+Complete documentation for Perl, including FAQ lists, should be found on
+this system using "man perl" or "perldoc perl".  If you have access to the
+Internet, point your browser at http://www.perl.org/, the Perl Home Page.
+
+</pre>
+<h2>Die neue Version verwenden</h2>
+<p>
+Für Perl 5.12.muss stets der volle Pfad angegeben werden. (Die Umgebungsvariable $PATH bleibt unverändert.) Entweder in der <a href="http://de.wikipedia.org/wiki/Shebang">Shebang-Zeile</a> 
+</p>
+<pre>
+<strong>#!/opt/perl512/bin/perl</strong>
+use strict;
+use warnings;
+</pre>
+<p>
+oder auf der Kommandozeile:
+</p>
+<pre>
+$ <strong>/opt/perl512/bin/perl</strong> meinprogramm.pl
+</pre>
+
+<h2>CPAN-Module mit cpanminus installieren</h2>
+<p>
+Zunächst wird <a href="http://search.cpan.org/perldoc?App::cpanminus">App::cpanminus</a> mit Perl 5.12 installiert:
+</p>
+<pre>
+$ cd /tmp/
+$ wget http://search.cpan.org/CPAN/authors/id/M/MI/MIYAGAWA/App-cpanminus-1.0001.tar.gz
+$ tar -xzvf App-cpanminus-1.0001.tar.gz
+$ cd App-cpanminus-1.0001
+$ /opt/perl512/bin/perl Makefile.PL
+$ sudo make install
+ Installing /opt/perl512/lib/site_perl/5.12.0/App/cpanminus.pm
+ Installing /opt/perl512/man/man3/App::cpanminus.3
+ Installing /opt/perl512/bin/cpanm
+ Appending installation info to /opt/perl512/lib/5.12.0/i686-linux-thread-multi/perllocal.pod
+</pre>
+<p>
+Anschließend können CPAN-Module mit dem Kommandozeilentool <em>cpanm</em> installiert werden:
+</p>
+<pre>
+$ sudo /opt/perl512/bin/cpanm CGI
+ Fetching http://search.cpan.org/CPAN/authors/id/L/LD/LDS/CGI.pm-3.49.tar.gz ... OK
+ Configuring CGI.pm-3.49 ... OK
+ ==> Found dependencies: FCGI
+ Fetching http://search.cpan.org/CPAN/authors/id/F/FL/FLORA/FCGI-0.71.tar.gz ... OK
+ Configuring FCGI-0.71 ... OK
+ Building and testing FCGI-0.71 for FCGI ... OK
+ Successfully installed FCGI-0.71
+ Building and testing CGI.pm-3.49 for CGI ... OK
+ Successfully installed CGI.pm-3.49 (upgraded from 3.48)
+</pre>
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/dist/perl-5.12.0/">Perl 5.12</a></li>
+<li>Perl News: <a href="http://perl-nachrichten.de/index.cgi/details/694">Perl 5.12 ist da!</a></li>
+<li>Heise Developer: <a href="http://www.heise.de/developer/meldung/Perl-5-12-erlaubt-Syntaxerweiterungen-977361.html">Perl 5.12 erlaubt Syntaxerweiterungen</a></li>
+<li><a href="{{ site.url }}/2010/03/appcpanminus-zero-conf-installer-fur-cpan-module.html">App::cpanminus - Zero Conf Installer für CPAN-Module</a></li>
+<li><a href="http://search.cpan.org/perldoc?App::cpanminus">App::cpanminus</a></li>
+<li><a href="http://github.com/miyagawa/cpanminus">http://github.com/miyagawa/cpanminus</a></li>
+</ul>

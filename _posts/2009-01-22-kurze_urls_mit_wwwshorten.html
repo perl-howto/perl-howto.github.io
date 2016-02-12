@@ -1,0 +1,66 @@
+---
+layout: post
+title: Kurze URLs mit WWW::Shorten
+date: '2009-01-22 21:25:00 +0000'
+mt_id: 114
+blog_id: 1
+post_id: 114
+permalink: /2009/01/kurze_urls_mit_wwwshorten.html
+categories:
+- lwp
+---
+<p>
+<a href="http://search.cpan.org/perldoc?WWW::Shorten">WWW::Shorten</a> von <a href="http://www.perl.com/pub/au/Cross_Dave">Dave Cross</a> stellt eine einfach zu bedienende Schnittstelle zu verschiedenen <a href="http://de.wikipedia.org/wiki/Tinyurl">Kurz-URL-Diensten</a> zur Verfügung.
+</p>
+<p>
+In den beiden nachfolgenden Beispielen wird <a href="http://tinyurl.com/">http://tinyurl.com/</a> als Kurz-URL-Dienst verwendet. Es stehen aber noch <a href="http://search.cpan.org/dist/WWW-Shorten/">mehr Dienste</a> zur Verfügung.
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">WWW::Shorten</span> <span style=" color: #CD5555;">&#39;TinyURL&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$long_url</span> = <span style=" color: #CD5555;">&#39;http://maps.google.com/maps/ms?hl=de&amp;ie=UTF8&amp;msa=0&amp;msid=104418621568716707067.00045ffd70f3b765080f6&amp;ll=50.112433,8.690529&amp;spn=0.085204,0.220757&amp;z=12&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$short_url</span> = <span style=" color: #00688B;">makeashorterlink</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$long_url</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Long:  $long_url\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Short: $short_url\n&quot;</span><span style=" color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Long:  http://maps.google.com/maps/ms?hl=de&ie=UTF8&msa=0&msid=104418621568716707067.00045ffd70f3b765080f6&ll=50.112433,8.690529&spn=0.085204,0.220757&z=12
+Short: http://tinyurl.com/7lmoeg
+</pre>
+<p>
+Wer die langen Funktionsnamen nicht mag, kann kürzere über das Tag <span style=" color: #CD5555;">&#39;:short&#39;</span> importieren:
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">WWW::Shorten</span> <span style=" color: #CD5555;">&#39;TinyURL&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;:short&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$long_url</span> = <span style=" color: #CD5555;">&#39;http://maps.google.com/maps/ms?hl=de&amp;ie=UTF8&amp;msa=0&amp;msid=104418621568716707067.00045ffd70f3b765080f6&amp;ll=50.112433,8.690529&amp;spn=0.085204,0.220757&amp;z=12&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$short_url</span> = <span style=" color: #00688B;">short_link</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$long_url</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Long:  $long_url\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Short: $short_url\n&quot;</span><span style=" color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt dieselbe Ausgabe wie oben.
+</p>
+<p>
+</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?WWW::Shorten">WWW::Shorten</a> </li>
+<li><a href="http://search.cpan.org/perldoc?CGI%3A%3AShorten">CGI::Shorten</a></li>
+<li><a href="http://perlmeister.com/snapshots/200402/index.html">Web-Kompressor (Linux-Magazin, Februar 2004)</a></li>
+</ul>

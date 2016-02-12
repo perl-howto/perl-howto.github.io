@@ -1,0 +1,57 @@
+---
+layout: post
+title: Business::Tax::VAT::Validation - Umsatzsteuer-Identifikationsnummern einfach
+  überprüfen
+date: '2009-06-03 13:15:00 +0000'
+mt_id: 145
+blog_id: 1
+post_id: 145
+permalink: /2009/06/businesstaxvatvalidation_-_umsatzsteuer-identifikationsnummern_einfach_ueberprufen.html
+categories:
+- lwp
+---
+
+<p>
+<a href="http://search.cpan.org/perldoc?Business::Tax::VAT::Validation">Business::Tax::VAT::Validation</a> von <a href="http://search.cpan.org/~bpgn/">Bernard Nauwelaerts</a> ermöglicht die Überprüfung einer europäischen <a href="http://de.wikipedia.org/wiki/Umsatzsteuer-Identifikationsnummer">Umsatzsteuer-Identifikationsnummer</a> durch eine Online-Abfrage der <a href="http://ec.europa.eu/taxation_customs/vies/vieshome.do">VIES VAT number validation</a>-Datenbank der <a href="http://ec.europa.eu/index_en.htm">European Commission</a>. (Eine einfache Prüfung durch <a href="http://www.perl.com/doc/manual/html/pod/perlre.html">reguläre Ausdrücke</a> kann ebenfalls durchgeführt werden.)
+</p>
+
+<h2>Beispiel</h2>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Business::Tax::VAT::Validation</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@UstIdNr</span> = <span style=" color: #CD5555;">qw/ DE17590386 DE175903868 /</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$btvv</span> = <span style=" color: #000000;">Business::Tax::VAT::Validation</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$UStIdNr</span> <span style=" color: #000000;">(</span> <span style=" color: #00688B;">@UstIdNr</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span> 
+  <span style=" color: #228B22;"># Check number</span>
+  <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$btvv</span><span style=" color: #00688B;">-&gt;check</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$UStIdNr</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">)</span><span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;OK: $UStIdNr.\n&quot;</span><span style=" color: #000000;">;</span>
+  <span style=" color: #000000;">}</span>
+  <span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Error: $UStIdNr. &quot;</span><span style=" color: #000000;">,</span>  <span style=" color: #00688B;">$btvv</span><span style=" color: #00688B;">-&gt;get_last_error</span> <span style=" color: #000000;">,</span><span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+  <span style=" color: #000000;">}</span> 
+<span style=" color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Error: DE17590386. Invalid VAT number format
+OK: DE175903868.
+</pre>
+
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Business::Tax::VAT::Validation">Business::Tax::VAT::Validation</a>
+</li>
+<li><a href="http://ec.europa.eu/taxation_customs/vies/vieshome.do">European Commission: VIES VAT number validation</a> und den <a href="http://ec.europa.eu/taxation_customs/vies/viesdisc.do">Specific disclaimer for this service</a> und die dazugehörige <a href="http://ec.europa.eu/taxation_customs/vies/faqvies.do">FAQ</a></li>
+<li><a href="http://ec.europa.eu/taxation_customs/taxation/vat/traders/vat_community/index_en.htm">European Commission: VAT in the European Community</a></li>
+</ul>

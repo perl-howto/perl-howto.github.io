@@ -1,0 +1,48 @@
+---
+layout: post
+title: App::cpanminus - Zero Conf Installer für CPAN-Module
+date: '2010-03-14 22:00:00 +0000'
+mt_id: 184
+blog_id: 1
+post_id: 184
+permalink: /2010/03/appcpanminus-zero_conf_installer_fur_cpan-module.html
+categories:
+- '101'
+---
+<p>
+Zur Installation von <a href="http://www.cpan.org/">CPAN</a>-Modulen werden üblicherweise die bekannten und bewährten Module <a href="http://search.cpan.org/perldoc?CPAN">CPAN</a> oder  <a href="http://search.cpan.org/perldoc?CPANPLUS">CPANPLUS</a> verwendet. Für weniger erfahrene Perl-User ist die Vielzahl der Konfigurationseinstellungen allerdings manchmal verwirrend. 
+</p>
+<p>
+Das noch sehr junge <a href="http://search.cpan.org/perldoc?App::cpanminus">App::cpanminus</a> von <a href="http://search.cpan.org/~miyagawa/">Tatsuhiko Miyagawa</a> vereinfacht die Installation von CPAN-Modulen erheblich, indem es automatisch eine sinnvolle Konfiguration wählt und Abhängigkeiten ebenfalls automatisch auflöst. 
+</p>
+
+<h2>Installation - Check it out</h2>
+<pre>
+$ git clone git://github.com/miyagawa/cpanminus.git
+$ cd cpanminus
+$ perl Makefile.PL
+$ sudo make install
+</pre>
+<h2>CPAN-Module mit cpanm installieren</h2>
+<pre>
+$ sudo cpanm  CGI
+Fetching http://search.cpan.org/CPAN/authors/id/L/LD/LDS/CGI.pm-3.49.tar.gz ... OK
+Configuring CGI.pm-3.49 ... OK
+Building and testing CGI.pm-3.49 for CGI ... OK
+Successfully installed CGI.pm-3.49
+</pre>
+<p>
+<strong>That's it</strong>. So einfach kann es sein.
+</p>
+
+<h2>Siehe auch:</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?App::cpanminus">App::cpanminus</a></li>
+<li><a href="http://github.com/miyagawa/cpanminus">http://github.com/miyagawa/cpanminus</a></li>
+<li>Steven Haryanto: <a href="http://blogs.perl.org/users/steven_haryanto/2010/02/the-shorter-path-to-deployment-heaven.html">The shorter path to deployment heaven</a></li>
+<li>marcus ramberg: <a href="http://marcus.nordaaker.com/2010/02/cpanminus-the-new-cpan-superstar/">cpanminus, the new CPAN shell superstar</a></li>
+<li>dagolden: <a href="http://www.dagolden.com/index.php/689/the-power-of-not-being-all-things-to-all-people/">The power of not being all things to all people</a></li>
+<li>John Napiorkowski: <a href="http://jjnapiorkowski.vox.com/library/post/bootstrapping-locallib-part-2.html">Bootstrapping local::lib, part 2</a></li>
+<li>Perl Indonesia: <a href="http://id-perl.blogspot.com/2010/02/problems-with-older-cpan-clients.html">The problems with the older CPAN clients</a></li>
+</ul>

@@ -1,0 +1,202 @@
+---
+layout: post
+title: SMTP via Telnet
+date: '2008-06-24 17:00:00 +0000'
+mt_id: 54
+blog_id: 1
+post_id: 54
+permalink: /2008/06/smtp_via_telnet.html
+categories:
+- email
+---
+<p>
+Nach einer knappen Übersicht der SMTP-Kommandos gemäss <a href="http://www.ietf.org/rfc/rfc0821.txt">RFC 821</a> führt Sie diese Seite durch eine Telnet-Beispielsitzung mit einem SMTP-Server, die Ihnen zeigen soll, wie Anfragen und Antworten zwischen Client und Server ablaufen.
+ </p>
+
+<h2>SMTP Kommandos RFC 821</h2>
+
+<DL>
+<DT>HELO</DT>
+<DT>EHLO</DT>
+
+<DD>Anmelden beim Server</DD>
+
+<DT>MAIL FROM:</DT>
+<DD>Spezifiziert den Absender und leitet das Absenden von Mail ein.</DD>
+
+<DT>RCPT TO:</DT>
+<DD>Spezifizieren des Empfängers.</DD>
+
+<DT>DATA</DT>
+<DD>Nachrichteninhalt eingeben und übertragen.</DD>
+
+<DT>RSET</DT>
+<DD>Abbruch einer laufenden Übertragung und Reset der Verbindung.</DD>
+
+<DT>SEND FROM:</DT>
+<DD>Übertragung der Nachricht an ein Terminal. (Optional)</DD>
+
+<DT>SOML FROM:</DT>
+<DD>Übertragung der Nachricht an ein Postfach oder ein Terminal.</DD>
+
+<DT>SEND OR MAIL</DT>
+<DD>Optional, Enhanced SMTP)</DD>
+
+<DT>SAML FROM:</DT>
+<DD> Übertragung der Nachricht an ein Terminal und ein Postfach.</DD>
+
+<DT>SEND AND MAIL</DT>
+<DD>(Optional, Enhanced SMTP)</DD>
+
+
+<DT>VRFY</DT>
+<DD>Fragt nach, ob ein bestimmtes Postfach verfügbar ist.  (Optional)</DD>
+
+<DT>EXPN</DT>
+<DD> Fragt nach den Mitgliedern einer Maillingliste. (Optional, Enhanced SMTP)</DD>
+
+<DT>HELP</DT>
+<DD>Fordert Hilfeinstruktionen an. (Optional, Enhanced SMTP)</DD>
+
+<DT>NOOP</DT>
+<DD>No Operation, gibt einen positiven Wert zurück, falls der Server noch lebt.</DD>
+
+<DT>QUIT</DT>
+<DD>Ordnungsgemässes Abmelden beim SMTP-Server.</DD>
+
+<DT>TURN</DT>
+<DD>Dreht das Verhältnis zwischen Server und Client um. (Optional, Enhanced SMTP)</DD>
+
+</DL>
+
+<h2>Eine SMTP-Sitzung via telnet</h2>
+<p>
+Unter Linux ist üblicherweise ein brauchbarer <a href="http://de.wikipedia.org/wiki/Telnet">Telnet</a>-Client vorhanden. Windows-Usern empfehle ich <a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">PuTTYtel</a> oder <a href="http://www.hilgraeve.com/hyperterminal.html">HyperTerminal Private Edition</a>.
+</p>
+<p>
+Ein SMTP-Server ist üblicherweise an den Port 25 gebunden.
+</p>
+<pre>
+telnet localhost 25
+</pre>
+
+<p>Verbindungsaufbau</p>
+
+<pre>
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+220 Rechnername ESMTP Mailerinformation Datumsangabe
+</pre>
+
+<p>login</p>
+
+<pre>
+EHLO localhost
+</pre>
+
+<p>Antwort der SMTP-Servers</p>
+
+<pre>
+250-Rechnername Hello thomas@localhost [127.0.0.1], pleased to meet you
+250-8BITMIME
+250-SIZE
+250-DSN
+250-ONEX
+250-ETRN
+250-XUSR
+250 HELP
+</pre>
+
+<p>Eine Übersicht der Hilfethemen anfordern</p>
+
+<pre>
+HELP
+214-This is  XXXXX
+214-Topics:
+214-    HELO    EHLO    MAIL    RCPT    DATA
+214-    RSET    NOOP    QUIT    HELP    VRFY
+214-    EXPN    VERB    ETRN    DSN
+214-For more info use "HELP &lt;topic>".
+214-For local information send email to Postmaster at your site.
+214 End of HELP info
+</pre>
+
+<p>Hilfe zu einem bestimmten Thema (HELP topic)</p>
+
+<pre>
+HELP MAIL
+214-MAIL FROM: &lt;sender> [ &lt;parameters> ]
+214-    Specifies the sender.  Parameters are ESMTP extensions.
+214-    See "HELP DSN" for details.
+214 End of HELP info HELP MAIL
+</pre>
+
+<p>Absender spezifizieren</p>
+
+<pre>
+MAIL From: dummy
+250 dummy... Sender ok
+</pre>
+
+<p>Eingaben zurücksetzen</p>
+
+<pre>
+RSET
+250 Reset state
+</pre>
+
+<p>Diesmal den richtigen Absender einsetzen</p>
+
+<pre>
+MAIL From: thomas
+250 thomas... Sender ok
+</pre>
+
+<p>Empfänger</p>
+
+<pre>
+RCPT To: info@thomas-fahle.de
+250 info@thomas-fahle.de... Recipient ok (will queue)
+</pre>
+
+<p>Einen zweiten Empfänger angeben</p>
+
+<pre>
+RCPT To: info@xyz.de
+250 info@xyz.de... Recipient ok (will queue)
+</pre>
+
+<p>Nachrichtentext und ggf. Header eingeben. Ein einzelner Punkt (.) am Anfang einer Zeile beendet die Eingabe.</p>
+
+<pre>
+DATA
+354 Enter mail, end with "." on a line by itself
+Subject: Teste SMTP
+
+Hallo allerseits,
+..........
+
+MFG
+
+.
+250 SAA02108 Message accepted for delivery
+</pre>
+
+<p>Sitzung ordungsgemäss beenden</p>
+
+<pre>
+QUIT
+221 Rechnername closing connection
+Connection closed by foreign host.
+</pre>
+
+
+
+ <h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+	<li><a href="http://www.ietf.org/rfc/rfc0821.txt">RFC 821</a></li>
+       <li><a href="http://de.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol">Simple Mail Transfer Protocol - Wikipedia</a></li>
+       <li><a href="http://www.elektronik-kompendium.de/sites/net/0903081.htm">SMTP - Befehle und Statuscodes mit Erklärung</a></li>
+</ul>

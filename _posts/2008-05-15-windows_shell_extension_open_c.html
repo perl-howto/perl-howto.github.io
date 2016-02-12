@@ -1,0 +1,57 @@
+---
+layout: post
+title: Windows Shell Extension - Open Command Prompt - Perl HowTo - Tipps, Tricks und Anleitungen
+date: '2008-05-15 12:29:53 +0000'
+permalink: /2008/05/windows-shell-extension-open-c.html
+categories:
+- 'Windows'
+---
+<p><span style="display: inline;"><img alt="CommandRegShellExtension.jpg" src="http://perl-howto.de/assets/images/CommandRegShellExtension.jpg" width="378" height="181" style="float: left; margin: 0 20px 20px 0;" /></span>
+Dieses kleine Tool fügt den Eintrag "Command Prompt" zum <a href="http://de.wikipedia.org/wiki/Windows_Explorer">Windows Explorer</a>  hinzu. Bei einem rechten Mausklick auf einen Ordner im Windows Explorer wird  eine DOS-Shell (<a href="http://de.wikipedia.org/wiki/Cmd.exe">cmd.exe</a>) im angeklickten Ordner geöffnet.</p>
+<p>
+&nbsp;
+</p>
+<p>
+<strong>Schritt für Schritt</strong>
+</p>
+<p>
+Den nachfolgenden <a href="http://de.wikipedia.org/wiki/Registrierungsdatei">Registry</a>-Hack als Datei speichern. z.B. <em>command.reg</em>.
+</p>
+<p>
+&nbsp;
+</p>
+<pre>
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Drive\shell\cmdprmpt]
+@="Command Prompt"
+
+[HKEY_CLASSES_ROOT\Drive\shell\cmdprmpt\command]
+@="cmd /K \"cd %L&&dir/w/o/p\""
+
+[HKEY_CLASSES_ROOT\Directory\shell\cmdprmpt]
+@="Command Prompt"
+
+[HKEY_CLASSES_ROOT\Directory\shell\cmdprmpt\command]
+@="cmd /K \"cd %L&&dir/w/o/p\""
+</pre>
+<p>
+Jetzt bitte erst einmal die Registry <a href="http://www.winfaq.de/faq_html/Content/tip0000/onlinefaq.php?h=tip0010.htm">sichern</a>.
+</p>
+<p>
+Dann den Hack durch Doppelklick auf <em>command.reg</em> zur Registry hinzufügen.
+</p>
+<p>
+Nun den Windows Explorer öffnen. Die Extension sollte installiert sein.
+</p>
+<p>
+<strong>Enjoy!</strong>
+</p>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+ <li><a href="http://www.microsoft.com/windowsxp/downloads/powertoys/xppowertoys.mspx">Microsoft PowerToys for Windows XP</a></li>
+ <li><a href="http://www.ktechcomputing.com/cmdopen/">Open Command Prompt Shell Extension</a></li>
+ <li><a href="http://www.computerbild.de/fotos/Versteckte-Funktionen-unter-Windows-XP-aktivieren_2869565.html?bild=36&cid=2869857">Versteckte Funktionen unter Windows XP aktivieren</a></li>
+</ul>

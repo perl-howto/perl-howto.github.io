@@ -1,0 +1,278 @@
+---
+layout: post
+title: Data::UUID - Universally Unique IDentifier gemäß RFC 4122
+date: '2010-04-06 08:10:00 +0000'
+mt_id: 185
+blog_id: 1
+post_id: 185
+permalink: /2010/04/datauuid-universally_unique_identifier_gemass_rfc_4122.html
+categories:
+- '101'
+---
+<p>
+Das CPAN-Modul <a href="http://search.cpan.org/perldoc?Data::UUID">Data::UUID</a> von <a href="http://search.cpan.org/~rjbs/">Ricardo Signes</a> ermöglicht die Erstellung weltweit eindeutiger <a href="http://de.wikipedia.org/wiki/Universally_Unique_Identifier">Universally Unique IDentifier</a> (UUID) gemäß <a href="http://de.wikipedia.org/wiki/Request_for_Comments">RFC</a> 1422 <a href="http://tools.ietf.org/html/rfc4122">A Universally Unique IDentifier (UUID) URN Namespace</a>.
+</p>
+<p>
+UUIDs dienen der eindeutigen Kennzeichnung von Informationen in verteilten Systemen ohne zentrale Koordination.
+</p>
+<p>
+Ein UUID besteht aus einer 16-Byte-Zahl, die hexadezimal notiert und in fünf Gruppen unterteilt wird. In ihrer Normalform sieht eine UUID beispielsweise so aus
+</p>
+<pre>
+DA2611D6-40EB-11DF-96A3-FE9FC5186A11
+</pre>
+<p>
+<a href="http://search.cpan.org/perldoc?Data::UUID">Data::UUID</a> kann UUIDs als 16 Byte Long, als String (Normalform), als Hexadezimalzahl und als Base64-kodierten String ausgeben und diese verschiedenen Formate in einander umwandeln. Auch namensbasierte UUIDs können in den genannten Formaten einfach erzeugt werden. Eine Vergleichsfunktion für UUIDs ist ebenfalls im Lieferumfang enthalten. 
+</p>
+<p>
+&nbsp;
+</p>
+
+<h2>String UUIDs (Normalform)</h2>
+<p>
+Die Methode <em>create_str()</em> erzeugt eine zufällige UUID als String.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Data::UUID</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ug</span> = <span style="color: #000000;">Data::UUID</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #000000;">(</span> <span style="color: #B452CD;">1</span> .. <span style="color: #B452CD;">5</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+	<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">$ug</span><span style="color: #00688B;">-&gt;create_str</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt z.B. folgende Ausgabe:
+</p>
+<pre>
+17654D24-40EB-11DF-93A0-159FC5186A11
+17655904-40EB-11DF-93A0-159FC5186A11
+17655BFC-40EB-11DF-93A0-159FC5186A11
+17655ECC-40EB-11DF-93A0-159FC5186A11
+17656192-40EB-11DF-93A0-159FC5186A11
+</pre>
+<p>
+&nbsp;
+</p>
+
+<h2>Binäre UUIDs</h2>
+<p>
+16-Byte-Zahlen werden mit den Methoden <em>create()</em> oder <em>create_bin()</em> erzeugt. Zur Ausgabe auf dem Bildschirm werden die UUIDs hier mit der Methode <em>to_string()</em> in die Normalform umgewandelt.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Data::UUID</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ug</span> = <span style="color: #000000;">Data::UUID</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+   <span style="color: #228B22;"># Die beiden Methoden sind identisch</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$bin_uuid_1</span> = <span style="color: #00688B;">$ug</span><span style="color: #00688B;">-&gt;create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$bin_uuid_2</span> = <span style="color: #00688B;">$ug</span><span style="color: #00688B;">-&gt;create_bin</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">$ug</span><span style="color: #00688B;">-&gt;to_string</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$bin_uuid_1</span> <span style="color: #000000;">)</span> <span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">$ug</span><span style="color: #00688B;">-&gt;to_string</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$bin_uuid_2</span> <span style="color: #000000;">)</span> <span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt z.B. folgende Ausgabe:
+</p>
+<pre>
+C9BD82B0-40EC-11DF-9BBF-26A1C5186A11
+C9BD89CC-40EC-11DF-9BBF-26A1C5186A11
+</pre>
+<p>
+Die beiden Methoden sind intern identisch; durch den zweimaligen Aufruf werden auch zwei unterschiedliche UUIDs erzeugt.
+</p>
+<p>
+&nbsp;
+</p>
+
+<h2>Hexadezimale UUIDs</h2>
+<p>
+Die Methode <em>create_hex()</em> erzeugt UUIDs als hexadezimale Zahl.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Data::UUID</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ug</span> = <span style="color: #000000;">Data::UUID</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #000000;">(</span> <span style="color: #B452CD;">1</span> .. <span style="color: #B452CD;">5</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+	<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">$ug</span><span style="color: #00688B;">-&gt;create_hex</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt z.B. folgende Ausgabe:
+</p>
+<pre>
+0xEF20D4F840F111DF93B9DFA7C5186A11
+0xEF20DD0E40F111DF93B9DFA7C5186A11
+0xEF20DE8040F111DF93B9DFA7C5186A11
+0xEF20DFD440F111DF93B9DFA7C5186A11
+0xEF20E13240F111DF93B9DFA7C5186A11
+</pre>
+<p>
+&nbsp;
+</p>
+
+<h2>Base64 kodierte UUIDs</h2>
+<p>
+<a href="http://de.wikipedia.org/wiki/Base64">Base64 </a>kodierte UUIDs lassen sich mit der Methode <em>create_b64()</em> erzeugen.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Data::UUID</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ug</span> = <span style="color: #000000;">Data::UUID</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #000000;">(</span> <span style="color: #B452CD;">1</span> .. <span style="color: #B452CD;">5</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+	<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">$ug</span><span style="color: #00688B;">-&gt;create_b64</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt z.B. folgende Ausgabe:
+</p>
+<pre>
+6JxiLPJA3xGwTFSoxRhqEQ==
+9qdiLPJA3xGwTFSoxRhqEQ==
+gKpiLPJA3xGwTFSoxRhqEQ==
+4qxiLPJA3xGwTFSoxRhqEQ==
+Oq9iLPJA3xGwTFSoxRhqEQ==
+</pre>
+
+<p>
+&nbsp;
+</p>
+
+<h2>UUIDs vergleichen</h2>
+<p>
+<strong>Binäre</strong> UUIDs lassen sich mit der Methode <em>compare()</em> vergleichen. Falls die UUIDs in einem anderen Format vorliegen, können diese mit den Methoden <em>from_string()</em>, <em>from_hexstring()</em> oder <em>from_b64string()</em> in das binäre Format umgewandelt werden. <em>compare()</em> kann einfach in benutzerdefinierten Vergleichsroutinen für <a href="http://perldoc.perl.org/functions/sort.html">sort</a> verwendet werden.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Data::UUID</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@uuids</span> = <span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ug</span> = <span style="color: #000000;">Data::UUID</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #000000;">(</span> <span style="color: #B452CD;">1</span> .. <span style="color: #B452CD;">5</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+
+    <span style="color: #228B22;"># Binary UUIDs</span>
+    <span style="color: #8B008B; font-weight:bold;">push</span><span style="color: #000000;">(</span> <span style="color: #00688B;">@uuids</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$ug</span><span style="color: #00688B;">-&gt;create</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$uuid</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">sort</span> <span style="color: #00688B;">uuid_compare</span> <span style="color: #00688B;">@uuids</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">$ug</span><span style="color: #00688B;">-&gt;to_string</span><span style="color: #000000;">(</span><span style="color: #00688B;">$uuid</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+
+<a name="uuid_compare"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">uuid_compare</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$res</span> = <span style="color: #00688B;">$ug</span><span style="color: #00688B;">-&gt;compare</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$a</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$b</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">return</span> <span style="color: #00688B;">$res</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt z.B. folgende Ausgabe:
+</p>
+<pre>
+9C9DC1A8-40EE-11DF-AFFA-9CA3C5186A11
+9C9DC5E0-40EE-11DF-AFFA-9CA3C5186A11
+9C9DC612-40EE-11DF-AFFA-9CA3C5186A11
+9C9DC63A-40EE-11DF-AFFA-9CA3C5186A11
+9C9DC662-40EE-11DF-AFFA-9CA3C5186A11
+</pre>
+<p>
+&nbsp;
+</p>
+
+<h2>Namespace UUIDs</h2>
+<p>
+<a href="http://search.cpan.org/perldoc?Data::UUID">Data::UUID</a> unterstützt die im <a href="http://tools.ietf.org/html/rfc4122">RFC 4122</a> vorgeschlagenen Namespaces
+</p>
+<ul class="no-bullet">
+	<li>NameSpace_DNS</li>
+	<li>NameSpace_URL</li>
+	<li>NameSpace_OID</li>
+	<li>NameSpace_X500</li>
+</ul>
+<p>
+Diese Namensräume sollen u.a. gewährleisten,
+</p> 
+
+<ul class="no-bullet">
+<li>das UUIDs, die aus dem selbem Namen (Ursprung) im selben Namensraum erzeugt werden, stets identisch sind.</li>
+<li>das UUIDs, die aus dem selbem Namen (Ursprung) in einem anderen Namensraum erzeugt werden, sich von den erstgenannten unterscheiden.</li>
+</ul>
+<p>
+Das nachfolgende Programm liefert auch bei mehrmaligen Aufruf auf unterschiedlichen Rechnern das selbe Ergebnis. 
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Data::UUID</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ug</span> = <span style="color: #000000;">Data::UUID</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$name</span> <span style="color: #000000;">(</span> <span style="color: #B452CD;">1</span> .. <span style="color: #B452CD;">5</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Name: $name\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Namespace DNS: &quot;</span><span style="color: #000000;">,</span>
+        <span style="color: #00688B;">$ug</span><span style="color: #00688B;">-&gt;create_from_name_str</span><span style="color: #000000;">(</span> <span style="color: #000000;">NameSpace_DNS</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$name</span> <span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Namespace URL: &quot;</span><span style="color: #000000;">,</span>
+        <span style="color: #00688B;">$ug</span><span style="color: #00688B;">-&gt;create_from_name_str</span><span style="color: #000000;">(</span> <span style="color: #000000;">NameSpace_URL</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$name</span> <span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Name: 1
+Namespace DNS: AFD0B036-625A-3AA8-B639-9DC8C8FFF0FF
+Namespace URL: 9311744C-3746-3502-84C9-D06E8B5EA2D6
+Name: 2
+Namespace DNS: 9C45C2F1-1761-3DAA-AD31-1FF8703AE846
+Namespace URL: 4BB9C1A0-DED7-3F16-93FB-BD2CBAC9A815
+Name: 3
+Namespace DNS: 15E0BA07-10E4-3D7F-AAFF-C00FED873C88
+Namespace URL: 78F8CF0B-0C6A-3FB8-9D24-1E4A8E882EAA
+Name: 4
+Namespace DNS: BC27B4DB-BC0F-34F9-AE8E-4B72F2D51B60
+Namespace URL: C8F0193B-CDC1-3F89-93DB-2FC9698580BD
+Name: 5
+Namespace DNS: 7586BFED-B8B8-3BB3-9C95-09A4A79DC0F7
+Namespace URL: 80C57EB0-2ACB-36AC-89F9-95F0481C77A6
+</pre>
+
+<p>
+&nbsp;
+</p>
+
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li>CPAN: <a href="http://search.cpan.org/perldoc?Data::UUID">Data::UUID</a></li>
+<li>RFC 4122:  <a href="http://tools.ietf.org/html/rfc4122">A Universally Unique IDentifier (UUID) URN Namespace</a></li>
+<li>The 2004 Perl Advent Calendar: <a href="http://www.perladvent.org/2004/10th/">Data::UUID</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?Tie::DataUUID">Tie::DataUUID</a></li>
+<li>Wikipedia: <a href="http://de.wikipedia.org/wiki/Universally_Unique_Identifier">Universally Unique Identifier</a></li>
+<li>Wikipedia (en): <a href="http://en.wikipedia.org/wiki/Universally_Unique_Identifier">Universally Unique Identifier</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?UUID::Tiny">UUID::Tiny</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?UUID::Random">UUID::Random</a></li>
+</ul>

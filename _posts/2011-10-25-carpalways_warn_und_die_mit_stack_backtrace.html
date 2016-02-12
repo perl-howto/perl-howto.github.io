@@ -1,0 +1,140 @@
+---
+layout: post
+title: Carp::Always - warn und die mit stack backtrace
+date: '2011-10-25 20:50:00 +0000'
+mt_id: 222
+blog_id: 1
+post_id: 222
+permalink: /2011/10/carpalways_warn_und_die_mit_stack_backtrace.html
+categories:
+- '101'
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Carp::Always">Carp::Always - Warns and dies noisily with stack backtraces</a> von <a href="http://search.cpan.org/~ferreira/">Adriano Ferreira</a> erleichtert das Debuggen von <a href="http://www.perl.org/">Perl</a>-Programmen. 
+</p>
+<p>
+Statt m&uuml;hselig den Debugger an zu werfen, wird <a href="http://search.cpan.org/perldoc?Carp::Always">Carp::Always</a> einfach ohne &Auml;nderung des Programms auf der Kommandozeile aufgerufen.
+</p>
+<pre>
+$ perl -MCarp::Always programm.pl
+</pre>
+<p>
+&nbsp;
+</p>
+<h2>Beispiel:</h2>
+<p>
+Das folgende Beispielprogramm versucht eine nicht existierende Webseite auf zu rufen.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">WWW::Mechanize</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$mech</span> = <span style="color: #000000;">WWW::Mechanize</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$url</span> = <span style="color: #CD5555;">&#39;http://example.tld&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">$mech</span><span style="color: #00688B;">-&gt;get</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$url</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+<pre>
+Error GETing http://example.tld: Can't connect to example.tld:80 (Bad hostname 'example.tld') at mech.pl line 11
+</pre>
+<p>
+Carp::Always wird auf der Kommandozeile aufgerufen
+</p>
+<pre>
+$ /opt/perl-5.12.3/bin/perl -MCarp::Always mech.pl
+</pre>
+<p>
+und erzeugt folgenden Stack Backtrace (den ich hier ein wenig umgebrochen habe):
+</p>
+<pre>
+Error GETing http://example.tld: Can't connect to example.tld:80 (Bad
+hostname) at /opt/perl-5.12.3/lib/site_perl/5.12.3/WWW/Mechanize.pm
+line 2747
+	WWW::Mechanize::_die('Error ', 'GET', 'ing ',
+	'URI::http=SCALAR(0xa1f2db0)', ': ', 'Can\'t
+	connect to example.tld:80 (Bad hostname)') called at
+	/opt/perl-5.12.3/lib/site_perl/5.12.3/WWW/Mechanize.pm line 2734
+
+	WWW::Mechanize::die('WWW::Mechanize=HASH(0xa11cf98)',
+	'Error ', 'GET', 'ing ', 'URI::http=SCALAR(0xa1f2db0)', ': ',
+	'Can\'t connect to example.tld:80 (Bad hostname)') called at
+	/opt/perl-5.12.3/lib/site_perl/5.12.3/WWW/Mechanize.pm line 2381
+
+	WWW::Mechanize::_update_page('WWW::Mechanize=HASH(0xa11cf98)',
+	'HTTP::Request=HASH(0xa211690)', 'HTTP::Response=HASH(0xa15f480)')
+	called at /opt/perl-5.12.3/lib/site_perl/5.12.3/WWW/Mechanize.pm
+	line 2213
+
+	WWW::Mechanize::request('WWW::Mechanize=HASH(0xa11cf98)',
+	'HTTP::Request=HASH(0xa211690)') called at
+	/opt/perl-5.12.3/lib/site_perl/5.12.3/LWP/UserAgent.pm line 411
+
+	LWP::UserAgent::get('WWW::Mechanize=HASH(0xa11cf98)',
+	'http://example.tld') called at
+	/opt/perl-5.12.3/lib/site_perl/5.12.3/WWW/Mechanize.pm line 407
+
+	WWW::Mechanize::get('WWW::Mechanize=HASH(0xa11cf98)',
+	'http://example.tld') called at
+	/opt/perl-5.12.3/lib/site_perl/5.12.3/WWW/Mechanize.pm line 2747
+
+	WWW::Mechanize::_die('Error ', 'GET', 'ing ',
+	'URI::http=SCALAR(0xa1f2db0)', ': ', 'Can\'t
+	connect to example.tld:80 (Bad hostname)') called at
+	/opt/perl-5.12.3/lib/site_perl/5.12.3/WWW/Mechanize.pm line 2734
+
+	WWW::Mechanize::die('WWW::Mechanize=HASH(0xa11cf98)',
+	'Error ', 'GET', 'ing ', 'URI::http=SCALAR(0xa1f2db0)', ': ',
+	'Can\'t connect to example.tld:80 (Bad hostname)') called at
+	/opt/perl-5.12.3/lib/site_perl/5.12.3/WWW/Mechanize.pm line 2381
+
+	WWW::Mechanize::_update_page('WWW::Mechanize=HASH(0xa11cf98)',
+	'HTTP::Request=HASH(0xa211690)', 'HTTP::Response=HASH(0xa15f480)')
+	called at /opt/perl-5.12.3/lib/site_perl/5.12.3/WWW/Mechanize.pm
+	line 2213
+
+	WWW::Mechanize::request('WWW::Mechanize=HASH(0xa11cf98)',
+	'HTTP::Request=HASH(0xa211690)') called at
+	/opt/perl-5.12.3/lib/site_perl/5.12.3/LWP/UserAgent.pm line 411
+
+	LWP::UserAgent::get('WWW::Mechanize=HASH(0xa11cf98)',
+	'http://example.tld') called at
+	/opt/perl-5.12.3/lib/site_perl/5.12.3/WWW/Mechanize.pm line 407
+
+	WWW::Mechanize::get('WWW::Mechanize=HASH(0xa11cf98)',
+	'http://example.tld') called at mech.pl line 11
+</pre>
+<p>
+Wem Schwarz-Wei&szlig; zu langweilig ist, kann die Ausgabe mit <a href="http://search.cpan.org/perldoc?Carp::Always::Color">Carp::Always::Color</a> aufh&uuml;bschen.
+</p>
+<pre>
+$ perl -MCarp::Always::Color programm.pl
+</pre>
+<p>
+&nbsp;
+</p>
+<h2>Hinweis:</h2>
+<p>
+Da Carp::Always eigene Signalhandler f&uuml;r <a href="http://perldoc.perl.org/functions/die.html">die()</a> und <a href="http://perldoc.perl.org/functions/warn.html">warn()</a> installiert, funktioniert dieses Modul <b>nicht</b> mit Programmen oder Modulen, die bereits Signalhandler f&uuml;r <i>die()</i> und/oder <i>warn()</i> verwenden.
+</p>
+<p>
+&nbsp;
+</p>
+<h2>Siehe auch:</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Carp::Always">Carp::Always - Warns and dies noisily with stack backtraces</a></li>
+<li><a href="http://cpanratings.perl.org/dist/Carp-Always">CPAN Ratings Carp-Always reviews</a></li>
+<li><a href="http://www.dereferenced.com/2011/08/22/perl-module-monday-carpalways/">Perl Module Monday: Carp::Always</a></li>
+<li><a href="http://search.cpan.org/perldoc?Carp::Always::Color">Carp::Always::Color - Carp::Always, but with color</a></li>
+<li><a href="http://search.cpan.org/perldoc?Carp::Source::Always">Carp::Source::Always - Warns and dies with stack backtraces and source code context</a></li>
+<li><a href="http://search.cpan.org/perldoc?Devel::SimpleTrace">Devel::SimpleTrace - See where you code warns and dies using stack traces</a></li>
+<li><a href="http://perldoc.perl.org/Carp.html">Carp</a></li>
+<li><a href="http://perldoc.perl.org/diagnostics.html">diagnostics</a></li>
+<li><a href="http://perl101.org/debugging.html">Perl 101: Debugging</a></li>
+</ul>

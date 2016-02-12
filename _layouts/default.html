@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+  {% include head.html %}
+
+<body>
+
+    {% include header.html %}
+
+    <div class="row">
+     <!-- Left Column - Blog -->
+     <div class="columns large-9 medium-12 small-12">
+        {{ content }}
+     </div> <!-- Left column -->
+     <!-- Right Column - Sidebar -->
+     <div class="columns large-3 medium-12 small-12">
+       {% include sidebar.html %}
+     </div> <!-- Right Column -->
+    </div> <!-- row -->
+
+    {% include footer.html %}
+
+</body>
+</html>
+

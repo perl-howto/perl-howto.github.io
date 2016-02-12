@@ -1,0 +1,152 @@
+---
+layout: post
+title: Mikro-Blogging mit Net::Twitter und OAuth
+date: '2010-09-05 15:30:00 +0000'
+mt_id: 199
+blog_id: 1
+post_id: 199
+permalink: /2010/09/mikro-blogging_mit_nettwitter_und_oauth.html
+categories:
+- lwp
+---
+<p>
+<a href="http://twitter.com/">Twitter</a> zwingt Drittanbieter seit ein paar Tagen ein neues Authentifizierungsverfahren, <a href="http://oauth.net/">OAuth</a>, zu verwenden. Dieses Verfahren soll den Diebstahl von Passwörtern unterbinden. 
+</p>
+<p>
+&nbsp;
+</p>
+<h2>Registrierung</h2>
+ <p>
+Drittanbieter müssen Ihre Applikation zunächst unter <a href="http://twitter.com/apps">http://twitter.com/apps</a> registrieren.  
+</p>
+<p>
+&nbsp;
+</p>
+
+<h2>Autorisierung</h2>
+<p>
+Im nächsten Schritt muss der Anwender der Applikation den Zugriff erlauben.
+</p>
+
+<p>
+Das folgende Beispiel-Skript führt die Autorisierung durch und speichert alle erforderlichen Daten in eine Konfigurationsdatei.
+</p> 
+<pre>
+#!/usr/local/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Config::Simple</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Net::Twitter</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$config_file</span> = <span style="color: #CD5555;">&#39;twitter.access.ini&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cfg</span> = <span style="color: #000000;">new</span> <span style="color: #00688B;">Config::Simple</span><span style="color: #000000;">(</span> <span style="color: #000000;">syntax</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;ini&#39;</span> <span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #00688B;">$!</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># You can replace the consumer tokens with your own;</span>
+<span style="color: #228B22;"># these tokens are for the Net::Twitter example app.</span>
+<span style="color: #228B22;">#my %consumer_tokens = (</span>
+<span style="color: #228B22;">#    consumer_key    =&gt; &#39;v8t3JILkStylbgnxGLOQ&#39;,</span>
+<span style="color: #228B22;">#    consumer_secret =&gt; &#39;5r31rSMc0NPtBpHcK8MvnCLg2oAyFLx5eGOMkXM&#39;,</span>
+<span style="color: #228B22;">#);</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">%consumer_tokens</span> = <span style="color: #000000;">(</span>
+    <span style="color: #000000;">consumer_key</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;Get_Your_Consumer_Key_From_TwitterDotComSlashApps&#39;</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">consumer_secret</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;Get_Your_Consumer_Secret_From_TwitterDotComSlashApps&#39;</span><span style="color: #000000;">,</span>
+<span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$nt</span> = <span style="color: #000000;">Net::Twitter</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span> <span style="color: #000000;">traits</span> <span style="color: #000000;">=&gt;</span> <span style="color: #000000;">[</span><span style="color: #CD5555;">qw/API::REST OAuth/</span><span style="color: #000000;">]</span><span style="color: #000000;">,</span> <span style="color: #00688B;">%consumer_tokens</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Autorisierung</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$auth_url</span> = <span style="color: #00688B;">$nt</span><span style="color: #00688B;">-&gt;get_authorization_url</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Diese Applikation muss autorisiert werden.\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Bitte $auth_url \n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;in einem Browser oeffnen und den Zugang erlauben.\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Bitte Twitter-PIN eingeben: &quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$pin</span> = <span style="color: #CD5555;">&lt;STDIN&gt;</span><span style="color: #000000;">;</span>    <span style="color: #228B22;"># Auf Eingabe warten</span>
+<span style="color: #8B008B; font-weight:bold;">chomp</span> <span style="color: #00688B;">$pin</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Autorisierung mit PIN#</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$access_token</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$access_token_secret</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$user_id</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$screen_name</span> <span style="color: #000000;">)</span> =
+  <span style="color: #00688B;">$nt</span><span style="color: #00688B;">-&gt;request_access_token</span><span style="color: #000000;">(</span> <span style="color: #000000;">verifier</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$pin</span> <span style="color: #000000;">)</span>
+  <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #00688B;">$!</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Daten in Config-Datei schreiben</span>
+<span style="color: #00688B;">$cfg</span><span style="color: #00688B;">-&gt;param</span><span style="color: #000000;">(</span> <span style="color: #CD5555;">&#39;access_token&#39;</span><span style="color: #000000;">,</span>         <span style="color: #00688B;">$access_token</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$cfg</span><span style="color: #00688B;">-&gt;param</span><span style="color: #000000;">(</span> <span style="color: #CD5555;">&#39;accesss_token_secret&#39;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$access_token_secret</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$cfg</span><span style="color: #00688B;">-&gt;param</span><span style="color: #000000;">(</span> <span style="color: #CD5555;">&#39;user_id&#39;</span><span style="color: #000000;">,</span>              <span style="color: #00688B;">$user_id</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$cfg</span><span style="color: #00688B;">-&gt;param</span><span style="color: #000000;">(</span> <span style="color: #CD5555;">&#39;screen_name&#39;</span><span style="color: #000000;">,</span>          <span style="color: #00688B;">$screen_name</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$cfg</span><span style="color: #00688B;">-&gt;param</span><span style="color: #000000;">(</span> <span style="color: #CD5555;">&#39;consumer_key&#39;</span><span style="color: #000000;">,</span>         <span style="color: #00688B;">$consumer_tokens</span>{<span style="color: #000000;">consumer_key</span>} <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$cfg</span><span style="color: #00688B;">-&gt;param</span><span style="color: #000000;">(</span> <span style="color: #CD5555;">&#39;consumer_secret&#39;</span><span style="color: #000000;">,</span>      <span style="color: #00688B;">$consumer_tokens</span>{<span style="color: #000000;">consumer_secret</span>} <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">$cfg</span><span style="color: #00688B;">-&gt;write</span><span style="color: #000000;">(</span><span style="color: #00688B;">$config_file</span><span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #00688B;">$!</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">exit</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+&nbsp;
+</p>
+<h2>Tweet</h2>
+<p>
+Im Beispiel wird die oben erzeugte Konfigurationsdatei verwendet, ein Test-Tweet erzeugt und die letzen Tweets angezeigt.
+</p>
+<pre>
+#!/usr/local/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Config::Simple</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Net::Twitter</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$config_file</span> = <span style="color: #CD5555;">&#39;twitter.access.ini&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cfg</span> = <span style="color: #000000;">new</span> <span style="color: #00688B;">Config::Simple</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #00688B;">$!</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$cfg</span><span style="color: #00688B;">-&gt;read</span><span style="color: #000000;">(</span><span style="color: #00688B;">$config_file</span><span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #00688B;">$!</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$access_token</span>        = <span style="color: #00688B;">$cfg</span><span style="color: #00688B;">-&gt;param</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;access_token&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$access_token_secret</span> = <span style="color: #00688B;">$cfg</span><span style="color: #00688B;">-&gt;param</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;accesss_token_secret&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$user_id</span>             = <span style="color: #00688B;">$cfg</span><span style="color: #00688B;">-&gt;param</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;user_id&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$screen_name</span>         = <span style="color: #00688B;">$cfg</span><span style="color: #00688B;">-&gt;param</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;screen_name&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$consumer_key</span>        = <span style="color: #00688B;">$cfg</span><span style="color: #00688B;">-&gt;param</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;consumer_key&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$consumer_secret</span>     = <span style="color: #00688B;">$cfg</span><span style="color: #00688B;">-&gt;param</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;consumer_secret&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$nt</span> = <span style="color: #000000;">Net::Twitter</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span>
+    <span style="color: #000000;">traits</span> <span style="color: #000000;">=&gt;</span> <span style="color: #000000;">[</span><span style="color: #CD5555;">qw/API::REST OAuth/</span><span style="color: #000000;">]</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">(</span> <span style="color: #000000;">consumer_key</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$consumer_key</span><span style="color: #000000;">,</span> <span style="color: #000000;">consumer_secret</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$consumer_secret</span> <span style="color: #000000;">)</span>
+<span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">$nt</span><span style="color: #00688B;">-&gt;access_token</span><span style="color: #000000;">(</span><span style="color: #00688B;">$access_token</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$nt</span><span style="color: #00688B;">-&gt;access_token_secret</span><span style="color: #000000;">(</span><span style="color: #00688B;">$access_token_secret</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">$nt</span><span style="color: #00688B;">-&gt;update</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;Test Net::Twitter mit OAuth!&#39;</span><span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #00688B;">$!</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$statuses</span> = <span style="color: #00688B;">$nt</span><span style="color: #00688B;">-&gt;user_timeline</span><span style="color: #000000;">(</span> <span style="color: #000000;">{</span> <span style="color: #000000;">count</span> <span style="color: #000000;">=&gt;</span> <span style="color: #B452CD;">10</span> <span style="color: #000000;">}</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$status</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@$statuses</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">$status</span>-&gt;{<span style="color: #000000;">text</span>}<span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>    
+
+<span style="color: #00688B;">$nt</span><span style="color: #00688B;">-&gt;end_session</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">exit</span><span style="color: #000000;">;</span>
+</pre>
+
+<p>
+&nbsp;
+</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li>OAuth: <a href="http://oauth.net/">An open protocol to allow secure API authorization  in a simple and standard method from desktop and web applications.</a></li>
+<li>/var/log/rant: <a href="http://varlogrant.blogspot.com/2010/09/surviving-twitpocalypse.html">Surviving the Twitpocalypse</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?Config::Simple">Config::Simple</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?Net::Twitter">Net::Twitter</a></li>
+<li>CPAN: Net::Twitter <a href="http://cpansearch.perl.org/src/MMIMS/Net-Twitter-3.13008_01/examples/">Examples</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?Net::Twitter::OAuth">Net::Twitter::OAuth</a></li>
+<li>Twitter: <a href="http://apiwiki.twitter.com/">http://apiwiki.twitter.com/</a></li>
+<li>Zeit.de: <a href="http://www.zeit.de/digital/datenschutz/2010-09/twitter-oauthcalypse-authentification">"OAuth" soll Passwortraub bei Twitter verhindern</a></li>
+</ul>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Fehlende Links, Ergänzungen, Anregungen?</h2>
+<p>
+Bitte einfach als Kommentar. Danke.
+</p>

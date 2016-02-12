@@ -1,0 +1,109 @@
+---
+layout: post
+title: Perl-HowTo.de moved to GitHub Pages
+date: '2016-02-11 08:15:00 +0000'
+permalink: /2016/02/perl-howto-moved-to-github.html
+author_full_name: "Thomas Fahle"
+author_url: "http://thomas-fahle.de"
+---
+<p>
+<img alt="Desert Trip - A man with 3 camels walking in the desert" src="{{ site.url }}/assets/images/desert-trip/17027247671_d19e4cd643.jpg" width="500" height="367" class="float-center" />
+</p>
+
+
+<h2>Von Movable Type 5 zu GitHub Pages</h2>
+
+<p>
+Bisher lief dieser Blog mit mit <a href="https://movabletype.org/">Movable Type 5 OS</a> auf einem <a href="http://www.ubuntu.com/">Ubuntu Linux</a> Server mit <a href="https://httpd.apache.org/">Apache Webserver</a> und einer <a href="http://www.oracle.com/de/products/mysql/overview/index.html">MySQL-Datenbank</a>.
+</p>
+<p>
+Nun läuft Perl-Howto auf <a href="https://pages.github.com/">GitHub Pages</a> unterstützt von <a href="https://jekyllrb.com/">Jekyll</a>, also ohne eigene Server und auch ohne Datenbank.
+</p>
+
+<h3>Responsive dank Zurb Foundation</h3>
+
+<p>
+Das ursprüngliche <a href="https://github.com/movabletype/mtstyles/tree/master/minimalist-blue">Design</a> wurde grundlegend übernommen und zu <a href="https://foundation.zurb.com/sites.html">Zurb Foundation 6</a> migriert. Jetzt <a href="https://www.google.com/webmasters/tools/mobile-friendly/?hl=de&url=http%3A%2F%2Fperl-howto.github.io%2F">klappt's auch mit dem Smartphone</a>.
+</p>
+
+<h3>Neue Website URL</h3>
+<p>
+Die neue URL für diese Website ist <a href="{{ site.url }}">{{ site.url }}</a>. Die alte Website URL <a href="http://perl-howto.de">Perl-Howto.de</a> wird noch für einige Monate unterstützt.
+</p>
+<p>
+Die URL für den RSS Feed via <a href="https://feeds2.feedburner.com/PerlHowto">FeedBurner</a> ändert sich nicht. Wer FeedBurner nicht mag, kann auch <a href="{{ site.url }}/feed.xml">{{ site.url }}/feed.xml</a> verwenden. 
+</p>
+
+
+
+<h2>Migrations Hintergrund</h2>
+
+<p>
+Movable Type 5 OS wird zwar noch mit Sicherheitsupdates <a href="https://movabletype.org/downloads/stable/">versorgt</a>. Neuere MT Versionen stehen aber <b>nicht</b> mehr als <a href="https://movabletype.org/news/2013/07/clarifying_changes_to_movable_type_starting_with_mt6.html">Open Source zur Verfügung</a>. Zeit, sich nach etwas anderem um zu sehen.
+</p>
+
+<h3>Neue Anforderungen an die Website</h3>
+
+<p>
+Grundsätzlich möchte ich den Aufwand für den Betrieb dieses Blogs möglichst gering halten, also z.B. keine Datenbank und auch keinen Webserver mehr betreiben. Hierfür bieten sich <a href="https://www.staticgen.com/">statische Website Generatoren</a> an.
+</p>
+
+<p>
+Daher musste ich leider auch die, in <a href="https://www.perl.org/">Perl</a> geschriebene, BlogSoftware <a href="http://www.pearlbee.org/">PearlBee</a> recht zügig von der Liste der Alternativen streichen.
+</p>
+
+<p>
+Weiterhin soll das neue Webdesign auf dem aktuellen Stand der Technik, sprich reponsive, sein und wenigstens in etwa so aussehen wie zuvor. Gleichzeitig wollte ich den Umzug als Chance nutzen, mich in ein aktuelles Front End Framework ein zu arbeiten. 
+</p>
+
+<p>
+Die bestehende Linkstruktur sollte ebenfalls erhalten bleiben.
+</p>
+
+<h3>Auswahl</h3>
+
+<p>
+Nach längerem Herumprobieren mit verschiedenen statischen Website Generatoren, Responsive Web Design Frameworks und Hostern für statische Websites, habe ich mich für die folgende Kombination entschieden:  
+</p>
+<ul class="no-bullet">
+ <li><a href="https://pages.github.com/">GitHub Pages</a></li>
+ <li><a href="https://jekyllrb.com/">Jekyll</a></li>
+ <li><a href="https://foundation.zurb.com/sites.html">Zurb Foundation 6</a></li>
+</ul>
+
+<h3>Migration von MTOS zu Jekyll</h3>
+<p>
+Die Migration vom MTOS zu Jekyll ist trotz des <a href="http://import.jekyllrb.com/docs/mt/">Importers von  Movable Type in Jekyll</a> nicht trivial. Da ist noch manuelles Nacharbeiten angesagt. Aktuell fehlen auf dieser Website noch die Kommentare, Tags und Kategorien der alten Posts. Hier werde ich noch nach arbeiten. 
+</p>
+
+<h3>Migration zu Zurb Foundation</h3>
+<p>
+Zurb Foundation 6 ist ein sehr umfangreiches und mächtiges Framework. Die zahlreichen <a href="http://foundation.zurb.com/templates.html">HTML-Templates</a> und die <a href="http://foundation.zurb.com/sites/docs/">umfangreiche Dokumentation</a> erleichtern den Start allerdings erheblich.
+</p>
+<p>
+Eigenes CSS habe ich nur in sehr geringem Umfang erstellen müssen. Die meiste Arbeit hat das Framework übernommen. So soll es ja auch sein. 
+</p>
+
+<h3>GitHub Repo der Website inklusive</h3>
+<p>
+Wer mag, kann sich das <a href="https://github.com/perl-howto/perl-howto.github.io">GitHub Repo dieser Website</a> näher anschauen.
+</p>
+
+
+
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+ <li><a href="https://pages.github.com/">GitHub Pages</a></li>
+ <li><a href="https://jekyllrb.com/">Jekyll</a></li>
+ <li><a href="https://help.github.com/articles/using-jekyll-with-pages/">Using Jekyll with Pages</a></li>
+ <li><a href="http://import.jekyllrb.com/docs/mt/">Import Movable Type into Jekyll</a></li>
+ <li><a href="https://github.com/Shopify/liquid">Liquid template engine</a></li>
+ <li><a href="https://foundation.zurb.com/sites.html">Zurb Foundation 6</a></li>
+ <li><a href="http://www.pearlbee.org/">PearlBee</a></li>
+</ul>
+
+<h2>Bildnachweis</h2>
+<p>
+photo credit: <a href="http://www.flickr.com/photos/24339354@N08/17027247671" target="_blank">Desert Trip</a> via <a href="http://photopin.com"target="_blank">photopin</a> <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank">(license)</a>
+</p>
+

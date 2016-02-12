@@ -1,0 +1,235 @@
+---
+layout: post
+title: Geo::IP - IP-Adressen oder Hostnamen regional zuordnen
+date: '2009-03-09 20:20:00 +0000'
+mt_id: 124
+blog_id: 1
+post_id: 124
+permalink: /2009/03/geoip-ip-adressen_oder_hostnamen_regional_zuordnen.html
+categories:
+- geo
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Geo::IP">Geo::IP</a> von <a href="http://search.cpan.org/~borisz/">Boris Zentner</a> ermöglicht die <a href="http://de.wikipedia.org/wiki/Geotargeting">regionale Zuordnung</a> von <a href="http://de.wikipedia.org/wiki/IP-Adresse">IP-Adressen</a> oder <a href="http://de.wikipedia.org/wiki/Hostname">Hostnamen</a>.
+</p>
+<p>
+<a href="http://search.cpan.org/perldoc?Geo::IP">Geo::IP</a> bietet eine <a href="http://www.maxmind.com/app/geolitecountry">kleine, aber häufig ausreichende,  Auswahl</a> an Geoinformationen der <a href="http://www.maxmind.com/app/ip-location">Geolocation Datenbank vom MaxMind</a>. Wer mehr möchte, muss auf die <a href="http://www.maxmind.com/app/country">kommerzielle Version</a> upgraden. 
+</p>
+<p>
+Nachfolgend ein Beispiel zur Ermittlung des Herkunftslandes und ein Beispiel zur Ermittlung detaillierter Ortsinformationen. 
+</p>
+
+<h2>Beispiel Länderinfo (Herkunftsland)</h2>
+<p>
+<a href="http://search.cpan.org/perldoc?Geo::IP">Geo::IP</a> liefert Länderinformationen gemäß <a href="http://de.wikipedia.org/wiki/ISO_3166">ISO 3166</a> zurück. Für weitere Details verweise ich auf den Beitrag <a href="{{ site.url }}/2008/09/localecountry-iso-3166-norm-fu.html">Locale::Country - ISO 3166 - Norm für Kodierung von geographischen Einheiten</a>.
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Geo::IP</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$ip</span> = <span style=" color: #CD5555;">&#39;81.169.145.71&#39;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$host</span> = <span style=" color: #CD5555;">&#39;perl-howto.de&#39;</span><span style=" color: #000000;">;</span>
+
+
+	<span style=" color: #228B22;"># Download: http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz</span>
+	<span style=" color: #228B22;"># Nutzt GeoIP.dat in /usr/local/share/GeoIP/</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$gi</span> = <span style=" color: #000000;">Geo::IP</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #000000;">GEOIP_STANDARD</span><span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+
+	<span style=" color: #228B22;"># Datenbankinfos ausgeben</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$db_info</span> = <span style=" color: #00688B;">$gi</span><span style=" color: #00688B;">-&gt;database_info</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Datenbankinfo: $db_info\n&quot;</span><span style=" color: #000000;">;</span>
+
+    <span style=" color: #228B22;"># Methoden bei bekannter IP</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$country</span>     = <span style=" color: #00688B;">$gi</span><span style=" color: #00688B;">-&gt;country_code_by_addr</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$ip</span> <span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$country3</span>    = <span style=" color: #00688B;">$gi</span><span style=" color: #00688B;">-&gt;country_code3_by_addr</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$ip</span> <span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$countryname</span> = <span style=" color: #00688B;">$gi</span><span style=" color: #00688B;">-&gt;country_name_by_addr</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$ip</span> <span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Info fuer $ip\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Country:      $country\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Country3:     $country3\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Country Name: $countryname\n&quot;</span><span style=" color: #000000;">;</span>
+
+    <span style=" color: #228B22;"># Methoden bei bekanntem Host</span>
+
+<span style=" color: #00688B;">$country</span>     = <span style=" color: #00688B;">$gi</span><span style=" color: #00688B;">-&gt;country_code_by_name</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$host</span> <span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$country3</span>    = <span style=" color: #00688B;">$gi</span><span style=" color: #00688B;">-&gt;country_code3_by_name</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$host</span> <span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$countryname</span> = <span style=" color: #00688B;">$gi</span><span style=" color: #00688B;">-&gt;country_name_by_name</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$host</span> <span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Info fuer $host\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Country:      $country\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Country3:     $country3\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Country Name: $countryname\n&quot;</span><span style=" color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe
+</p>
+<pre>
+Datenbankinfo: GEO-106FREE 20090201 Build 1 Copyright (c) 2007 MaxMind LLC All Rights Reserved
+
+Info fuer 81.169.145.71
+Country:      DE
+Country3:     DEU
+Country Name: Germany
+
+Info fuer perl-howto.de
+Country:      DE
+Country3:     DEU
+Country Name: Germany
+</pre>
+
+<h2>Beispiel Ortsinfo</h2>
+<p>
+Hierzu wird zusätzlich die Datenbank <em>GeoLiteCity.dat</em> benötigt (<a href="http://geolite.maxmind.com/download/geoip/database/">Download</a>). 
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Geo::IP</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$ip</span>   = <span style=" color: #CD5555;">&#39;81.169.145.71&#39;</span><span style=" color: #000000;">;</span>    <span style=" color: #228B22;"># perl-howto.de</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$host</span> = <span style=" color: #CD5555;">&#39;google.de&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Download --&gt; http://geolite.maxmind.com/download/geoip/database/</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$gi</span> =
+  <span style=" color: #000000;">Geo::IP</span><span style=" color: #000000;">-&gt;open</span><span style=" color: #000000;">(</span> <span style=" color: #CD5555;">&quot;/usr/local/share/GeoIP/GeoLiteCity.dat&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">GEOIP_STANDARD</span> <span style=" color: #000000;">)</span>
+  <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$db_info</span> = <span style=" color: #00688B;">$gi</span><span style=" color: #00688B;">-&gt;database_info</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Datenbankinfo: $db_info\n&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$record</span> = <span style=" color: #00688B;">$gi</span><span style=" color: #00688B;">-&gt;record_by_addr</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$ip</span><span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">display</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$ip</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$record</span> = <span style=" color: #00688B;">$gi</span><span style=" color: #00688B;">-&gt;record_by_name</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$host</span><span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">display</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$host</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;">###########################################################</span>
+<a name="display"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">display</span> <span style=" color: #000000;">{</span>
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$info</span>   = <span style=" color: #8B008B; font-weight:bold;">shift</span> <span style=" color: #00688B;">@_</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$record</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span> <span style=" color: #00688B;">@_</span><span style=" color: #000000;">;</span>
+
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Info fuer $info\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Country Code:   &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span><span style=" color: #00688B;">-&gt;country_code</span><span style=" color: #000000;">,</span>   <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Country Code3:  &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span><span style=" color: #00688B;">-&gt;country_code3</span><span style=" color: #000000;">,</span>  <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Country Name:   &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span><span style=" color: #00688B;">-&gt;country_name</span><span style=" color: #000000;">,</span>   <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Region:         &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span><span style=" color: #00688B;">-&gt;region</span><span style=" color: #000000;">,</span>         <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Region (Name):  &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span><span style=" color: #00688B;">-&gt;region_name</span><span style=" color: #000000;">,</span>    <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;City:           &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span><span style=" color: #00688B;">-&gt;city</span><span style=" color: #000000;">,</span>           <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;PLZ:            &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span><span style=" color: #00688B;">-&gt;postal_code</span><span style=" color: #000000;">,</span>    <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Latitude:       &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span><span style=" color: #00688B;">-&gt;latitude</span><span style=" color: #000000;">,</span>       <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Longitude:      &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span><span style=" color: #00688B;">-&gt;longitude</span><span style=" color: #000000;">,</span>      <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;TimeZone:       &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span><span style=" color: #00688B;">-&gt;time_zone</span><span style=" color: #000000;">,</span>      <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Area Code:      &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span><span style=" color: #00688B;">-&gt;area_code</span><span style=" color: #000000;">,</span>      <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Continent Code: &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span><span style=" color: #00688B;">-&gt;continent_code</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Continent Name: &quot;</span><span style=" color: #000000;">,</span>
+      <span style=" color: #00688B;">continentcode2continent</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$record</span><span style=" color: #00688B;">-&gt;continent_code</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Metro Code:     &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$record</span><span style=" color: #00688B;">-&gt;metro_code</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #228B22;">###########################################################</span>
+<a name="continentcode2continent"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">continentcode2continent</span> <span style=" color: #000000;">{</span>
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$code</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span> <span style=" color: #00688B;">@_</span><span style=" color: #000000;">;</span>
+
+    <span style=" color: #228B22;">#Possible continent codes are AF, AS, EU, NA, OC, SA</span>
+    <span style=" color: #228B22;">#for Africa, Asia, Europe, North America, Oceania  and South America.</span>
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">%continent</span> = <span style=" color: #000000;">(</span>
+        <span style=" color: #CD5555;">&#39;AF&#39;</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;Africa&#39;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #CD5555;">&#39;AS&#39;</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;Asia&#39;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #CD5555;">&#39;EU&#39;</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;Europe&#39;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #CD5555;">&#39;NA&#39;</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;North America&#39;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #CD5555;">&#39;OC&#39;</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;Oceania&#39;</span><span style=" color: #000000;">,</span>
+        <span style=" color: #CD5555;">&#39;SA&#39;</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;South America&#39;</span><span style=" color: #000000;">,</span>
+    <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span> <span style=" color: #8B008B; font-weight:bold;">exists</span> <span style=" color: #00688B;">$continent</span>{<span style=" color: #00688B;">$code</span>} <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">return</span> <span style=" color: #00688B;">$continent</span>{<span style=" color: #00688B;">$code</span>}<span style=" color: #000000;">;</span>
+    <span style=" color: #000000;">}</span>
+    <span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">warn</span> <span style=" color: #CD5555;">&quot;Unknown Continent for &lt;$code&gt;\n&quot;</span><span style=" color: #000000;">;</span>
+        <span style=" color: #8B008B; font-weight:bold;">return</span><span style=" color: #000000;">;</span>
+    <span style=" color: #000000;">}</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #228B22;">###########################################################</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe
+</p>
+<pre>
+Datenbankinfo: GEO-533LITE 20090201 Build 1 Copyright (c) 2007 MaxMind LLC All Rights Reserved
+
+Info fuer 81.169.145.71
+Country Code:   DE
+Country Code3:  DEU
+Country Name:   Germany
+Region:         16
+Region (Name):  Berlin
+City:           Berlin
+PLZ:            
+Latitude:       52.5167
+Longitude:      13.4000
+TimeZone:       Europe/Berlin
+Area Code:      0
+Continent Code: EU
+Continent Name: Europe
+Metro Code:     0
+
+Info fuer google.de
+Country Code:   US
+Country Code3:  USA
+Country Name:   United States
+Region:         CA
+Region (Name):  California
+City:           Mountain View
+PLZ:            94043
+Latitude:       37.4192
+Longitude:      -122.0574
+TimeZone:       America/Chicago
+Area Code:      650
+Continent Code: NA
+Continent Name: North America
+Metro Code:     807
+</pre>
+<p>
+Hier lässt sich erkennen, das die Städte-Datenbank für Nordamerika besser gefüllt ist als für Europa. 
+</p>
+
+<h2>Ubuntu Installationstipps</h2>
+<p>
+Zunächst sollten die Bibliotheken für Geo::IP installiert werden:
+</p>
+<pre>
+sudo apt-get install libgeoip1 libgeoip-dev
+</pre>
+<p>
+Die Datenbank <em>GeoIP.dat</em> befindet sich nun in <em>/usr/share/GeoIP/</em>.
+</p>
+<p>
+Geo::IP erwartet die Datenbanken aber in <em>/usr/local/share/GeoIP/</em>.
+</p>
+<p>
+Also installiere ich die Datenbank und die monatlich kostenlos zum <a href="http://www.maxmind.com/download/geoip/database/">Download zur Verfügung gestellten Updates</a> nach <em>/usr/local/share/GeoIP/</em>, da Geo::IP die Datenbanken dort erwartet.
+</p>
+
+<h2>Siehe auch:</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Geo::IP">Geo::IP</a></li>
+<li><a href="http://search.cpan.org/dist/Geo-IP-PurePerl/">Geo-IP-PurePerl</a></li>
+<li><a href="http://search.cpan.org/perldoc?IP::Country::MaxMind">IP::Country::MaxMind</a>, eine Alternative</li>
+<li><a href="http://www.maxmind.com">MaxMind</a></li>
+<li><a href="http://www.maxmind.com/download/geoip/database/">Free monthly updates to the database</a></li>
+<li><a href="http://www.maxmind.com/app/geolitecity">MaxMind GeoLite City</a></li>
+<li><a href="http://www.maxmind.com/app/geolitecountry">MaxMind GeoLite Country</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Geotargeting">Wikipedia: Geotargeting</a></li>
+<li><a href="http://www.howtoforge.de/howto/exim4-und-geoip/">HowToForge: Exim4 und GeoIP</a></li>
+<li><a href="http://www.linux-magazin.de/heft_abo/ausgaben/2009/02/spam_kartieren?category=378">Linux-Magazin: Spam kartieren - Perl-Skript zeichnet Spam-Karten nach Webserver-Logs </a></li>
+<li><a href="http://www.netip.de/">Geo-Location Information</a></li>
+<li><a href="{{ site.url }}/2008/09/localecountry-iso-3166-norm-fu.html">Locale::Country - ISO 3166 - Norm für Kodierung von geographischen Einheiten</a></li>
+</ul>

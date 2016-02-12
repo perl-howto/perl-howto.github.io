@@ -1,0 +1,109 @@
+---
+layout: post
+title: Sub::Identify - Wie bitte heisst das Unterprogramm auf welches diese Coderefenz
+  verweist?
+date: '2009-04-02 09:15:00 +0000'
+mt_id: 134
+blog_id: 1
+post_id: 134
+permalink: /2009/04/subidentify_wie_bitte_heisst_das_unterprogramm_auf_welches_diese_coderefenz_verweist.html
+categories:
+- '101'
+---
+<p>
+Mit <a href="http://search.cpan.org/perldoc?Sub::Identify">Sub::Identify - Retrieve names of code references</a> von <a href="http://search.cpan.org/~rgarcia/">Rafaël Garcia-Suarez</a> lässt sich sehr einfach der Name des <a href="http://perldoc.perl.org/functions/sub.html">Unterprogramms</a> ermitteln, auf den sich eine Code-Referenz bezieht. 
+</p>
+<h2>Beispiel</h2>
+<p>
+Zunächst wird ein einfaches <a href="http://perldoc.perl.org/functions/package.html">package</a> namens  XYZ erstellt. Dieses ansonsten weitgehend sinnfreie Package gibt aus  dem Unterprogramm <em>greeting</em> eine Code-Referenz auf eines der  beiden Unterprogramme <em>hallo</em> oder <em>hello</em> zurück. Der Aufrufer von <em>greeting</em> kann aber nicht ohne weiteres erkennen, auf welches der beiden Unterprogramme eine Referenz zurückgeben wird.
+</p>
+<pre>
+<a name="package-XYZ"></a><span style=" color: #8B008B; font-weight:bold;">package </span><span style=" color: #00688B;">XYZ</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Exporter</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">our</span> <span style=" color: #00688B;">@ISA</span> = <span style=" color: #CD5555;">qw/ Exporter /</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">our</span> <span style=" color: #00688B;">@EXPORT</span> = <span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">our</span> <span style=" color: #00688B;">@EXPORT_OK</span> = <span style=" color: #CD5555;">qw/ greeting/</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">our</span> <span style=" color: #00688B;">$VERSION</span> = <span style=" color: #CD5555;">&#39;0.01&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;">###########################################################</span>
+<a name="hello"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">hello</span> <span style=" color: #000000;">{</span> <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Hello\n&quot;</span> <span style=" color: #000000;">}</span><span style=" color: #000000;">;</span>
+<span style=" color: #228B22;">###########################################################</span>
+<a name="hallo"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">hallo</span> <span style=" color: #000000;">{</span> <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Hallo\n&quot;</span> <span style=" color: #000000;">}</span><span style=" color: #000000;">;</span>
+<span style=" color: #228B22;">###########################################################</span>
+<a name="greeting"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">greeting</span> <span style=" color: #000000;">{</span>  
+	<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$lang</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span> <span style=" color: #00688B;">@_</span><span style=" color: #000000;">;</span>
+		<span style=" color: #228B22;"># Das passende Unterprogramm waehlen</span>
+	<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$greet</span> = <span style=" color: #00688B;">$lang</span> <span style=" color: #8B008B; font-weight:bold;">eq</span> <span style=" color: #CD5555;">&#39;de&#39;</span> ? \<span style=" color: #00688B;">&amp;hallo</span> <span style=" color: #000000;">:</span> \<span style=" color: #00688B;">&amp;hello</span><span style=" color: #000000;">;</span>
+		<span style=" color: #228B22;"># und als Code-Referenz zurueckgeben</span>
+	<span style=" color: #8B008B; font-weight:bold;">return</span> <span style=" color: #00688B;">$greet</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #228B22;">###########################################################</span>
+<a name="VERSION"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">VERSION</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">return</span> <span style=" color: #00688B;">$VERSION</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #228B22;">###########################################################</span>
+<span style=" color: #B452CD;">1</span><span style=" color: #000000;">;</span>
+<a name="__END__"></a><span style=" color: #8B008B; font-weight:bold;">__END__</span>
+</pre>
+<p>
+Dank <a href="http://search.cpan.org/perldoc?Sub::Identify">Sub::Identify</a> lässt sich nun sehr einfach der Name des Unterprogramms ermitteln, auf den sich die Code-Referenz bezieht.
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Sub::Identify</span> <span style=" color: #CD5555;">&#39;:all&#39;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">XYZ</span> <span style=" color: #CD5555;">qw/greeting/</span><span style=" color: #000000;">;</span>
+
+	<span style=" color: #228B22;"># Code-Referenzen holen</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$de</span> = <span style=" color: #00688B;">greeting</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&#39;de&#39;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$en</span> = <span style=" color: #00688B;">greeting</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&#39;en&#39;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+	<span style=" color: #228B22;"># und ausfuehren</span>
+<span style=" color: #00688B;">$de</span>-&gt;<span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$en</span>-&gt;<span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">identify</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$de</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">identify</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$en</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;">###########################################################</span>
+<a name="identify"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">identify</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$coderef</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span> <span style=" color: #00688B;">@_</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$subname</span> = <span style=" color: #00688B;">sub_name</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$coderef</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$p</span> = <span style=" color: #00688B;">stash_name</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$coderef</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$fully_qualified_name</span> = <span style=" color: #00688B;">sub_fullname</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$coderef</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">defined</span> <span style=" color: #00688B;">$subname</span> ?
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;This coderef points to sub $subname in package $p\n&quot;</span>
+		<span style=" color: #000000;">:</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;oops\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #228B22;">###########################################################</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Hallo
+Hello
+This coderef points to sub <strong>hallo</strong> in package XYZ
+This coderef points to sub <strong>hello</strong> in package XYZ
+</pre>
+<p>
+Bei anonymen Code-Referenzen gibt <em>sub_name</em> entsprechend <em>__ANON__</em> zurück.
+</p>
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Sub::Identify">Sub::Identify - Retrieve names of code references</a></li>
+<li><a href="http://search.cpan.org/perldoc?Sub::Information">Sub::Information - Get subroutine information</a>, eine Alternative</li>
+<li><a href="http://www.perlmonks.org/?node_id=754182">Perlmonks: How to get the name from a reference</a></li>
+<li><a href="http://www.perlmonks.org/?node_id=413799">Perlmonks: Re: How to de-reference a coderef? (B tricks)</a></li>
+<li><a href="http://perldoc.perl.org/functions/ref.html">Perldoc: ref</a></li>
+<li><a href="http://perldoc.perl.org/B.html">Perldoc: B</a></li>
+<li><a href="http://datenzoo.de/pub/Advanced-perl-techniques/advanced-perl-techniques-talk.html">Max Maischein: Perl für Fortgeschrittene</a></li>
+</ul>

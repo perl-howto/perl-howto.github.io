@@ -1,0 +1,61 @@
+---
+layout: post
+title: 'Logdateien rotieren mit Logfile::Rotate '
+date: '2010-02-19 08:50:17 +0000'
+mt_id: 180
+blog_id: 1
+post_id: 180
+permalink: /2010/02/logdateien_rotieren_mit_logfilerotate.html
+published: false
+categories:
+- linux
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Logfile::Rotate">Logfile::Rotate</a> von <a href="http://search.cpan.org/~paulg/">Paul Gampe</a> 
+</p>
+<p>
+Logrotation funktioniert häufig nach folgendem Schema:
+</p>
+<ol>
+<li>Verschiebe alte Logdateien  bzw. die Sequenz der Logdateien
+<li>Sende dem Prozess ein Signal, damit er die aktuell verwendete Logdatei schließt, und das Loggen kurzfristig unterbricht oder puffert
+<li>Kopiere die aktuelle Logdatei in eine neue Datei, z.B. logfile.1
+<li>Lösche oder trunkiere die aktuelle Logdatei.
+<li>Sende dem Prozess ein Signal, damit er das Loggen wieder aufnimmt
+<li>Räume auf, z.B. Dateien komprimieren oder uralte Dateien löschen
+</ol>
+<p>
+Eine kleine Skizze zur Verdeutlichung:
+</p>
+<pre>
+ .-.       .-.
+ | |  =>   | |
+ `-'       `-'
+logfile logfile.1
+
+ .-.       .-.       .-.
+ | |  =>   | |  =>   | |
+ `-'       `-'       `-'
+logfile logfile.1 logfile.2
+
+usw.
+
+ .-.       .-.       .-.       .-.       .-.       .-.         .--.
+ | |  =>   | |   =>  | |   =>  | |  =>   | |  =>   | |    =>   ||||
+ `-'       `-'       `-'       `-'       `-'       `-'         `--'
+logfile logfile.1 logfile.2 logfile.3 logfile.4 logfile.5    /dev/null
+</pre>
+<p>
+<small>Skizze nach David N. Blank-Edelmann: <a href="http://www.otterbook.com/">Automating System Administration with Perl</a>
+</small></p>
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Logfile::Rotate">Logfile::Rotate</a></li>
+<li>Perl Advent Calendar 2006-12-17: <a href="http://www.perladvent.org/2006/17/">Yule Log-Rolling</a></li>
+<li><a href="http://www.linuxcommand.org/man_pages/logrotate8.html">logrotate (8)</a></li>
+<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::FileRotate">Log::Dispatch::FileRotate</a></li>
+<li>David N. Blank-Edelmann: <a href="http://www.otterbook.com/">Automating System Administration with Perl</a></li>
+<li>&lt;openbook> / Linux: <a href="http://openbook.galileocomputing.de/linux/linux_09_verwaltungsaufgaben_004.htm#mj617d9ae1b957c51c4b2ef1b26d0165dd">Logging</a></li>
+<li>Ubuntuusers: <a href="http://wiki.ubuntuusers.de/Logdateien">Logdateien</a></li>
+</ul>

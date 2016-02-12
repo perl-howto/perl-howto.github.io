@@ -1,0 +1,86 @@
+---
+layout: post
+title: Tagesaktuelle Währungsumrechnung
+date: '2008-09-16 19:22:48 +0000'
+mt_id: 98
+blog_id: 1
+post_id: 98
+permalink: /2008/09/tagesaktuelle_wahrungsumrechnu.html
+categories:
+- '101'
+- lwp
+- finance
+---
+<p>
+<a href="http://www.perlmonks.org/?node_id=660050">alexm</a> hat drüben bei den <a href="http://www.perlmonks.org/">Perlmonks</a> ein kleines Programm zur tagesaktuellen Währungsumrechnung veröffentlicht: <a href="http://www.perlmonks.org/?node_id=709343">Using up-to-date currency conversion rates</a>
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #228B22;"># Quelle: Using up-to-date currency conversion rates</span>
+<span style=" color: #228B22;"># http://www.perlmonks.org/?node_id=709343</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Locale::Currency</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">File::Basename</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Cache::FileCache</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Finance::Quote</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #CD5555;">&quot;usage: $0 amount currency_from currency_to\n&quot;</span>
+    <span style=" color: #8B008B; font-weight:bold;">unless</span> <span style=" color: #00688B;">@ARGV</span> == <span style=" color: #B452CD;">3</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$amount</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span> <span style=" color: #00688B;">@ARGV</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$currency_from</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$currency_to</span><span style=" color: #000000;">)</span> = <span style=" color: #8B008B; font-weight:bold;">map</span> <span style=" color: #000000;">{</span> <span style=" color: #8B008B; font-weight:bold;">uc</span> <span style=" color: #000000;">}</span> <span style=" color: #00688B;">@ARGV</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">for</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$code</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$currency_from</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$currency_to</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+    <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #CD5555;">&quot;sorry, currency $code not in ISO 4217\n&quot;</span>
+        <span style=" color: #8B008B; font-weight:bold;">unless</span> <span style=" color: #8B008B; font-weight:bold;">defined</span> <span style=" color: #00688B;">code2currency</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$code</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$filename</span><span style=" color: #000000;">)</span> = <span style=" color: #00688B;">fileparse</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$0</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;.pl&#39;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$cache</span> = <span style=" color: #000000;">Cache::FileCache</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #000000;">{</span>
+    <span style=" color: #000000;">cache_root</span>         <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;$ENV{HOME}/.$filename&quot;</span><span style=" color: #000000;">,</span>
+    <span style=" color: #000000;">default_expires_in</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;1 day&#39;</span><span style=" color: #000000;">,</span>
+<span style=" color: #000000;">}</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$quote</span> = <span style=" color: #000000;">Finance::Quote</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$ratio</span> = <span style=" color: #00688B;">$cache</span><span style=" color: #00688B;">-&gt;get</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$currency_from:$currency_to&quot;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$ratio</span> = <span style=" color: #00688B;">$quote</span><span style=" color: #00688B;">-&gt;currency</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$currency_from</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$currency_to</span><span style=" color: #000000;">)</span>
+    <span style=" color: #8B008B; font-weight:bold;">unless</span> <span style=" color: #8B008B; font-weight:bold;">defined</span> <span style=" color: #00688B;">$ratio</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #CD5555;">&quot;sorry, cannot convert from $currency_from to $currency_to\n&quot;</span>
+    <span style=" color: #8B008B; font-weight:bold;">unless</span> <span style=" color: #8B008B; font-weight:bold;">defined</span> <span style=" color: #00688B;">$ratio</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$cache</span><span style=" color: #00688B;">-&gt;set</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$currency_from:$currency_to&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$ratio</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$amount $currency_from = &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$amount</span> * <span style=" color: #00688B;">$ratio</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot; $currency_to\n&quot;</span><span style=" color: #000000;">;</span>
+</pre>
+<p>
+Wenn man das Programm als <em>currency.pl</em>  speichert und anschließend auf der Kommandozeile aufruft, ergibt sich beispielsweise folgende Ausgabe.
+</p>
+<pre>
+$ perl currency.pl 100 USD EUR
+100 USD = 70.46 EUR
+</pre>
+<p>
+
+</p>
+<p>
+<a href="http://search.cpan.org/perldoc?Finance::Quote">Finance::Quote</a> holt den Umrechnungsfaktor, <a href="http://search.cpan.org/perldoc?Cache::FileCache">Cache::FileCache</a> speichert diesen Faktor für einen Tag auf der lokalen Festplatte und <a href="http://search.cpan.org/perldoc?Locale::Currency">Locale::Currency</a> prüft, ob die eingegebenen Währungscodes gültig sind.
+</p>
+
+<h2>Siehe auch:</h2>
+
+<ul class="no-bullet">
+<li><a href="http://www.perlmonks.org/?node_id=709343">Using up-to-date currency conversion rates</a></li>
+<li><a href="http://search.cpan.org/perldoc?Finance::Quote">Finance::Quote</a></li>
+<li><a href="http://search.cpan.org/perldoc?Cache::FileCache">Cache::FileCache</a></li>
+<li><a href="http://search.cpan.org/perldoc?File::Basename">File::Basename</a></li>
+<li><a href="http://search.cpan.org/perldoc?Locale::Currency">Locale::Currency</a></li>
+<li><a href="{{ site.url }}/2008/09/localecurrency-iso-4217-norm-fur-wahrungs-abkurzungen.html">Locale::Currency - ISO 4217 - Norm für Währungs-Abkürzungen</a></li>
+</ul>

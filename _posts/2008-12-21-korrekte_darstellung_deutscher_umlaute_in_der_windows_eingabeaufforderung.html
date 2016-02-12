@@ -1,0 +1,48 @@
+---
+layout: post
+title: Korrekte Darstellung deutscher Umlaute in der Windows Eingabeaufforderung
+date: '2008-12-21 21:00:00 +0000'
+mt_id: 111
+blog_id: 1
+post_id: 111
+permalink: /2008/12/korrekte_darstellung_deutscher_umlaute_in_der_windows_eingabeaufforderung.html
+categories:
+- windows
+---
+<p>
+Um korrekte (deutsche) Umlaute unter Windows im <a href="http://de.wikipedia.org/wiki/Cmd.exe">Kommandozeileninterpreter</a> (DOS-Modus, <a href="http://de.wikipedia.org/wiki/Eingabeaufforderung">Eingabeaufforderung</a> oder Windows-DOSBox) darzustellen, kann man die Ausgabe mit <a href="http://perldoc.perl.org/functions/binmode.html">binmode</a> filtern: 
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">binmode</span><span style=" color: #000000;">(</span><span style=" color: #000000;">STDOUT</span> <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;:encoding(cp437)&quot;</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@umlaute</span> = <span style=" color: #CD5555;">qw/&Auml; &Uuml; &Ouml; &szlig; &auml; &uuml; &ouml;/</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$umlaut</span> <span style=" color: #000000;">(</span> <span style=" color: #00688B;">@umlaute</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$umlaut\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+C:\Dokumente und Einstellungen\tf\Eigene Dateien>perl binmode.pl
+Ä
+Ö
+Ü
+ß
+ä
+ö
+ü
+</pre>
+
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li><a href="http://wiki.perl-community.de/bin/view/Wissensbasis/DosBoxUmlaute">PerlCommunityWiki » Wissensbasis » DosBoxUmlaute</a></li>
+<li><a href="http://perldoc.perl.org/functions/binmode.html">perldoc: binmode</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Codepage_437">Wikipedia: Codepage 437</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Cmd.exe">Wikipedia: Cmd.exe</a></li>
+</ul>

@@ -1,0 +1,138 @@
+---
+layout: post
+title: Parallel::Iterator - Mehrere Tasks parallel ausführen
+date: '2010-08-31 18:45:00 +0000'
+mt_id: 198
+blog_id: 1
+post_id: 198
+permalink: /2010/08/paralleliterator-mehrere_tasks_parallel_ausfuehren.html
+categories:
+- lwp
+- '101'
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Parallel::Iterator">Parallel::Iterator</a> von <a href="http://search.cpan.org/~andya/">Andy Armstrong</a> erlaubt die gleichzeitige (parallele) Ausführung mehrerer Task auf einem Rechner mit (vorzugsweise) mehreren CPUs.
+</p>
+<p>
+Dabei kümmert sich <a href="http://search.cpan.org/perldoc?Parallel::Iterator">Parallel::Iterator</a> um korrekte Interprozeß-Kommunikation, Forking und Verteilung auf mehrere CPUs, so daß man sich voll und ganz auf die eigentliche Aufgabe konzentrieren kann.
+</p>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Ein ganz einfaches Beispiel</h2>
+
+<p>
+In diesem Beispiel wird eine Liste von Quadratwurzeln aus einer Liste von Zahlen parallel ermittelt.
+</p>
+
+<p>
+Das Unterprogramm <span style="color: #FF0000;">square_root</span>, das die eigentliche Rechenarbeit ausführt,  erhält als ersten Parameter den Index aus <span style="color: #00688B;">@numbers</span> und als weiteren Parameter die zu bearbeitende Zahl. 
+</p>
+
+<p>
+Um die Ergebnisse im <span style="color: #00688B;">@output</span> korrekt anzuordnen, müssen sowohl Index und Ergebnis aus 
+<span style="color: #FF0000;">square_root</span> zurückgegeben werden. 
+</p>
+<p>
+Fall die Reihenfolge keine Rolle spielt, kann der Index in der Rückgabeliste entfallen.
+</p>
+
+<p>
+<span style="color: #FF0000;">iterate_as_array</span> kümmert sich um die Parallelisierung des Unterprogramms 
+<span style="color: #FF0000;">square_root</span>.
+</p>
+
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Parallel::Iterator</span> <span style="color: #CD5555;">qw( iterate_as_array )</span><span style="color: #000000;">;</span>
+
+       <span style="color: #228B22;"># Indizes: 0  1  2  3  4  5  6</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@numbers</span> = <span style="color: #CD5555;">qw/ 1  4  9  16 25 36 49 /</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@output</span> = <span style="color: #00688B;">iterate_as_array</span><span style="color: #000000;">(</span> \<span style="color: #00688B;">&amp;square_root</span><span style="color: #000000;">,</span> \<span style="color: #00688B;">@numbers</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #8B008B; font-weight:bold;">join</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;\t&quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">@output</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+
+
+<a name="square_root"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">square_root</span> <span style="color: #000000;">{</span>
+	<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #000000;">(</span><span style="color: #00688B;">$index</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$number</span><span style="color: #000000;">)</span> =  <span style="color: #00688B;">@_</span><span style="color: #000000;">;</span>
+	<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$sr</span> = <span style="color: #8B008B; font-weight:bold;">sqrt</span><span style="color: #000000;">(</span><span style="color: #00688B;">$number</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+	<span style="color: #8B008B; font-weight:bold;">return</span> <span style="color: #000000;">(</span><span style="color: #00688B;">$index</span><span style="color: #000000;">,</span><span style="color: #00688B;">$sr</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+1	2	3	4	5	6	7
+</pre>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Beispiel: Mehrere URLs parallel holen</h2>
+<p>
+Dieses Beispiel habe ich aus dem Beitrag <a href="http://www.dagolden.com/index.php/935/parallel-map-with-paralleliterator/">Parallel map with Parallel::Iterator</a> von David Golden übernommen.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">LWP::UserAgent</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Parallel::Iterator</span> <span style="color: #CD5555;">qw/iterate_as_array/</span><span style="color: #000000;">;</span>
+
+
+<span style="color: #228B22;"># shamelessly stolen from </span>
+<span style="color: #228B22;"># http://www.dagolden.com/index.php/935/parallel-map-with-paralleliterator/</span>
+ 
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ua</span> = <span style="color: #000000;">LWP::UserAgent</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># this worker fetches a page or returns undef</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$worker</span> = <span style="color: #8B008B; font-weight:bold;">sub</span> <span style="color: #000000;">{</span>
+  <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$index</span> = <span style="color: #8B008B; font-weight:bold;">shift</span><span style="color: #000000;">;</span>
+  <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$url</span> = <span style="color: #8B008B; font-weight:bold;">shift</span><span style="color: #000000;">;</span>
+  <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$resp</span> = <span style="color: #00688B;">$ua</span><span style="color: #00688B;">-&gt;get</span><span style="color: #000000;">(</span><span style="color: #00688B;">$url</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+  <span style="color: #8B008B; font-weight:bold;">return</span> <span style="color: #8B008B; font-weight:bold;">undef</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$resp</span><span style="color: #00688B;">-&gt;is_success</span><span style="color: #000000;">;</span>
+  <span style="color: #8B008B; font-weight:bold;">return</span> <span style="color: #00688B;">$resp</span><span style="color: #00688B;">-&gt;decoded_content</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span><span style="color: #000000;">;</span>
+ 
+<span style="color: #228B22;"># this gets a list of pages and fetches them in parallel</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@urls</span> = <span style="color: #CD5555;">qw(</span>
+	<span style="color: #CD5555;">http://www.yahoo.de</span>
+	<span style="color: #CD5555;">http://www.perl-howto.de</span>
+	<span style="color: #CD5555;">http://www.perl.org</span>
+<span style="color: #CD5555;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Fetch pages in parallel</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@pages</span> = <span style="color: #00688B;">iterate_as_array</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$worker</span><span style="color: #000000;">,</span> \<span style="color: #00688B;">@urls</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$page</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">@pages</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #228B22;"># Do something with &quot;$page&quot;;</span>
+    <span style="color: #228B22;"># ...</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Siehe auch:</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Parallel::Iterator">Parallel::Iterator</a></li>
+<li><a href="http://www.dagolden.com/index.php/935/parallel-map-with-paralleliterator/">Parallel map with Parallel::Iterator</a></li>
+<li>Beispiel: <a href="http://cpansearch.perl.org/src/ANDYA/Parallel-Iterator-1.00/examples/cpan-faces.pl">cpan-faces.pl</a></li>
+<li>Beispiel: <a href="http://cpansearch.perl.org/src/ANDYA/Parallel-Iterator-1.00/examples/speedy.pl">speedy.pl</a></li>
+</ul>
+<p>
+&nbsp;
+</p>
+

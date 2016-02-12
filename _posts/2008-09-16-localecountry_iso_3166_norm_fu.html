@@ -1,0 +1,139 @@
+---
+layout: post
+title: Locale::Country - ISO 3166 - Norm für Kodierung von geographischen Einheiten
+date: '2008-09-16 19:00:00 +0000'
+mt_id: 97
+blog_id: 1
+post_id: 97
+permalink: /2008/09/localecountry_iso_3166_norm_fu.html
+categories:
+- '101'
+---
+<p>
+Die <a href="http://de.wikipedia.org/wiki/ISO_3166">ISO 3166</a> ist ein Standard für die Kodierung von geographischen Einheiten, aka Ländern. Jedem Land werden drei Codes zugeordnet: Ein zweistelliger Ländercode (ALPHA-2), ein dreistelliger Ländercode (ALPHA-3) und ein numerischer Ländercode (NUMERIC).
+</p>
+<p>
+Diese Ländercodes können in der <a href="http://de.wikipedia.org/wiki/ISO-3166-1-Kodierliste">ISO-3166-1-Kodierliste</a> nachgeschlagen werden. Beispielsweise sind Deutschland (Germany) folgende Codes zugeordnet:
+</p>
+<ul class="no-bullet">
+<li>DE (ALPHA-2)</li>
+<li>DEU (ALPHA-3)</li>
+<li>276 (NUMERIC)</li>
+</ul>
+<p>
+<a href="http://search.cpan.org/perldoc?Locale::Country">Locale::Country</a>von <a href="http://search.cpan.org/~neilb/">Neil Bowers</a> ermöglicht den Zugriff auf die Ländercodes gemäß <a href="http://de.wikipedia.org/wiki/ISO_3166">ISO 3166</a>.
+</p>
+<p>
+Über die der <a href="http://perldoc.perl.org/constant.html">Konstanten</a>  LOCALE_CODE_ALPHA_2,  LOCALE_CODE_ALPHA_3 und  LOCALE_CODE_NUMERIC teilt man den Funktionen <em>code2country()</em> bzw. <em>country2code()</em> mit, welcher der drei Codes verwendet werden soll. Ohne diese Angabe wird automatisch LOCALE_CODE_ALPHA_2 verwendet.
+</p>
+<p>
+Mit Hilfe dieses Moduls lässt sich z.B. leicht prüfen, ob ein gültiger ISO-Code vorliegt.
+</p>
+
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Locale::Country</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$|</span> = <span style=" color: #B452CD;">1</span><span style=" color: #000000;">;</span>    <span style=" color: #228B22;"># turn off buffering</span>
+
+<span style=" color: #228B22;">###########################################################</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Bitte zweistelligen L&auml;ndercode eingeben: &quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">chomp</span><span style=" color: #000000;">(</span><span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$code</span> = <span style=" color: #CD5555;">&lt;STDIN&gt;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$country</span> = <span style=" color: #00688B;">code2country</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$code</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span> <span style=" color: #228B22;"># LOCALE_CODE_ALPHA_2 implizit</span>
+<span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #8B008B; font-weight:bold;">defined</span> <span style=" color: #00688B;">$country</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$code = $country\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;&#39;$code&#39; ist kein g&uuml;ltiger L&auml;ndercode!\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #228B22;">###########################################################</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Bitte dreistelligen L&auml;ndercode eingeben: &quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">chomp</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$code</span> = <span style=" color: #CD5555;">&lt;STDIN&gt;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$country</span> = <span style=" color: #00688B;">code2country</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$code</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">LOCALE_CODE_ALPHA_3</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span> 
+<span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #8B008B; font-weight:bold;">defined</span> <span style=" color: #00688B;">$country</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$code = $country\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;&#39;$code&#39; ist kein g&uuml;ltiger L&auml;ndercode!\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #228B22;">###########################################################</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Bitte dreistelligen numerischen L&auml;ndercode eingeben: &quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">chomp</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$code</span> = <span style=" color: #CD5555;">&lt;STDIN&gt;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$country</span> = <span style=" color: #00688B;">code2country</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$code</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">LOCALE_CODE_NUMERIC</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span> 
+<span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #8B008B; font-weight:bold;">defined</span> <span style=" color: #00688B;">$country</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$code = $country\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;&#39;$code&#39; ist kein g&uuml;ltiger L&auml;ndercode!\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #228B22;">###########################################################</span>
+</pre>
+<p>
+Wenn man das Programm als <em>localecountry.pl</em>  speichert und anschließend auf der Kommandozeile aufruft, ergibt sich beispielsweise folgende Ausgabe.
+</p>
+<pre>
+per localecountry.pl 
+Bitte zweistelligen Ländercode eingeben: DE
+DE = Germany
+Bitte dreistelligen Ländercode eingeben: DEU
+DEU = Germany
+Bitte dreistelligen numerischen Ländercode eingeben: 276
+276 = Germany
+</pre>
+<p>
+Aus dem Namen eines Landes lassen sich leicht die zugehörigen Ländercodes ermitteln.
+Gleichzeitig lässt sich prüfen, ob der Name des Landes der <a href="http://de.wikipedia.org/wiki/ISO_3166">ISO 3166</a> entspricht.
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Locale::Country</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$|</span> = <span style=" color: #B452CD;">1</span><span style=" color: #000000;">;</span>    <span style=" color: #228B22;"># turn off buffering</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Bitte den Namen eines Landes eingeben: &quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">chomp</span><span style=" color: #000000;">(</span><span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$country</span> = <span style=" color: #CD5555;">&lt;STDIN&gt;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$code</span>    = <span style=" color: #00688B;">country2code</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$country</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span> <span style=" color: #228B22;"># LOCALE_CODE_ALPHA_2 implizit</span>
+<span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span> <span style=" color: #8B008B; font-weight:bold;">defined</span> <span style=" color: #00688B;">$code</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$country = $code\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span> 
+<span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;&#39;$country&#39; ist kein g&uuml;ltiger Name!\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">exit</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+
+<span style=" color: #00688B;">$code</span>    = <span style=" color: #00688B;">country2code</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$country</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">LOCALE_CODE_ALPHA_3</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>    
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$country = $code\n&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$code</span>    = <span style=" color: #00688B;">country2code</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$country</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">LOCALE_CODE_NUMERIC</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>    
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$country = $code\n&quot;</span><span style=" color: #000000;">;</span>
+</pre>
+<p>
+Wenn man das Programm als <em>localecountry2.pl</em>  speichert und anschließend auf der Kommandozeile aufruft, ergibt sich beispielsweise folgende Ausgabe.
+</p>
+<pre>
+perl localecountry2.pl 
+Bitte den Namen eines Landes eingeben: Germany
+Germany = de
+Germany = deu
+Germany = 276
+</pre>
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://de.wikipedia.org/wiki/ISO_3166">ISO 3166</a></li>
+<li><a href="http://www.iso.org/iso/en/prods-services/iso3166ma/02iso-3166-code-lists/index.html">ISO 3166 code lists</a></li>
+<li><a href="http://de.wikipedia.org/wiki/ISO-3166-1-Kodierliste">ISO-3166-1-Kodierliste</a></li>
+<li><a href="http://search.cpan.org/perldoc?Locale::Country">Locale::Country</a></li>
+<li><a href="http://search.cpan.org/perldoc?Geography::Countries">Geography::Countries</a> - Eine Alternative</li>
+<li><a href="{{ site.url }}/2008/09/localecurrency-iso-4217-norm-fur-wahrungs-abkurzungen.html">Locale::Currency - ISO 4217 - Norm für Währungs-Abkürzungen</a></li>
+</ul>

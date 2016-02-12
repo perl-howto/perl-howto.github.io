@@ -1,0 +1,64 @@
+---
+layout: post
+title: Finance::QuoteHist - Historische Börsenkursdaten einfach abrufen
+date: '2009-06-17 22:25:00 +0000'
+mt_id: 148
+blog_id: 1
+post_id: 148
+permalink: /2009/06/financequotehist-historische_borsenkursdaten_einfach_abrufen.html
+categories:
+- finance
+- lwp
+---
+<p>
+Mit <a href="http://search.cpan.org/perldoc?Finance::QuoteHist">Finance::QuoteHist</a> von <a href="http://search.cpan.org/~msisk/">Matt Sisk</a> lassen sich historische Börsenkursdaten (<a href="http://en.wikipedia.org/wiki/Stock_quote">Stock Quotes</a>) einfach über das <a href="http://de.wikipedia.org/wiki/Web">Web</a> abrufen.
+</p>
+
+<h2>Beispiel: Historische Dax-Kurse von Yahoo! Finance</h2>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Finance::QuoteHist::Yahoo</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$q</span> = <span style=" color: #000000;">Finance::QuoteHist::Yahoo</span><span style=" color: #000000;">-&gt;new</span>
+     <span style=" color: #000000;">(</span>
+      			<span style=" color: #228B22;">#symbols    =&gt; [qw(IBM UPS AMZN)],</span>
+      			<span style=" color: #228B22;">#Adidas</span>
+      			<span style=" color: #228B22;">#symbols    =&gt; [qw(ADS.DE)],</span>
+      <span style=" color: #000000;">symbols</span>    <span style=" color: #000000;">=&gt;</span> <span style=" color: #000000;">[</span><span style=" color: #CD5555;">qw(^GDAXI)</span><span style=" color: #000000;">]</span><span style=" color: #000000;">,</span>
+      <span style=" color: #000000;">start_date</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;01/01/1999&#39;</span><span style=" color: #000000;">,</span>
+      <span style=" color: #000000;">end_date</span>   <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;today&#39;</span><span style=" color: #000000;">,</span>
+     <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+  <span style=" color: #228B22;"># Einfache Ausgabe der Ergebnisse </span>
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$quote</span> <span style=" color: #000000;">(</span> <span style=" color: #00688B;">$q</span><span style=" color: #00688B;">-&gt;quotes</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$symbol</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$date</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$open</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$high</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$low</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$close</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$volume</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$adjusted</span><span style=" color: #000000;">)</span> = <span style=" color: #00688B;">@$quote</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$symbol startete am $date mit $open und schloss zu $close ($adjusted).\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+^GDAXI startete am 1999/01/04 mit 4991.9500 und schloss zu 5252.3600 (5252.3600).
+^GDAXI startete am 1999/01/05 mit 5221.4300 und schloss zu 5253.9100 (5253.9100).
+^GDAXI startete am 1999/01/06 mit 5328.0200 und schloss zu 5443.6200 (5443.6200).
+^GDAXI startete am 1999/01/07 mit 5485.6100 und schloss zu 5323.2100 (5323.2100).
+......
+^GDAXI startete am 2009/06/11 mit 5039.9700 und schloss zu 5107.2600 (5107.2600).
+^GDAXI startete am 2009/06/12 mit 5098.0100 und schloss zu 5069.2400 (5069.2400).
+^GDAXI startete am 2009/06/15 mit 5051.3500 und schloss zu 4889.9400 (4889.9400).
+^GDAXI startete am 2009/06/16 mit 4899.8100 und schloss zu 4890.7200 (4890.7200).
+</pre>
+<p>
+&nbsp;
+</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Finance::QuoteHist">Finance::QuoteHist</a></li>
+<li><a href="http://search.cpan.org/perldoc?Finance::QuoteHist::Yahoo">Finance::QuoteHist::Yahoo</a></li>
+<li><a href="http://search.cpan.org/perldoc?Finance::QuoteHist::QuoteMedia">Finance::QuoteHist::QuoteMedia</a></li>
+<li><a href="http://finance.yahoo.com/">Yahoo! Finance</a> <a href="http://info.yahoo.com/legal/us/yahoo/utos/utos-173.html">Terms of Service</a></li>
+<li><a href="http://www.quotemedia.com/">QuoteMedia</a></li>
+</ul>

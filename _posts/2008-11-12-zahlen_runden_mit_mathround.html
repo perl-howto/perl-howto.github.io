@@ -1,0 +1,343 @@
+---
+layout: post
+title: Zahlen runden mit Math::Round
+date: '2008-11-12 13:00:02 +0000'
+mt_id: 101
+blog_id: 1
+post_id: 101
+permalink: /2008/11/zahlen_runden_mit_mathround.html
+categories:
+- '101'
+---
+<p>
+Zahlen runden kann eine recht tückische Aufgabe sein.
+</p>
+<p>
+Das CPAN-Modul <a href="http://search.cpan.org/perldoc?Math::Round">Math::Round</a> von <a href="http://search.cpan.org/~grommel/">Geoffrey Rommel</a> vereinfacht diese Aufgabe erheblich.
+</p>
+<p>
+Dieser Beitrag geht auf die Themen
+<ul class="no-bullet">
+	<li>Auf Ganze Zahlen runden</li>
+	<li>Auf Fließkommazahlen runden, z.B. Nachkommastellen</li>
+	<li>Zum nächsten Vielfachen auf- oder abrunden, z.B. Hunderter</li>
+</ul>
+ein.
+</p>
+
+<h2>Auf Ganze Zahlen runden</h2>
+<p>
+Die Prozeduren <em>round</em>, <em>round_even</em>, <em>round_odd</em> und <em>round_rand</em> runden auf Ganzzahlen (Integer) auf bzw. ab.
+</p>
+<ul class="no-bullet">
+	<li><em>round LIST</em> rundet zur nächsten Ganzzahl auf bzw. ab.</li>
+	<li><em>round_even LIST</em> rundet zur nächsten Ganzzahl auf bzw. ab. Zahlen, die in der Mitte zwischen zwei Ganzzahlen liegen, werden zur nächsten geraden Zahl gerundet.</li>
+	<li><em>round_odd LIST</em> rundet zur nächsten Ganzzahl auf bzw. ab. Zahlen, die in der Mitte zwischen zwei Ganzzahlen liegen, werden zur nächsten ungeraden Zahl gerundet.</li>
+	<li><em>round_rand LIST</em> rundet zur nächsten Ganzzahl auf bzw. ab. Zahlen, die in der Mitte zwischen zwei Ganzzahlen liegen, werden zufällig auf- bzw.  abgerundet</li>
+</ul>
+<p><strong>Beispiel: Zur nächsten Ganzzahl auf- oder abrunden:</strong></p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Math::Round</span> <span style=" color: #CD5555;">qw/round/</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@zahlen</span> = <span style=" color: #CD5555;">qw /-2.5 -2.0 -1.5 -1.0 -0.5 </span>
+                 <span style=" color: #CD5555;">0.0 </span>
+                 <span style=" color: #CD5555;">0.5 1.0 1.5 2.0 2.5</span>
+                 <span style=" color: #CD5555;">125.3456 125.5678/</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$zahl</span> <span style=" color: #000000;">(</span> <span style=" color: #00688B;">@zahlen</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">printf</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;%8s wird zu %8s gerundet\n&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">,</span>  <span style=" color: #00688B;">round</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">)</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+    -2.5 wird zu       -3 gerundet
+    -2.0 wird zu       -2 gerundet
+    -1.5 wird zu       -2 gerundet
+    -1.0 wird zu       -1 gerundet
+    -0.5 wird zu       -1 gerundet
+     0.0 wird zu        0 gerundet
+     0.5 wird zu        1 gerundet
+     1.0 wird zu        1 gerundet
+     1.5 wird zu        2 gerundet
+     2.0 wird zu        2 gerundet
+     2.5 wird zu        3 gerundet
+125.3456 wird zu      125 gerundet
+125.5678 wird zu      126 gerundet
+</pre>
+
+<p><strong>Beispiel: round_even</strong></p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Math::Round</span> <span style=" color: #CD5555;">qw/round_even/</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@zahlen</span> = <span style=" color: #CD5555;">qw /-2.5 -2.0 -1.5 -1.0 -0.5 </span>
+                 <span style=" color: #CD5555;">0.0 </span>
+                 <span style=" color: #CD5555;">0.5 1.0 1.5 2.0 2.5</span>
+                 <span style=" color: #CD5555;">125.3456 125.5678/</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$zahl</span> <span style=" color: #000000;">(</span> <span style=" color: #00688B;">@zahlen</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">printf</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;%8s wird zu %8s gerundet\n&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">,</span>  <span style=" color: #00688B;">round_even</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">)</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+    -2.5 wird zu       -2 gerundet
+    -2.0 wird zu       -2 gerundet
+    -1.5 wird zu       -2 gerundet
+    -1.0 wird zu       -1 gerundet
+    -0.5 wird zu        0 gerundet
+     0.0 wird zu        0 gerundet
+     0.5 wird zu        0 gerundet
+     1.0 wird zu        1 gerundet
+     1.5 wird zu        2 gerundet
+     2.0 wird zu        2 gerundet
+     2.5 wird zu        2 gerundet
+125.3456 wird zu      125 gerundet
+125.5678 wird zu      126 gerundet
+</pre>
+
+<p><strong>Beispiel: round_odd</strong></p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Math::Round</span> <span style=" color: #CD5555;">qw/round_odd/</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@zahlen</span> = <span style=" color: #CD5555;">qw /-2.5 -2.0 -1.5 -1.0 -0.5 </span>
+                 <span style=" color: #CD5555;">0.0 </span>
+                 <span style=" color: #CD5555;">0.5 1.0 1.5 2.0 2.5</span>
+                 <span style=" color: #CD5555;">125.3456 125.5678/</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$zahl</span> <span style=" color: #000000;">(</span> <span style=" color: #00688B;">@zahlen</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">printf</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;%8s wird zu %8s gerundet\n&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">,</span>  <span style=" color: #00688B;">round_odd</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">)</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+    -2.5 wird zu       -3 gerundet
+    -2.0 wird zu       -2 gerundet
+    -1.5 wird zu       -1 gerundet
+    -1.0 wird zu       -1 gerundet
+    -0.5 wird zu       -1 gerundet
+     0.0 wird zu        0 gerundet
+     0.5 wird zu        1 gerundet
+     1.0 wird zu        1 gerundet
+     1.5 wird zu        1 gerundet
+     2.0 wird zu        2 gerundet
+     2.5 wird zu        3 gerundet
+125.3456 wird zu      125 gerundet
+125.5678 wird zu      126 gerundet
+</pre>
+
+<p><strong>Beispiel: round_rand</strong></p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Math::Round</span> <span style=" color: #CD5555;">qw/round_rand/</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Messbereich (Anzahl der Messungen);</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$von</span> = <span style=" color: #B452CD;">1</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$bis</span>  = <span style=" color: #B452CD;">10_000</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Die Zahl, die gemessen/gepr&uuml;ft wird</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$zahl</span> = <span style=" color: #B452CD;">2.5</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Zaehler fuer Anzahl der Messungen</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$anzahl_messungen</span> = <span style=" color: #B452CD;">0</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Container fuer die Messergebnisse</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">%messergebnis</span> = <span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">for</span> <span style=" color: #000000;">(</span> <span style=" color: #00688B;">$von</span> .. <span style=" color: #00688B;">$bis</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$gerundet</span> = <span style=" color: #00688B;">round_rand</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+	<span style=" color: #00688B;">$messergebnis</span>{<span style=" color: #00688B;">$gerundet</span>}++<span style=" color: #000000;">;</span>
+	<span style=" color: #00688B;">$anzahl_messungen</span>++<span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@messwerte</span> = <span style=" color: #8B008B; font-weight:bold;">keys</span> <span style=" color: #00688B;">%messergebnis</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$messwert</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">@messwerte</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$zahl wurde $messergebnis{$messwert} mal zu $messwert gerundet.\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Das entspricht &quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$messergebnis</span>{<span style=" color: #00688B;">$messwert</span>} / <span style=" color: #00688B;">$anzahl_messungen</span> * <span style=" color: #B452CD;">100</span> <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;%.\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+2.5 wurde 5044 mal zu 3 gerundet.
+Das entspricht 50.44%.
+2.5 wurde 4956 mal zu 2 gerundet.
+Das entspricht 49.56%.
+</pre>
+
+<p><strong>Runden auf Ganzzahlen im Vergleich</strong></p>
+<p>
+Das folgende Beispiel erstellt eine kleine tabellarische Übersicht, die den Vergleich der vorgestellten Prozeduren vereinfachen soll.
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Math::Round</span> <span style=" color: #CD5555;">qw/round round_even round_odd round_rand/</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@zahlen</span> = <span style=" color: #CD5555;">qw /-2.5 -2.0 -1.5 -1.0 -0.5 </span>
+                 <span style=" color: #CD5555;">0.0 </span>
+                 <span style=" color: #CD5555;">0.5 1.0 1.5 2.0 2.5</span>
+                <span style=" color: #CD5555;">/</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Format f&uuml;r printf</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$format</span> = <span style=" color: #CD5555;">&#39;%6s %6s %10s %10s %10s&#39;</span><span style=" color: #000000;">;</span>
+
+
+<span style=" color: #8B008B; font-weight:bold;">printf</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$format\n&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;Zahl&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;round&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;round_even&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;round_odd&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;round_rand&#39;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$zahl</span> <span style=" color: #000000;">(</span> <span style=" color: #00688B;">@zahlen</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">printf</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$format\n&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">round</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">round_even</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">round_odd</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">round_rand</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+  Zahl  round round_even  round_odd round_rand
+  -2.5     -3         -2         -3         -3
+  -2.0     -2         -2         -2         -2
+  -1.5     -2         -2         -1         -2
+  -1.0     -1         -1         -1         -1
+  -0.5     -1          0         -1          0
+   0.0      0          0          0          0
+   0.5      1          0          1          1
+   1.0      1          1          1          1
+   1.5      2          2          1          2
+   2.0      2          2          2          2
+   2.5      3          2          3          2
+</pre>
+
+
+
+<h2>Auf Fließkommazahlen runden</h2>
+<p>Hier bietet sich <em>nearest(TARGET, LIST)</em> an. nearest rundet zum Vielfachen von TARGET auf bzw. ab. 
+</p>
+<p><strong>Beispiel: Auf eine bzw. zwei Nachkommastellen runden</strong></p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Math::Round</span> <span style=" color: #CD5555;">qw/nearest/</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@zahlen</span> = <span style=" color: #CD5555;">qw /-2.5 -2.0 -1.5 -1.0 -0.5 </span>
+                 <span style=" color: #CD5555;">0.0 </span>
+                 <span style=" color: #CD5555;">0.5 1.0 1.5 2.0 2.5</span>
+                 <span style=" color: #CD5555;">125.3456 125.5678/</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$format</span> = <span style=" color: #CD5555;">&#39;%8s %8s %8s&#39;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">printf</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$format\n&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;Zahl&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;Eine NK&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;Zwei NK&#39;</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$zahl</span> <span style=" color: #000000;">(</span> <span style=" color: #00688B;">@zahlen</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+			<span style=" color: #228B22;"># Eine Nachkommastelle (0.1)</span>
+			<span style=" color: #228B22;"># Zwei Nachkommastellen (0.01)</span>
+	<span style=" color: #8B008B; font-weight:bold;">printf</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$format\n&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">,</span>  <span style=" color: #00688B;">nearest</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&#39;0.1&#39;</span><span style=" color: #000000;">,</span><span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">nearest</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&#39;0.01&#39;</span><span style=" color: #000000;">,</span><span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+    Zahl  Eine NK  Zwei NK
+    -2.5     -2.5     -2.5
+    -2.0       -2       -2
+    -1.5     -1.5     -1.5
+    -1.0       -1       -1
+    -0.5     -0.5     -0.5
+     0.0        0        0
+     0.5      0.5      0.5
+     1.0        1        1
+     1.5      1.5      1.5
+     2.0        2        2
+     2.5      2.5      2.5
+125.3456    125.3   125.35
+125.5678    125.6   125.57
+</pre>
+<p>
+
+</p>
+
+
+<h2>Zum nächsten Vielfachen auf- oder abrunden</h2>
+<p>
+Die beiden Prozeduren <em>nlowmult</em> und <em>nhimult</em> runden zum nächsten kleineren bzw. größerem Vielfachen ab bzw. auf.
+</p>
+<ul class="no-bullet">
+	<li><em>nlowmult TARGET, LIST</em> rundet zum nächsten kleineren Vielfachen ab.</li>
+	<li><em>nhimult TARGET, LIST</em> rundet zum nächsten größeren Vielfachen auf.</li>
+</ul>
+<p>
+<strong>Beispiel: Auf volle 100er auf- bzw. abrunden.</strong>
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Math::Round</span> <span style=" color: #CD5555;">qw/nlowmult nhimult/</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@zahlen</span> = <span style=" color: #CD5555;">qw/ 126 176/</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Auf volle 100er auf- bzw. abrunden</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$target</span> = <span style=" color: #B452CD;">100</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$format</span> = <span style=" color: #CD5555;">&#39;%6s %10s %10s&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">printf</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$format\n&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;Zahl&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;nlowmult&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;nhimult&#39;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$zahl</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">@zahlen</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">printf</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;$format\n&quot;</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">nlowmult</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$target</span><span style=" color: #000000;">,</span><span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">nhimult</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$target</span><span style=" color: #000000;">,</span><span style=" color: #00688B;">$zahl</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+  Zahl   nlowmult    nhimult
+   126        100        200
+   176        100        200
+</pre>
+<p>
+Das funktioniert auch mit Vielfachen von Fließkommazahlen. Probieren Sie es einfach mal aus.
+</p>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+	<li><a href="http://search.cpan.org/perldoc?Math::Round">Math::Round</a></li>
+	<li><a href="http://search.cpan.org/perldoc?Math::SigFigs">Math::SigFigs</a></li>
+	<li><a href="http://search.cpan.org/perldoc?Math::BigInt">Math::BigInt</a></li>
+	<li><a href="http://de.wikipedia.org/wiki/Rundung">Wikipedia: Rundung</a></li>
+	<li><a href="http://perldoc.perl.org/functions/sprintf.html">perldoc: sprintf</a></li>
+	<li><a href="http://perldoc.perl.org/functions/printf.html">perldoc: printf</a></li>
+	<li><a href="http://perldoc.perl.org/POSIX.html">perldoc: Posix</a></li>
+	<li><a href="http://www.perl.com/doc/FAQs/FAQ/oldfaq-html/Q4.13.html">Perl FAQ 4.13 -  Does perl have a round function? What about ceil() and floor()?</a></li>
+	<li><a href="http://faq.perl-community.de/bin/view/Wissensbasis/PerlTutorialKapitel5">PerlCommunityWiki » Wissensbasis » PerlTutorialKapitel5</a></li>
+	<li><a href="http://www.perlmonks.org/?node_id=24335">Perlmonks: How do I round a number?</a></li>
+	<li><a href="http://www.perlmonks.org/?node_id=66948">Perlmonks: How do I round up a number?</a></li>
+</ul>

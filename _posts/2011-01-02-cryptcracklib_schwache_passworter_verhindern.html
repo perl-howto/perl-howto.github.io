@@ -1,0 +1,89 @@
+---
+layout: post
+title: 'Crypt::Cracklib - Schwache Passwörter verhindern '
+date: '2011-01-02 18:15:00 +0000'
+mt_id: 209
+blog_id: 1
+post_id: 209
+permalink: /2011/01/cryptcracklib_schwache_passworter_verhindern.html
+categories:
+- '101'
+- kryptographie
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Crypt::Cracklib">Crypt::Cracklib</a> von <a href="http://search.cpan.org/~daniel/">Dan Sully</a> verhindert bzw. erschwert die Verwendung zu einfacher Passwörter.
+</p>
+<p>
+Dazu führt <a href="http://search.cpan.org/perldoc?Crypt::Cracklib">Crypt::Cracklib</a> eine <a href="http://de.wikipedia.org/wiki/W%C3%B6rterbuchangriff">Wörterbuch Attacke</a> auf das Passwort durch und prüft auch die  Verteilung der Zeichen, die Länge der Zeichenkette und die Groß- und Kleinschreibung.
+</p>
+<p>
+<a href="http://search.cpan.org/perldoc?Crypt::Cracklib">Crypt::Cracklib</a> sollte verwendet werden, wenn der Benutzer sein Passwort selbst festlegen kann.
+</p>
+<p>
+&nbsp;
+</p>
+<h2>Beispiel fascist_check</h2>
+<p>
+Die automatisch exportierte Funktion <em>fascist_check()</em> liefert folgende Zeichenketten, die Begründung für ein zu schwaches Passwort, zurück (in Klammern die deutsche Lokalisierung):
+</p>
+<ul class="no-bullet">
+<li>it is based on a dictionary word (Es basiert auf einem Wörterbucheintrag)</li>
+<li>it is based on a (reversed) dictionary word (Es basiert auf einem (umgekehrten) Wörterbucheintrag)</li>
+<li>it is WAY too short! (Es ist VIEL zu kurz!)</li>
+<li>it is too short ((Es ist zu kurz)</li>
+<li>it does not contain enough DIFFERENT characters (Es enthält nicht genug unterschiedliche Zeichen)</li>
+<li>it is all whitespace</li>
+<li>it is too simplistic/systematic (Es ist zu einfach/systematisch)</li>
+<li>it looks like a National Insurance number (Es schaut nach Versicherungsnummer aus)</li>
+</ul>
+<p>
+Falls das Password gut genug ist, wird <em>ok</em> zurück geliefert.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Crypt::Cracklib</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@passwords</span> = <span style="color: #CD5555;">qw/123456 Schatzi abc</span>
+                   <span style="color: #CD5555;">z6IvPlOx6H oWOYNZI$bP</span>
+                   <span style="color: #CD5555;">geheym aaa2$ss iztahcS</span>
+		   <span style="color: #CD5555;">FH153436A /</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$password</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@passwords</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+
+    <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">fascist_check</span><span style="color: #000000;">(</span><span style="color: #00688B;">$password</span><span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">eq</span> <span style="color: #CD5555;">&#39;ok&#39;</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+       <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Passwort $password ist OK.\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Ooops - Passwort $password: &quot;</span><span style="color: #000000;">,</span>  <span style="color: #00688B;">fascist_check</span><span style="color: #000000;">(</span><span style="color: #00688B;">$password</span><span style="color: #000000;">)</span> <span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot; !!!\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Ooops - Passwort 123456: Es ist zu einfach/systematisch !!!
+Ooops - Passwort Schatzi: Es basiert auf einem Wörterbucheintrag !!!
+Ooops - Passwort abc: Es ist VIEL zu kurz !!!
+Passwort z6IvPlOx6H ist OK.
+Passwort oWOYNZI$bP ist OK.
+Ooops - Passwort geheym: Es basiert auf einem Wörterbucheintrag !!!
+Ooops - Passwort aaa2$ss: Es enthält nicht genug unterschiedliche Zeichen !!!
+Ooops - Passwort iztahcS: Es basiert auf einem (umgekehrten) Wörterbucheintrag !!!
+Ooops - Passwort FH153436A: Es schaut nach Versicherungsnummer aus !!!
+</pre>
+
+
+<p>
+&nbsp;
+</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Crypt::Cracklib">Crypt::Cracklib</a></li>
+<li><a href="http://sourceforge.net/projects/cracklib/">CrackLib</a></li>
+<li><a href="http://www.heise.de/security/meldung/Gawker-Einbruch-Beliebtestes-Passwort-ist-123456-1153267.html">Gawker-Einbruch: Beliebtestes Passwort ist 123456</a></li>
+<li><a href="http://www.heise.de/newsticker/meldung/Das-Passwort-Die-einzige-Konstante-im-Leben-1030313.html">Das Passwort: Die einzige Konstante im Leben</a></li>
+</ul>

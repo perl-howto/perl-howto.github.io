@@ -1,0 +1,125 @@
+---
+layout: post
+title: Net::NTP - Antwortpakete eines NTP-Servers einfach dekodieren
+date: '2012-03-22 20:15:00 +0000'
+mt_id: 227
+blog_id: 1
+post_id: 227
+permalink: /2012/03/netntp_antwortpakete_eines_ntpservers_einfach_dekodieren.html
+categories:
+- net
+---
+<p>
+"Das <a href="http://de.wikipedia.org/wiki/Network_Time_Protocol">Network Time Protocol</a> (NTP) ist ein Standard zur Synchronisierung von Uhren in Computersystemen &uuml;ber paketbasierte Kommunikationsnetze. NTP verwendet das verbindungslose Transportprotokoll <a href="http://de.wikipedia.org/wiki/User_Datagram_Protocol">UDP</a>. NTP wurde speziell entwickelt, um eine zuverl&auml;ssige Zeitgabe &uuml;ber Netzwerke mit variabler Paketlaufzeit zu erm&ouml;glichen." <small>Quelle: <a href="http://de.wikipedia.org/wiki/Network_Time_Protocol">Wikipedia: Network Time Protocol</a></small>.
+</p>
+<p>
+NTP-Server versenden Antworten im <a href="http://www.faqs.org/rfcs/rfc2030.html">NTP Message Format</a>, die sich mit
+<a href="http://search.cpan.org/perldoc?Net::NTP">Net::NTP - Perl extension for decoding NTP server responses</a> von <a href="http://search.cpan.org/~abh/">Ask Bj&oslash;rn Hansen</a> einfach dekodieren lassen.
+</p>
+<p>
+&nbsp;
+</p>
+
+
+<h2>Beispiel:</h2>
+<p>
+Net::NTP exportiert eine einzige Funktion, <i>get_ntp_response()</i>, die als optionalen Parameter auch die Adresse eines NTP-Server annimmt und liefert einen Hash zur&uuml;ck, dessen Schl&uuml;ssel die einzelnen Abschnitte des NTP Antwort Pakets enth&auml;lt.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Net::NTP</span> <span style="color: #CD5555;">qw(get_ntp_response)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ntp_server</span> = <span style="color: #8B008B; font-weight:bold;">shift</span> ||  <span style="color: #CD5555;">&#39;ptbtime1.ptb.de&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">%response</span> = <span style="color: #00688B;">get_ntp_response</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$ntp_server</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@response_keys</span> = <span style="color: #8B008B; font-weight:bold;">sort</span> <span style="color: #8B008B; font-weight:bold;">keys</span> <span style="color: #00688B;">%response</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$response_key</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">@response_keys</span><span style="color: #000000;"> )</span> <span style="color: #000000;">{</span>
+	<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;$response_key: $response{ $response_key }\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm liefert folgende Ausgabe:
+</p>
+<pre>
+Leap Indicator: 0
+Mode: 4
+Originate Timestamp: 1332443226.50195
+Poll Interval: 0.0000
+Precision: -21
+Receive Timestamp: 1332443226.90883
+Reference Clock Identifier: PTB
+Reference Timestamp: 1332443217.35515
+Root Delay: 0
+Root Dispersion: 0.0000
+Stratum: 1
+Transmit Timestamp: 1332443226.90883
+Version Number: 3
+</pre>
+<p>
+Die Schl&uuml;ssel des <span style="color: #00688B;">%response</span> ensprechen den einzelnen Feldern des NTP Antwortpakets:
+</p>
+<pre>
+                           1                   2                   3
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |LI | VN  |Mode |    Stratum    |     Poll      |   Precision   |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                          Root Delay                           |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                       Root Dispersion                         |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                     Reference Identifier                      |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      |                   Reference Timestamp (64)                    |
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      |                   Originate Timestamp (64)                    |
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      |                    Receive Timestamp (64)                     |
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      |                    Transmit Timestamp (64)                    |
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                 Key Identifier (optional) (32)                |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      |                                                               |
+      |                                                               |
+      |                 Message Digest (optional) (128)               |
+      |                                                               |
+      |                                                               |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre>
+<p>
+<small>Quelle:<a href="http://www.faqs.org/rfcs/rfc2030.html"> RFC 2030</a></small>
+<p>
+&nbsp;
+</p>
+
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li>CPAN: <a href="http://search.cpan.org/perldoc?Net::NTP">Net::NTP - Perl extension for decoding NTP server responses</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?POE::Component::Client::NTP">POE::Component::Client::NTP - A POE Component to query NTP servers</a></li>
+<li><a href="http://www.ntp.org/">NTP: The Network Time Protocol</a></li>
+<li><a href="http://www.ptb.de/de/org/q/q4/q42/_ntp_main.htm">PTB: Zeitsynchronisation von Rechnern mit Hilfe des "Network Time Protocol" (NTP)</a></li>
+<li><a href="http://www.pool.ntp.org/zone/de">Germany - de.pool.ntp.org</a></li>
+<li><a href="http://www.faqs.org/rfcs/rfc1305.html">RFC 1305</a></li>
+<li><a href="http://www.faqs.org/rfcs/rfc2030.html">RFC 2030</a></li>
+<li>Wikipedia: <a href="http://de.wikipedia.org/wiki/Zeitserver">Zeitserver</a></li>
+<li>Wikipedia: <a href="http://de.wikipedia.org/wiki/Network_Time_Protocol">Network Time Protocol</a></li>
+</ul>
+
+<p>
+&nbsp;
+</p>

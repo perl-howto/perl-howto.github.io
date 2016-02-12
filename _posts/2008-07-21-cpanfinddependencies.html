@@ -1,0 +1,113 @@
+---
+layout: post
+title: Modulabhängigkeiten ermitteln mit CPAN::FindDependencies
+date: '2008-07-21 19:25:00 +0000'
+mt_id: 92
+blog_id: 1
+post_id: 92
+permalink: /2008/07/cpanfinddependencies.html
+categories:
+- '101'
+---
+<p>
+Das CPAN-Modul <a href="http://search.cpan.org/perldoc?CPAN::FindDependencies">CPAN::FindDependencies</a> von <a href="http://search.cpan.org/~dcantrell/">David Cantrell</a> findet fast alle Abhängigkeiten (dependencies) für CPAN-Module.
+
+<h2>Beispielprogramm für die Konsole</h2>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">ExtUtils::MakeMaker</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">CPAN::FindDependencies</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$mod</span> = <span style=" color: #00688B;">prompt</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&quot;Bitte den Namen des Perl-Moduls eingeben: &quot;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@dependencies</span> = <span style=" color: #00688B;">CPAN::FindDependencies::finddeps</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$mod</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$dep</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">@dependencies</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&#39; &#39;</span> x <span style=" color: #00688B;">$dep</span><span style=" color: #00688B;">-&gt;depth</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$dep</span><span style=" color: #00688B;">-&gt;name</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span>.<span style=" color: #CD5555;">&#39; (&#39;</span>.<span style=" color: #00688B;">$dep</span><span style=" color: #00688B;">-&gt;distribution</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span>.<span style=" color: #CD5555;">&quot;)\n&quot;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+<strong>Beispiel1:</strong> Abhängigkeiten für das Modul CPAN
+</p>
+<pre>
+Bitte den Namen des Perl-Moduls eingeben:   CPAN
+
+CPAN (A/AN/ANDK/CPAN-1.9205.tar.gz)
+ Scalar::Util (G/GB/GBARR/Scalar-List-Utils-1.19.tar.gz)
+ Test::Harness (A/AN/ANDYA/Test-Harness-3.12.tar.gz)
+  File::Spec (K/KW/KWILLIAMS/PathTools-3.2701.tar.gz)
+   Carp (R/RG/RGARCIA/perl-5.10.0.tar.gz)
+   Module::Build (K/KW/KWILLIAMS/Module-Build-0.2808.tar.gz)
+   ExtUtils::CBuilder (K/KW/KWILLIAMS/ExtUtils-CBuilder-0.23.tar.gz)
+ Test::More (M/MS/MSCHWERN/Test-Simple-0.80.tar.gz)
+ File::Temp (T/TJ/TJENNESS/File-Temp-0.20.tar.gz)
+</pre>
+<p>
+<strong>Beispiel2:</strong> Abhängigkeiten für das Modul CPAN::FindDependencies
+</p>
+<pre>
+Bitte den Namen des Perl-Moduls eingeben:  CPAN::FindDependencies
+
+WARNING: CPAN::FindDependencies: GBARR/CPAN-DistnameInfo-0.07: no META.yml
+WARNING: CPAN::FindDependencies: GAAS/MIME-Base64-3.07: no META.yml
+WARNING: CPAN::FindDependencies: GAAS/Digest-MD5-2.36: no META.yml
+WARNING: CPAN::FindDependencies: GAAS/HTML-Parser-3.56: no META.yml
+CPAN::FindDependencies (D/DC/DCANTRELL/CPAN-FindDependencies-2.0.tar.gz)
+ Parse::CPAN::Packages (L/LB/LBROCARD/Parse-CPAN-Packages-2.27.tar.gz)
+  Test::More (M/MS/MSCHWERN/Test-Simple-0.80.tar.gz)
+   Test::Harness (A/AN/ANDYA/Test-Harness-3.12.tar.gz)
+    File::Spec (K/KW/KWILLIAMS/PathTools-3.2701.tar.gz)
+     Scalar::Util (G/GB/GBARR/Scalar-List-Utils-1.19.tar.gz)
+     Carp (R/RG/RGARCIA/perl-5.10.0.tar.gz)
+     Module::Build (K/KW/KWILLIAMS/Module-Build-0.2808.tar.gz)
+     ExtUtils::CBuilder (K/KW/KWILLIAMS/ExtUtils-CBuilder-0.23.tar.gz)
+  IO::Zlib (T/TO/TOMHUGHES/IO-Zlib-1.09.tar.gz)
+   Compress::Zlib (P/PM/PMQS/Compress-Zlib-2.012.tar.gz)
+    IO::Uncompress::Gunzip (P/PM/PMQS/IO-Compress-Zlib-2.012.tar.gz)
+     Compress::Raw::Zlib (P/PM/PMQS/Compress-Raw-Zlib-2.012.tar.gz)
+     IO::Uncompress::Base (P/PM/PMQS/IO-Compress-Base-2.012.tar.gz)
+  version (J/JP/JPEACOCK/version-0.76.tar.gz)
+  Class::Accessor::Fast (K/KA/KASEI/Class-Accessor-0.31.tar.gz)
+   base (R/RG/RGARCIA/base-2.12.tar.gz)
+  CPAN::DistnameInfo (G/GB/GBARR/CPAN-DistnameInfo-0.07.tar.gz)
+ YAML (I/IN/INGY/YAML-0.66.tar.gz)
+ URI::file (G/GA/GAAS/URI-1.37.tar.gz)
+  MIME::Base64 (G/GA/GAAS/MIME-Base64-3.07.tar.gz)
+ Module::CoreList (R/RG/RGARCIA/Module-CoreList-2.15.tar.gz)
+ LWP::Simple (G/GA/GAAS/libwww-perl-5.813.tar.gz)
+  Net::FTP (G/GB/GBARR/libnet-1.22.tar.gz)
+  Digest::MD5 (G/GA/GAAS/Digest-MD5-2.36.tar.gz)
+  HTML::Parser (G/GA/GAAS/HTML-Parser-3.56.tar.gz)
+  HTML::Tagset (P/PE/PETDANCE/HTML-Tagset-3.20.tar.gz)
+</pre>
+<p>
+Die oben gezeigten Warnungen (<em>no META.yml</em>) zeigen an, das der Author des Moduls keine Metainformationen zu den Abhängigkeiten mitgeliefert hat. Daher können hier keine weiteren Abhängigkeiten ermittelt werden.
+</p>
+
+<h2>Graphische Darstellung</h2>
+
+
+<p>Wer eine graphische Darstellung der Abhängkeiten bevorzugt, sollte einen Blick auf
+<a href="http://deps.cpantesters.org/">CPAN dependencies and test results checker</a> riskieren.
+</p>
+<p>
+<strong>Beispiel 3:</strong> Graphische Darstellung der  Abhängigkeiten für das Modul CPAN (wie Beispiel1):
+</p>
+<p>
+<form mt:asset-id="8" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="CPANdependenciesandtestresultschecker.png" src="{{ site.url }}/assets/images/CPANdependenciesandtestresultschecker.png" width="637" height="354" style="text-align: center; display: block; margin: 0 auto 20px;" /></form>
+</p>
+
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+	<li><a href="http://www.perlmonks.org/?node_id=698698">PerlMonks: Installed Module Dependencies?</a></li>
+	<li><a href="http://search.cpan.org/perldoc?CPAN::FindDependencies">CPAN::FindDependencies</a></li>
+	<li><a href="http://deps.cpantesters.org/">CPAN dependencies and test results checker</a></li>
+<li><a href="http://cpandeps.cantrell.org.uk/">CPANdeps</a></li>
+<li><a href="http://search.cpan.org/perldoc?Module::ScanDeps">Module::ScanDeps</a>, eine Alternative</li>
+<li><a href="http://www.cantrell.org.uk/david/">Dave's Free Press
+(David Cantrell)</a></li>
+</ul>

@@ -1,0 +1,339 @@
+---
+layout: post
+title: Komplexe Datenstrukturen mit Dumpvalue darstellen
+date: '2008-06-25 20:00:00 +0000'
+mt_id: 80
+blog_id: 1
+post_id: 80
+permalink: /2008/06/komplexe_datenstrukturen_mit_d.html
+categories:
+- '101'
+---
+<h2>Smarte Datenstrukturen und dummer Code funktionieren viel besser als umgekehrt</h2>
+<p>
+<em>Brooks, Kapitel 9: "Also zeige mir Deinen [Code], aber verhülle Deine [Datenstrukturen], und ich werde auf ewig im Dunkeln tappen. Zeige mir aber Deine [Datenstrukturen] und ich werde Deinen [Code] gar nicht brauchen, denn ich weiß, wie er aussieht."
+</em> (<a href="http://www.problem-hilfe.de/linux/h/OpenSource/Kathedrale_und_Basar.html">Quelle: Die Kathedrale und der Basar</a>.)
+</p>
+<p>
+Smarte Datenstrukturen sind manchmal auch komplex. Hier hilft das Standardmodul <a href="http://perldoc.perl.org/Dumpvalue.html">Dumpvalue</a>, das die übersichtliche Darstellung komplexer Datenstrukturen unterstützt. Die für diesen Zweck häufig verwendeten CPAN-Module <a href="http://search.cpan.org/perldoc?Data::Dumper">Data::Dumper</a> und <a href="http://search.cpan.org/perldoc?Data::Dump::Streamer">Data::Dump::Streamer</a> sind eigentlich zur <a href="http://de.wikipedia.org/wiki/Serialisierung">Serialisierung</a> von Datenstrukturen entwickelt worden und weniger zur Darstellung.
+</p>
+<p>
+Dieser Beitrag geht auf folgende häufig anzutreffende Datenstrukturen ein 
+</p>
+<ul class="no-bullet">
+<li>Arrays of Arrays</li>
+<li>Hashes of Arrays</li>
+<li>Arrays of Hashes</li>
+<li>Hashes of Hashes</li>
+<li>Hash mit komplexer Datenstruktur</li>
+</ul>
+<p>
+und zeigt wie <a href="http://perldoc.perl.org/Dumpvalue.html">Dumpvalue</a> diese darstellt.
+</p>
+
+<h2>dumpvalue()</h2>
+
+<p>Die Methode <strong>dumpvalue()</strong> aus dem Paket <a href="http://perldoc.perl.org/Dumpvalue.html">Dumpvalue</a>, erwartet als Parameter eine Referenz (\) auf eine Datenstruktur und gibt eine Darstellung der Datenstruktur im Listenkontext zurück.
+</p>
+<p>
+Gibt man <strong>dumpvalue()</strong> jedoch eine Referenz auf eine Referenz (\\) auf eine Datenstruktur als Parameter, so wird die Ausgabe wesentlich informativer. In diesem Fall wird das Ausgabeformat des <a href="http://debugger.perl.org/">Perl-Debuggers</a> verwendet. 
+</p>
+<p>
+Im Abschnitt <em>Arrays of Arrays</em> werden beide Formen kurz dargestellt. In den weiteren Abschnitten wird durchgehend die zweite Form (\\) verwendet.
+</p>
+
+<h2>Arrays of Arrays</h2>
+
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">Dumpvalue</span><span class="sc">;</span>
+<span class="k">my</span> <span class="i">$dumper</span> = <span class="w">new</span> <span class="w">Dumpvalue</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">@AoA</span> = <span class="s">(</span>
+        <span class="s">[</span> <span class="q">&quot;fred&quot;</span><span class="cm">,</span> <span class="q">&quot;barney&quot;</span> <span class="s">]</span><span class="cm">,</span>
+        <span class="s">[</span> <span class="q">&quot;george&quot;</span><span class="cm">,</span> <span class="q">&quot;jane&quot;</span><span class="cm">,</span> <span class="q">&quot;elroy&quot;</span> <span class="s">]</span><span class="cm">,</span>
+        <span class="s">[</span> <span class="q">&quot;homer&quot;</span><span class="cm">,</span> <span class="q">&quot;marge&quot;</span><span class="cm">,</span> <span class="q">&quot;bart&quot;</span> <span class="s">]</span><span class="cm">,</span>
+      <span class="s">)</span><span class="sc">;</span>
+
+<span class="i">$dumper</span><span class="i">-&gt;dumpValue</span><span class="s">(</span>\<span class="i">@AoA</span><span class="s">)</span><span class="sc">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+0  ARRAY(0x8153c28)
+   0  'fred'
+   1  'barney'
+1  ARRAY(0x8190814)
+   0  'george'
+   1  'jane'
+   2  'elroy'
+2  ARRAY(0x81953f0)
+   0  'homer'
+   1  'marge'
+   2  'bart'
+</pre>
+<p>
+Verwendet man zwei Backslashes (\\), werden mehr Details angezeigt.
+</p>
+<pre>
+<span class="i">$dumper</span><span class="i">-&gt;dumpValue</span><span class="s">(</span>\\<span class="i">@AoA</span><span class="s">)</span><span class="sc">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt jetzt folgende Ausgabe:
+</p>
+<pre>
+-> ARRAY(0x8154630)
+   0  ARRAY(0x8153c28)
+      0  'fred'
+      1  'barney'
+   1  ARRAY(0x8190814)
+      0  'george'
+      1  'jane'
+      2  'elroy'
+   2  ARRAY(0x81953f0)
+      0  'homer'
+      1  'marge'
+      2  'bart'
+</pre>
+
+<h2>Hashes of Arrays</h2>
+
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">Dumpvalue</span><span class="sc">;</span>
+<span class="k">my</span> <span class="i">$dumper</span> = <span class="w">new</span> <span class="w">Dumpvalue</span><span class="sc">;</span>
+
+<span class="k">my</span>  <span class="i">%HoA</span> = <span class="s">(</span>
+        <span class="w">flintstones</span>        <span class="cm">=&gt;</span> <span class="s">[</span> <span class="q">&quot;fred&quot;</span><span class="cm">,</span> <span class="q">&quot;barney&quot;</span> <span class="s">]</span><span class="cm">,</span>
+        <span class="w">jetsons</span>            <span class="cm">=&gt;</span> <span class="s">[</span> <span class="q">&quot;george&quot;</span><span class="cm">,</span> <span class="q">&quot;jane&quot;</span><span class="cm">,</span> <span class="q">&quot;elroy&quot;</span> <span class="s">]</span><span class="cm">,</span>
+        <span class="w">simpsons</span>           <span class="cm">=&gt;</span> <span class="s">[</span> <span class="q">&quot;homer&quot;</span><span class="cm">,</span> <span class="q">&quot;marge&quot;</span><span class="cm">,</span> <span class="q">&quot;bart&quot;</span> <span class="s">]</span><span class="cm">,</span>
+      <span class="s">)</span><span class="sc">;</span>
+<span class="i">$dumper</span><span class="i">-&gt;dumpValue</span><span class="s">(</span>\\<span class="i">%HoA</span><span class="s">)</span><span class="sc">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+-> HASH(0x8154630)
+   'flintstones' => ARRAY(0x8153c28)
+      0  'fred'
+      1  'barney'
+   'jetsons' => ARRAY(0x8190880)
+      0  'george'
+      1  'jane'
+      2  'elroy'
+   'simpsons' => ARRAY(0x819545c)
+      0  'homer'
+      1  'marge'
+      2  'bart'
+</pre>
+
+<h2>Arrays of Hashes</h2>
+
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">Dumpvalue</span><span class="sc">;</span>
+<span class="k">my</span> <span class="i">$dumper</span> = <span class="w">new</span> <span class="w">Dumpvalue</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">@AoH</span> = <span class="s">(</span>
+        <span class="s">{</span>
+            <span class="w">Lead</span>     <span class="cm">=&gt;</span> <span class="q">&quot;fred&quot;</span><span class="cm">,</span>
+            <span class="w">Friend</span>   <span class="cm">=&gt;</span> <span class="q">&quot;barney&quot;</span><span class="cm">,</span>
+        <span class="s">}</span><span class="cm">,</span>
+        <span class="s">{</span>
+            <span class="w">Lead</span>     <span class="cm">=&gt;</span> <span class="q">&quot;george&quot;</span><span class="cm">,</span>
+            <span class="w">Wife</span>     <span class="cm">=&gt;</span> <span class="q">&quot;jane&quot;</span><span class="cm">,</span>
+            <span class="w">Son</span>      <span class="cm">=&gt;</span> <span class="q">&quot;elroy&quot;</span><span class="cm">,</span>
+        <span class="s">}</span><span class="cm">,</span>
+        <span class="s">{</span>
+            <span class="w">Lead</span>     <span class="cm">=&gt;</span> <span class="q">&quot;homer&quot;</span><span class="cm">,</span>
+            <span class="w">Wife</span>     <span class="cm">=&gt;</span> <span class="q">&quot;marge&quot;</span><span class="cm">,</span>
+            <span class="w">Son</span>      <span class="cm">=&gt;</span> <span class="q">&quot;bart&quot;</span><span class="cm">,</span>
+        <span class="s">}</span><span class="cm">,</span>
+  <span class="s">)</span><span class="sc">;</span>
+<span class="i">$dumper</span><span class="i">-&gt;dumpValue</span><span class="s">(</span>\\<span class="i">@AoH</span><span class="s">)</span><span class="sc">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+-> ARRAY(0x8154630)
+   0  HASH(0x8153c28)
+      'Friend' => 'barney'
+      'Lead' => 'fred'
+   1  HASH(0x81954ec)
+      'Lead' => 'george'
+      'Son' => 'elroy'
+      'Wife' => 'jane'
+   2  HASH(0x8195534)
+      'Lead' => 'homer'
+      'Son' => 'bart'
+      'Wife' => 'marge'
+</pre>
+
+<h2>Hashes of Hashes</h2>
+
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">Dumpvalue</span><span class="sc">;</span>
+<span class="k">my</span> <span class="i">$dumper</span> = <span class="w">new</span> <span class="w">Dumpvalue</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">%HoH</span> = <span class="s">(</span>
+        <span class="w">flintstones</span> <span class="cm">=&gt;</span> <span class="s">{</span>
+                <span class="w">lead</span>      <span class="cm">=&gt;</span> <span class="q">&quot;fred&quot;</span><span class="cm">,</span>
+                <span class="w">pal</span>       <span class="cm">=&gt;</span> <span class="q">&quot;barney&quot;</span><span class="cm">,</span>
+        <span class="s">}</span><span class="cm">,</span>
+        <span class="w">jetsons</span>     <span class="cm">=&gt;</span> <span class="s">{</span>
+                <span class="w">lead</span>      <span class="cm">=&gt;</span> <span class="q">&quot;george&quot;</span><span class="cm">,</span>
+                <span class="w">wife</span>      <span class="cm">=&gt;</span> <span class="q">&quot;jane&quot;</span><span class="cm">,</span>
+                <span class="q">&quot;his boy&quot;</span> <span class="cm">=&gt;</span> <span class="q">&quot;elroy&quot;</span><span class="cm">,</span>
+        <span class="s">}</span><span class="cm">,</span>
+        <span class="w">simpsons</span>    <span class="cm">=&gt;</span> <span class="s">{</span>
+                <span class="w">lead</span>      <span class="cm">=&gt;</span> <span class="q">&quot;homer&quot;</span><span class="cm">,</span>
+                <span class="w">wife</span>      <span class="cm">=&gt;</span> <span class="q">&quot;marge&quot;</span><span class="cm">,</span>
+                <span class="w">kid</span>       <span class="cm">=&gt;</span> <span class="q">&quot;bart&quot;</span><span class="cm">,</span>
+        <span class="s">}</span><span class="cm">,</span>
+ <span class="s">)</span><span class="sc">;</span>
+<span class="i">$dumper</span><span class="i">-&gt;dumpValue</span><span class="s">(</span>\\<span class="i">%HoH</span><span class="s">)</span><span class="sc">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+-> HASH(0x8154630)
+   'flintstones' => HASH(0x8153c28)
+      'lead' => 'fred'
+      'pal' => 'barney'
+   'jetsons' => HASH(0x81954fc)
+      'his boy' => 'elroy'
+      'lead' => 'george'
+      'wife' => 'jane'
+   'simpsons' => HASH(0x819552c)
+      'kid' => 'bart'
+      'lead' => 'homer'
+      'wife' => 'marge'
+</pre>
+
+<h2>Hash mit komplexer Datenstruktur</h2>
+
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">Dumpvalue</span><span class="sc">;</span>
+<span class="k">my</span> <span class="i">$dumper</span> = <span class="w">new</span> <span class="w">Dumpvalue</span><span class="sc">;</span>
+
+<span class="k">my</span>      <span class="i">%TV</span> = <span class="s">(</span>
+        <span class="w">flintstones</span> <span class="cm">=&gt;</span> <span class="s">{</span>
+            <span class="w">series</span>   <span class="cm">=&gt;</span> <span class="q">&quot;flintstones&quot;</span><span class="cm">,</span>
+            <span class="w">nights</span>   <span class="cm">=&gt;</span> <span class="s">[</span> <span class="q">qw(monday thursday friday)</span> <span class="s">]</span><span class="cm">,</span>
+            <span class="w">members</span>  <span class="cm">=&gt;</span> <span class="s">[</span>
+                <span class="s">{</span> <span class="w">name</span> <span class="cm">=&gt;</span> <span class="q">&quot;fred&quot;</span><span class="cm">,</span>    <span class="w">role</span> <span class="cm">=&gt;</span> <span class="q">&quot;lead&quot;</span><span class="cm">,</span> <span class="w">age</span>  <span class="cm">=&gt;</span> <span class="n">36</span><span class="cm">,</span> <span class="s">}</span><span class="cm">,</span>
+                <span class="s">{</span> <span class="w">name</span> <span class="cm">=&gt;</span> <span class="q">&quot;wilma&quot;</span><span class="cm">,</span>   <span class="w">role</span> <span class="cm">=&gt;</span> <span class="q">&quot;wife&quot;</span><span class="cm">,</span> <span class="w">age</span>  <span class="cm">=&gt;</span> <span class="n">31</span><span class="cm">,</span> <span class="s">}</span><span class="cm">,</span>
+                <span class="s">{</span> <span class="w">name</span> <span class="cm">=&gt;</span> <span class="q">&quot;pebbles&quot;</span><span class="cm">,</span> <span class="w">role</span> <span class="cm">=&gt;</span> <span class="q">&quot;kid&quot;</span><span class="cm">,</span>  <span class="w">age</span>  <span class="cm">=&gt;</span>  <span class="n">4</span><span class="cm">,</span> <span class="s">}</span><span class="cm">,</span>
+            <span class="s">]</span><span class="cm">,</span>
+        <span class="s">}</span><span class="cm">,</span>
+
+        <span class="w">jetsons</span>     <span class="cm">=&gt;</span> <span class="s">{</span>
+            <span class="w">series</span>   <span class="cm">=&gt;</span> <span class="q">&quot;jetsons&quot;</span><span class="cm">,</span>
+            <span class="w">nights</span>   <span class="cm">=&gt;</span> <span class="s">[</span> <span class="q">qw(wednesday saturday)</span> <span class="s">]</span><span class="cm">,</span>
+            <span class="w">members</span>  <span class="cm">=&gt;</span> <span class="s">[</span>
+                <span class="s">{</span> <span class="w">name</span> <span class="cm">=&gt;</span> <span class="q">&quot;george&quot;</span><span class="cm">,</span>  <span class="w">role</span> <span class="cm">=&gt;</span> <span class="q">&quot;lead&quot;</span><span class="cm">,</span> <span class="w">age</span>  <span class="cm">=&gt;</span> <span class="n">41</span><span class="cm">,</span> <span class="s">}</span><span class="cm">,</span>
+                <span class="s">{</span> <span class="w">name</span> <span class="cm">=&gt;</span> <span class="q">&quot;jane&quot;</span><span class="cm">,</span>    <span class="w">role</span> <span class="cm">=&gt;</span> <span class="q">&quot;wife&quot;</span><span class="cm">,</span> <span class="w">age</span>  <span class="cm">=&gt;</span> <span class="n">39</span><span class="cm">,</span> <span class="s">}</span><span class="cm">,</span>
+                <span class="s">{</span> <span class="w">name</span> <span class="cm">=&gt;</span> <span class="q">&quot;elroy&quot;</span><span class="cm">,</span>   <span class="w">role</span> <span class="cm">=&gt;</span> <span class="q">&quot;kid&quot;</span><span class="cm">,</span>  <span class="w">age</span>  <span class="cm">=&gt;</span>  <span class="n">9</span><span class="cm">,</span> <span class="s">}</span><span class="cm">,</span>
+            <span class="s">]</span><span class="cm">,</span>
+         <span class="s">}</span><span class="cm">,</span>
+
+        <span class="w">simpsons</span>    <span class="cm">=&gt;</span> <span class="s">{</span>
+            <span class="w">series</span>   <span class="cm">=&gt;</span> <span class="q">&quot;simpsons&quot;</span><span class="cm">,</span>
+            <span class="w">nights</span>   <span class="cm">=&gt;</span> <span class="s">[</span> <span class="q">qw(monday)</span> <span class="s">]</span><span class="cm">,</span>
+            <span class="w">members</span>  <span class="cm">=&gt;</span> <span class="s">[</span>
+                <span class="s">{</span> <span class="w">name</span> <span class="cm">=&gt;</span> <span class="q">&quot;homer&quot;</span><span class="cm">,</span> <span class="w">role</span> <span class="cm">=&gt;</span> <span class="q">&quot;lead&quot;</span><span class="cm">,</span> <span class="w">age</span>  <span class="cm">=&gt;</span> <span class="n">34</span><span class="cm">,</span> <span class="s">}</span><span class="cm">,</span>
+                <span class="s">{</span> <span class="w">name</span> <span class="cm">=&gt;</span> <span class="q">&quot;marge&quot;</span><span class="cm">,</span> <span class="w">role</span> <span class="cm">=&gt;</span> <span class="q">&quot;wife&quot;</span><span class="cm">,</span> <span class="w">age</span> <span class="cm">=&gt;</span> <span class="n">37</span><span class="cm">,</span> <span class="s">}</span><span class="cm">,</span>
+                <span class="s">{</span> <span class="w">name</span> <span class="cm">=&gt;</span> <span class="q">&quot;bart&quot;</span><span class="cm">,</span>  <span class="w">role</span> <span class="cm">=&gt;</span> <span class="q">&quot;kid&quot;</span><span class="cm">,</span>  <span class="w">age</span>  <span class="cm">=&gt;</span>  <span class="n">11</span><span class="cm">,</span> <span class="s">}</span><span class="cm">,</span>
+            <span class="s">]</span><span class="cm">,</span>
+         <span class="s">}</span><span class="cm">,</span>
+      <span class="s">)</span><span class="sc">;</span>
+<span class="i">$dumper</span><span class="i">-&gt;dumpValue</span><span class="s">(</span>\\<span class="i">%TV</span><span class="s">)</span><span class="sc">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+-> HASH(0x8154630)
+   'flintstones' => HASH(0x81d49d4)
+      'members' => ARRAY(0x81d4998)
+         0  HASH(0x81d4824)
+            'age' => 36
+            'name' => 'fred'
+            'role' => 'lead'
+         1  HASH(0x81d4860)
+            'age' => 31
+            'name' => 'wilma'
+            'role' => 'wife'
+         2  HASH(0x81d495c)
+            'age' => 4
+            'name' => 'pebbles'
+            'role' => 'kid'
+      'nights' => ARRAY(0x8153c28)
+         0  'monday'
+         1  'thursday'
+         2  'friday'
+      'series' => 'flintstones'
+   'jetsons' => HASH(0x81d4b30)
+      'members' => ARRAY(0x81d4af4)
+         0  HASH(0x81d4a40)
+            'age' => 41
+            'name' => 'george'
+            'role' => 'lead'
+         1  HASH(0x81d4a7c)
+            'age' => 39
+            'name' => 'jane'
+            'role' => 'wife'
+         2  HASH(0x81d4ab8)
+            'age' => 9
+            'name' => 'elroy'
+            'role' => 'kid'
+      'nights' => ARRAY(0x81d4a10)
+         0  'wednesday'
+         1  'saturday'
+      'series' => 'jetsons'
+   'simpsons' => HASH(0x81d4c80)
+      'members' => ARRAY(0x81d4c44)
+         0  HASH(0x81d4b90)
+            'age' => 34
+            'name' => 'homer'
+            'role' => 'lead'
+         1  HASH(0x81d4bcc)
+            'age' => 37
+            'name' => 'marge'
+            'role' => 'wife'
+         2  HASH(0x81d4c08)
+            'age' => 11
+            'name' => 'bart'
+            'role' => 'kid'
+      'nights' => ARRAY(0x81d4b6c)
+         0  'monday'
+      'series' => 'simpsons'
+</pre>
+
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://perldoc.perl.org/perldsc.html">perldsc - Perl Data Structures Cookbook</a></li>
+<li><a href="http://perldoc.perl.org/Dumpvalue.html">Dumpvalue</a></li>
+<li><a href="http://search.cpan.org/perldoc?Data::Dumper">Data::Dumper</a></li>
+<li><a href="http://search.cpan.org/perldoc?Data::Dump::Streamer">Data::Dump::Streamer</a></li>
+<li><a href="{{ site.url }}/2008/08/datenstrukturen-visualisieren.html">Datenstrukturen visualisieren mit GraphViz::Data::Grapher</a></li>
+</ul>

@@ -1,0 +1,128 @@
+---
+layout: post
+title: CRC-Prüfsummen von Dateien erstellen
+date: '2008-06-02 20:00:00 +0000'
+mt_id: 75
+blog_id: 1
+post_id: 75
+permalink: /2008/06/crcprufsummen_von_dateien_erst.html
+categories:
+- '101'
+- kryptographie
+---
+<p>
+<em>In der Informatik ist eine Prüfsumme (engl.: checksum) eine einfache Maßnahme zur Gewährleistung von Datenintegrität bei der Datenübermittlung oder -speicherung. Sie wird hauptsächlich bei der Datensicherung und bei der Datenübertragung verwendet.
+</em> (Quelle: <a href="http://de.wikipedia.org/wiki/Pr%C3%BCfsumme">Wikipedia: Prüfsumme</a>.)
+</p>
+
+<p>
+Nachfolgend finden Sie ein paar Beispiele zur Erstellung von Prüfsummen über Dateien.
+</p>
+
+<h2>Prüfsummen mit Bordmitteln erstellen</h2>
+<p>
+Hier bietet sich <a href="http://perldoc.perl.org/functions/unpack.html">unpack()</a> an.
+</p>
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">Fcntl</span><span class="sc">;</span>  <span class="c"># Standardmodul</span>
+<span class="s">{</span>	
+        <span class="k">local</span> <span class="k">undef</span> <span class="i">$/</span><span class="sc">;</span>  <span class="c"># Slurp-Mode - Nur in diesem Block</span>
+
+        <span class="k">my</span> <span class="i">$file</span> = <span class="q">&#39;/path/to/some/file&#39;</span><span class="sc">;</span>
+
+        <span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_RDONLY</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+	<span class="k">binmode</span><span class="s">(</span><span class="w">FH</span><span class="s">)</span><span class="sc">;</span>
+			<span class="c"># Die ganze Datei in den Hauptspeicher einlesen</span>
+	<span class="k">my</span> <span class="i">$CompleteFile</span> = <span class="q">&lt;FH&gt;</span><span class="sc">;</span>
+
+	<span class="k">close</span><span class="s">(</span><span class="w">FH</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+
+	<span class="k">my</span> <span class="i">$checksum</span><span class="sc">;</span>
+
+		<span class="c"># Berechnet die gleiche Prüfsumme wie sum für System V</span>
+	<span class="i">$checksum</span> = <span class="k">unpack</span> <span class="s">(</span><span class="q">&quot;%32C*&quot;</span><span class="cm">,</span> <span class="i">$CompleteFile</span><span class="s">)</span> % <span class="n">32767</span><span class="sc">;</span>
+	<span class="k">print</span> <span class="q">&quot;System V: &quot;</span><span class="cm">,</span> <span class="i">$checksum</span> <span class="cm">,</span> <span class="q">&quot;\n&quot;</span><span class="sc">;</span>
+
+		<span class="c"># 16-bit Prüfsumme berechnen</span>
+	<span class="i">$checksum</span> = <span class="k">unpack</span> <span class="s">(</span><span class="q">&quot;%16C*&quot;</span><span class="cm">,</span> <span class="i">$CompleteFile</span><span class="s">)</span><span class="sc">;</span>
+	<span class="k">print</span> <span class="q">&quot;16-bit: &quot;</span><span class="cm">,</span> <span class="i">$checksum</span> <span class="cm">,</span> <span class="q">&quot;\n&quot;</span><span class="sc">;</span>
+		
+		<span class="c"># 32-bit Prüfsumme berechnen</span>
+	<span class="i">$checksum</span> = <span class="k">unpack</span> <span class="s">(</span><span class="q">&quot;%32C*&quot;</span><span class="cm">,</span> <span class="i">$CompleteFile</span><span class="s">)</span><span class="sc">;</span>
+	<span class="k">print</span> <span class="q">&quot;32-bit: &quot;</span><span class="cm">,</span> <span class="i">$checksum</span> <span class="cm">,</span> <span class="q">&quot;\n&quot;</span><span class="sc">;</span>
+<span class="s">}</span>
+<span class="k">exit</span><span class="s">(</span><span class="s">)</span><span class="sc">;</span>
+</pre>
+<p>
+Diese Methode setzt voraus, dass die Daten bzw. Dateien in den Hauptspeicher passen. Vorteil dieser Methode: Sie funktioniert überall, wo Perl funktioniert.
+</p>
+
+
+<h2>CRC-32 Prüfsummen mit String::CRC32 erstellen</h2>
+<p>
+<a href="http://search.cpan.org/perldoc?String::CRC32">String::CRC32</a> von <a href="http://search.cpan.org/~soenke/">Sönke J. Peters</a> kann CRC32-Prüfsummen von Zeichenketten und Dateien erzeugen. String::CRC32 erzeugt die gleichen CRC Prüfsummen wie <a href="http://de.wikipedia.org/wiki/ZMODEM">ZModem</a>, <a href="http://de.wikipedia.org/wiki/PKZIP">PKZip</a> und entsprechende andere Programme. 
+</p>
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">Fcntl</span><span class="sc">;</span>  <span class="c"># Standardmodul</span>
+
+<span class="k">use</span> <span class="w">String::CRC32</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$file</span> = <span class="q">&#39;/path/to/some/file&#39;</span><span class="sc">;</span>
+
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_RDONLY</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+
+<span class="k">binmode</span><span class="s">(</span><span class="w">FH</span><span class="s">)</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$crc</span> = <span class="i">crc32</span><span class="s">(</span><span class="i">*FH</span><span class="s">)</span><span class="sc">;</span>
+
+<span class="k">close</span><span class="s">(</span><span class="w">FH</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+
+<span class="k">print</span> <span class="q">&quot;CRC32: &quot;</span><span class="cm">,</span> <span class="i">$crc</span> <span class="cm">,</span> <span class="q">&quot;\n&quot;</span><span class="sc">;</span>
+</pre>
+<p>
+<a href="http://search.cpan.org/perldoc?String::CRC32">String::CRC32</a> ist in <a href="http://perldoc.perl.org/perlxs.html">XS</a> implementiert und läuft sehr schnell. Auch hier gilt, dass die Daten in den Hauptspeicher passen müssen.
+</p>
+
+<h2>CRC32 Prüfsummen mit Digest::CRC erstellen</h2>
+<p>
+<a href="http://search.cpan.org/perldoc?Digest::CRC">Digest::CRC</a> von <a href="http://search.cpan.org/~olimaul/">Oliver Maul</a> implementiert das <a href="http://search.cpan.org/perldoc?Digest">Digest</a>-Interface und kann CRC8-, CRC16-, CRC32- und CRC64-Prüfsummen erstellen.
+</p>
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">Fcntl</span><span class="sc">;</span>  <span class="c"># Standardmodul</span>
+<span class="c"># OO style</span>
+<span class="k">use</span> <span class="w">Digest::CRC</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$file</span> = <span class="q">&#39;/path/to/some/file&#39;</span><span class="sc">;</span>
+<span class="k">sysopen</span><span class="s">(</span><span class="w">FH</span><span class="cm">,</span> <span class="i">$file</span><span class="cm">,</span> <span class="w">O_RDONLY</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+<span class="k">binmode</span><span class="s">(</span><span class="w">FH</span><span class="s">)</span><span class="sc">;</span>
+
+<span class="k">my</span> <span class="i">$ctx</span> = <span class="w">Digest::CRC</span><span class="w">-&gt;new</span><span class="s">(</span><span class="w">type</span><span class="cm">=&gt;</span><span class="q">&quot;crc32&quot;</span><span class="s">)</span><span class="sc">;</span>
+<span class="i">$ctx</span><span class="i">-&gt;addfile</span><span class="s">(</span><span class="i">*FH</span><span class="s">)</span><span class="sc">;</span>
+<span class="k">my</span> <span class="i">$digest</span> = <span class="i">$ctx</span><span class="i">-&gt;digest</span><span class="sc">;</span>
+<span class="k">print</span> <span class="q">&quot;CRC32: &quot;</span><span class="cm">,</span> <span class="i">$digest</span> <span class="cm">,</span> <span class="q">&quot;\n&quot;</span><span class="sc">;</span>
+<span class="i">$digest</span> = <span class="i">$ctx</span><span class="i">-&gt;hexdigest</span><span class="sc">;</span>
+<span class="k">print</span> <span class="q">&quot;CRC32 (HEX): &quot;</span><span class="cm">,</span> <span class="i">$digest</span> <span class="cm">,</span> <span class="q">&quot;\n&quot;</span><span class="sc">;</span>
+<span class="k">close</span><span class="s">(</span><span class="w">FH</span><span class="s">)</span> <span class="k">or</span> <span class="k">die</span> <span class="i">$!</span><span class="sc">;</span>
+</pre>
+<p>
+Die Datei muss hier nicht in den Hauptspeicher passen, addfile kann auch mit Dateien umgehen, die größer sind als der verfügbare Hauptspeicher.
+</p>
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://de.wikipedia.org/wiki/Zyklische_Redundanzpr%C3%BCfung">Zyklische Redundanzprüfung</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Pr%C3%BCfsumme">Prüfsumme</a></li>
+<li><a href="http://search.cpan.org/perldoc?Digest::CRC">Digest::CRC</a></li>
+<li><a href="http://search.cpan.org/perldoc?String::CRC32">String::CRC32</a></li>
+<li><a href="http://perldoc.perl.org/functions/unpack.html">unpack()</a></li>
+<li><a href="http://perldoc.perl.org/functions/pack.html">pack()</a></li>
+</ul>

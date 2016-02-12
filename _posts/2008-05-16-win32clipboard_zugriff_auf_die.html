@@ -1,0 +1,119 @@
+---
+layout: post
+title: Win32::Clipboard - Zugriff auf die Windows-Zwischenablage
+date: '2008-05-16 12:27:17 +0000'
+mt_id: 48
+blog_id: 1
+post_id: 48
+permalink: /2008/05/win32clipboard_zugriff_auf_die.html
+categories:
+- windows
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Win32::Clipboard">Win32::Clipboard</a> von <a href="http://search.cpan.org/~jdb/">Jan Dubois</a> ermöglicht den einfachen Zugriff auf die <a href="http://de.wikipedia.org/wiki/Zwischenablage">Windows-Zwischenablage</a>.
+</p>
+<p>
+<strong>Tipp</strong>: Unter Microsoft Windows kann der Inhalt der Zwischenablage über den Systemdienst Ablagemappe mit dem Programm <em>%systemroot%\system32\clipbrd.exe</em> eingesehen und auch verwaltet werden.</p>
+
+<h2>Text, Bitmaps und Dateilisten</h2>
+<p>
+In der Zwischenablage können sich Texte, Bitmaps oder Dateilisten befinden.
+</p>
+<p>
+Diese drei Typen müssen unterschiedlich behandelt werden.
+</p>
+<p>Win32::Clipboard kann alle drei Typen lesen; in der hier besprochenen Version 0.52 kann Win32::Clipboard nur Text in die Zwischenablage einfügen. Also keine Bitmaps oder Dateilisten.</p>
+
+<h2>Basics</h2>
+<p>&nbsp;</p>
+<h3>Ein neues Objekt der Klasse Win32::Clipboard erzeugen</h3>
+<pre>
+#!/usr/bin/perl
+use warnings;
+use strict;
+use Win32::Clipboard;
+
+my $clip = Win32::Clipboard();
+</pre>
+<p>
+und die installierte Version ausgeben:
+</p>
+<pre>
+    # installierte Version 
+print 'Win32::Clipboard Version: ', $clip->Version() , "\n";
+</pre>
+
+<h3>Zwischenablage leeren</h3>
+<pre>
+$clip->Empty();
+</pre>
+
+
+<h2>Text lesen und bearbeiten</h2>
+<p>&nbsp;</p>
+<h3>Text zur Zwischenablage hinzufügen</h3>
+<pre>
+$clip->Set('Testtext für Zwischenablage');
+</pre>
+
+<h3>Feststellen, ob sich Text in der Zwischenablage befindet</h3>
+<pre>
+if ( $clip->IsText() ) {
+	print "In der Zwischenablage befindet sich Text\n";	
+}
+</pre>
+
+<h3>Textinhalt der Zwischenablage anzeigen</h3>
+<pre>
+if ( $clip->IsText() ) {
+    my $text = $clip->GetText();
+    print "Text in der Zwischenablage: $text\n";
+}
+</pre>
+
+<h2>Bitmaps lesen</h2>
+<p>&nbsp;</p>
+<h3>Feststellen, ob sich in der Zwischenablage ein Bitmap befindet</h3>
+<pre>
+if ( $clip->IsBitmap() ) {
+	print "In der Zwischenablage befindet sich ein Bitmap\n";	
+}
+</pre>
+
+<h3>Bitmap aus der Zwischenablage lesen und in eine Datei speichern</h3>
+<pre>
+if ( $clip->IsBitmap() ) {
+	my $image = $clip->GetBitmap();
+	open    BITMAP,'>',"YouNameIt.bmp" or die $!;  
+	binmode BITMAP;
+	print   BITMAP $image;
+	close   BITMAP or die $!;
+}
+</pre>
+
+<h2>Dateilisten lesen</h2>
+<p>&nbsp;</p>
+<h3>Feststellen, ob sich in der Zwischenablage eine Dateiliste befindet</h3>
+<pre>
+if ( $clip->IsFiles() ) {
+	print "In der Zwischenablage befindet sich eine Dateiliste\n";	
+}
+</pre>
+
+<h3>Dateiliste aus der Zwischenablage lesen und ausgeben</h3>
+<pre>
+if ( $clip->IsFiles() ) {
+	my @files = $clip->GetFiles();
+	foreach my $file (@files) {
+		print "Datei: $file\n";
+	}
+}
+</pre>
+
+<h2>Siehe auch</h2>
+<p>&nbsp;</p>
+<ul class="no-bullet">
+	<li><a href="http://search.cpan.org/perldoc?Win32::Clipboard">Win32::Clipboard</a></li>
+	<li><a href="http://www.perl.com/doc/FAQs/nt/perlwin32faq9.html">perlwin32faq9 - Modules and sample scripts</a></li>
+	<li><a href="http://win32.perl.org/wiki/index.php?title=Libwin32">Libwin32 - Win32 Perl Wiki</a></li>
+</ul>

@@ -1,0 +1,154 @@
+---
+layout: post
+title: WWW::IP - Was ist meine öffentliche IP Adresse?
+date: '2014-10-04 08:20:00 +0000'
+mt_id: 255
+blog_id: 1
+post_id: 255
+permalink: /2014/10/was_ist_meine_offentliche_ip.html
+categories:
+- lwp
+- geo
+- net
+---
+<img alt="matrix_medium_6886658738.jpg" src="{{ site.url }}/assets/images/matrix_medium_6886658738.jpg" width="500" height="375" style="text-align: center; display: block; margin: 0 auto 20px;" />
+<p>
+<a href="https://metacpan.org/pod/WWW::IP">WWW::IP - Returns your ip address with failsafe mechanism</a> von <a href="https://metacpan.org/author/SILLYMOOS">David Farrell</a> ermittelt die eigene &ouml;ffentliche <a href="http://de.wikipedia.org/wiki/IP-Adresse">IP-Adresse</a>.  
+</p>
+<h3>Beispiel</h3>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">WWW::IP</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ip</span> = <span style="color: #00688B;">get_ip</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;IP: $ip\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Ausgabe des Beispielprogramms:
+</p>
+<pre>
+IP: 79.232.98.21
+</pre>
+
+<h3>Failsafe</h3>
+<p>
+Um Ausfallsicherheit zu erreichen, fragt <a href="https://metacpan.org/pod/WWW::IP">WWW::IP</a> nacheinander bis zu drei verschiedene Dienste (Webservices), f&uuml;r die entsprechende Perl Module zur Verf&uuml;gung stehen, ab: 
+</p>
+<ul class="no-bullet">
+<li><a href="http://curlmyip.com/">http://curlmyip.com/</a> - <a href="https://metacpan.org/pod/WWW::curlmyip">WWW::curlmyip</a></li>
+<li><a href="http://geoip.hidemyass.com/ip/">http://geoip.hidemyass.com/ip/</a> - <a href="https://metacpan.org/pod/WWW::hmaip">WWW::hmaip</a></li>
+<li><a href="http://ipinfo.io/">http://ipinfo.io/</a> - <a href="https://metacpan.org/pod/WWW::ipinfo">WWW::ipinfo</a></li>
+</ul>
+<p>
+Der erste Treffer gewinnt, die anderen Dienste werden dann nicht mehr abgefragt.
+</p>
+
+<p>&nbsp;</p>
+<h2>WWW::curlmyip</h2>
+<p>
+<a href="https://metacpan.org/pod/WWW::curlmyip">WWW::curlmyip</a> von <a href="https://metacpan.org/author/SILLYMOOS">David Farrell</a> nutzt <a href="http://curlmyip.com/">http://curlmyip.com/</a> um die &ouml;ffentliche IP-Adresse zu ermitteln.
+</p>
+<h3>Beispiel</h3>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">WWW::curlmyip</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ip</span> = <span style="color: #00688B;">get_ip</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;IP: $ip\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Ausgabe des Beispielprogramms:
+</p>
+<pre>
+IP: 79.232.98.21
+</pre>
+
+<p>&nbsp;</p>
+<h2>WWW::hmaip</h2>
+<p>
+<a href="https://metacpan.org/pod/WWW::hmaip">WWW::hmaip</a> von <a href="https://metacpan.org/author/SILLYMOOS">David Farrell</a> nutzt <a href="http://geoip.hidemyass.com/ip/">http://geoip.hidemyass.com/ip/</a> um die &ouml;ffentliche IP-Adresse zu ermitteln.
+</p>
+<h3>Beispiel</h3>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">WWW::hmaip</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ip</span> = <span style="color: #00688B;">get_ip</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;IP: $ip\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Ausgabe des Beispielprogramms:
+</p>
+<pre>
+IP: 79.232.98.21
+</pre>
+
+<p>&nbsp;</p>
+<h2>WWW::ipinfo</h2>
+<p>
+<a href="https://metacpan.org/pod/WWW::ipinfo">WWW::ipinfo</a> von <a href="https://metacpan.org/author/SILLYMOOS">David Farrell</a> nutzt <a href="http://ipinfo.io/">http://ipinfo.io/</a> um die &ouml;ffentliche IP-Adresse zu ermitteln. Weiterhin k&ouml;nnen <a href="http://de.wikipedia.org/wiki/Geolocation">Geolocation</a> Daten zu der IP-Adresse abgefragt werden.
+</p>
+<p>
+Die Funktion <i>get_ipinfo()</i> liefert eine Referenz auf einen Hash mit der IP Adresse und den Geolocation Daten zur&uuml;ck.
+</p>
+<h3>Beispiel</h3>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">WWW::ipinfo</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ipinfo</span> = <span style="color: #00688B;">get_ipinfo</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@ipinfo_keys</span> = <span style="color: #CD5555;">qw/ip hostname city region country loc org postal/</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ipinfo_key</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@ipinfo_keys</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #00688B;">$ipinfo</span>-&gt;{<span style="color: #00688B;">$ipinfo_key</span>} = <span style="color: #CD5555;">&#39;unknown&#39;</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$ipinfo</span>-&gt;{<span style="color: #00688B;">$ipinfo_key</span>}<span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;$ipinfo_key: $ipinfo-&gt;{$ipinfo_key}\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Ausgabe des Beispielprogramms:
+</p>
+<pre>
+ip: 79.232.98.21
+hostname: p4FE86215.dip0.t-ipconnect.de
+city: Leimbach
+region: Hessen
+country: DE
+loc: 50.7500,9.7833
+org: AS3320 Deutsche Telekom AG
+postal: unknown
+</pre>
+<p>
+Der Funktion <i>get_ipinfo()</i> kann auch eine IPv4 oder IPv6 Adresse als Parameter &uuml;bergeben werden, dann werden die Geolocation Daten f&uuml;r die angegebene IP zur&uuml;ckgeliefert.
+</p>
+<p>&nbsp;</p>
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li><a href="https://metacpan.org/pod/WWW::IP">WWW::IP</a></li>
+<li><a href="https://metacpan.org/pod/WWW::curlmyip">WWW::curlmyip</a></li>
+<li><a href="http://curlmyip.com/">http://curlmyip.com/</a></li>
+<li><a href="https://metacpan.org/pod/WWW::hmaip">WWW::hmaip</a></li>
+<li><a href="http://geoip.hidemyass.com/ip/">http://geoip.hidemyass.com/ip/</a></li>
+<li><a href="https://metacpan.org/pod/WWW::ipinfo">WWW::ipinfo</a></li>
+<li><a href="http://ipinfo.io/">http://ipinfo.io/</a></li>
+<li><a href="http://perltricks.com/article/116/2014/9/18/Easily-check-your-IP-address-with-Perl">Easily check your IP address with Perl</a></li>
+<li><a href="{{ site.url }}/2009/03/geoip-ip-adressen-oder-hostnamen-regional-zuordnen.html">Geo::IP - IP-Adressen oder Hostnamen regional zuordnen</a></li>
+</ul>
+
+<p>&nbsp;</p>
+<h2>Bildnachweis</h2>
+<p>
+<a href="https://www.flickr.com/photos/bippix/6886658738/">phsymyst</a> via <a href="http://photopin.com">photopin</a> <a href="http://creativecommons.org/licenses/by/2.0/">cc</a>
+</p>
+<p>&nbsp;</p>

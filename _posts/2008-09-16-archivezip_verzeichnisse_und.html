@@ -1,0 +1,141 @@
+---
+layout: post
+title: Archive::Zip - Verzeichnisse und Dateien im Zip-Format packen und entpacken
+date: '2008-09-16 20:45:00 +0000'
+mt_id: 99
+blog_id: 1
+post_id: 99
+permalink: /2008/09/archivezip_verzeichnisse_und.html
+categories:
+- '101'
+---
+<p>
+Das <a href="http://de.wikipedia.org/wiki/ZIP_(Dateiformat)">ZIP-Dateiformat</a> ist ein offenes Format zur komprimierten Archivierung von Dateien. Neben mehreren Dateien können auch ganze Verzeichnisbäume in einer einzelnen ZIP-Datei archiviert und komprimiert werden.
+</p>
+
+<p>
+<a href="http://search.cpan.org/perldoc?Archive::Zip">Archive::Zip</a> von <a href="http://search.cpan.org/~adamk/">Adam Kennedy</a> ermöglicht das Erstellen und Entpacken von Zip-Archiven
+</p>
+
+<p>
+Die Handbuchseite zu <a href="http://search.cpan.org/perldoc?Archive::Zip">Archive::Zip</a> ist ziemlich verwirrend. Glücklicherweise befinden sich in der <a href="http://search.cpan.org/CPAN/authors/id/A/AD/ADAMK/Archive-Zip-1.24.tar.gz">Source-Code Distribution (Archive-Zip-1.23.tar.gz)</a>  im Ordner <em>examples</em> zahlreiche Beispiele zur Verwendung von <a href="http://search.cpan.org/perldoc?Archive::Zip">Archive::Zip</a>, von denen ich hier zwei vorstelle:
+</p>
+
+<h2>Verzeichnisse und Dateien zippen</h2>
+<p>
+Das Beispielprogramm <span style="font-weight:bold;">zip.pl</span> aus dem examples Verzeichnis ist genau das gewünschte Tool.
+</p>
+<p>
+<strong>zip.pl</strong>
+</p>
+<pre>
+#!/bin/perl -w
+<span style=" color: #228B22;"># Creates a zip file, adding the given directories and files.</span>
+<span style=" color: #228B22;"># Usage:</span>
+<span style=" color: #228B22;"># perl zip.pl zipfile.zip file [...]</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Archive::Zip</span> <span style=" color: #CD5555;">qw(:ERROR_CODES :CONSTANTS)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #CD5555;">&quot;usage: $0 zipfile.zip file [...]\n&quot;</span>
+ <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #8B008B; font-weight:bold;">scalar</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">@ARGV</span><span style=" color: #000000;">)</span> &lt; <span style=" color: #B452CD;">2</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$zipName</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">@ARGV</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$zip</span> = <span style=" color: #000000;">Archive::Zip</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$memberName</span> <span style=" color: #000000;">(</span><span style=" color: #8B008B; font-weight:bold;">map</span> <span style=" color: #000000;">{</span> <span style=" color: #8B008B; font-weight:bold;">glob</span> <span style=" color: #000000;">}</span> <span style=" color: #00688B;">@ARGV</span><span style=" color: #000000;">)</span>
+<span style=" color: #000000;">{</span>
+ <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #8B008B; font-weight:bold;">-d</span> <span style=" color: #00688B;">$memberName</span> <span style=" color: #000000;">)</span>
+ <span style=" color: #000000;">{</span>
+  <span style=" color: #8B008B; font-weight:bold;">warn</span> <span style=" color: #CD5555;">&quot;Can&#39;t add tree $memberName\n&quot;</span>
+   <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$zip</span><span style=" color: #00688B;">-&gt;addTree</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$memberName</span><span style=" color: #000000;">,</span> <span style=" color: #00688B;">$memberName</span> <span style=" color: #000000;">)</span> != <span style=" color: #000000;">AZ_OK</span><span style=" color: #000000;">;</span>
+ <span style=" color: #000000;">}</span>
+ <span style=" color: #8B008B; font-weight:bold;">else</span>
+ <span style=" color: #000000;">{</span>
+  <span style=" color: #00688B;">$zip</span><span style=" color: #00688B;">-&gt;addFile</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$memberName</span> <span style=" color: #000000;">)</span>
+   <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">warn</span> <span style=" color: #CD5555;">&quot;Can&#39;t add file $memberName\n&quot;</span><span style=" color: #000000;">;</span>
+ <span style=" color: #000000;">}</span>
+<span style=" color: #000000;">}</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$status</span> = <span style=" color: #00688B;">$zip</span><span style=" color: #00688B;">-&gt;writeToFileNamed</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$zipName</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">exit</span> <span style=" color: #00688B;">$status</span><span style=" color: #000000;">;</span>
+</pre>
+<h3>Anwendungsbeispiele:</h3>
+<p>
+<strong>Komplettes Verzeichnis zippen</strong>
+</p>
+<pre>
+perl zip.pl test.zip examples
+</pre>
+<p>
+oder auch
+</p>
+<pre>
+perl zip.pl test.zip examples/*
+</pre>
+<p>
+<strong>Einzelne Dateien zippen</strong>
+</p>
+<pre>
+perl zip.pl test.zip datei1.doc datei2.doc dateiN.doc
+</pre>
+
+<h2>Zip-Dateien entpacken</h2>
+<p>
+Auch hier findet man das gewünschte Tool als  Beispielprogramm <span style="font-weight:bold;">unzipAll.pl</span> im examples Verzeichnis.
+</p>
+<p>
+<strong>unzipAll.pl</strong>
+</p>
+<pre>
+#!/bin/perl -w
+<span style=" color: #228B22;"># Extracts all files from the given zip</span>
+<span style=" color: #228B22;"># $Revision: 1.3 $</span>
+<span style=" color: #228B22;"># usage:</span>
+<span style=" color: #228B22;">#	perl unzipAll.pl [-j] zipfile.zip</span>
+<span style=" color: #228B22;"># if -j option given, discards paths.</span>
+<span style=" color: #228B22;">#</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">vars</span> <span style=" color: #CD5555;">qw( $opt_j )</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Archive::Zip</span> <span style=" color: #CD5555;">qw(:ERROR_CODES)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Getopt::Std</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$opt_j</span> = <span style=" color: #B452CD;">0</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">getopts</span><span style=" color: #000000;">(</span><span style=" color: #CD5555;">&#39;j&#39;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">@ARGV</span> &lt; <span style=" color: #B452CD;">1</span><span style=" color: #000000;">)</span>
+<span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #CD5555; font-weight:bold;">&lt;&lt;EOF</span>
+<span style=" color: #CD5555; font-style:italic;">	usage: perl $0 [-j] zipfile.zip</span>
+<span style=" color: #CD5555; font-style:italic;">	if -j option given, discards paths.</span>
+<span style=" color: #CD5555; font-weight:bold;">EOF</span>
+<span style=" color: #000000;">}</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$zip</span> = <span style=" color: #000000;">Archive::Zip</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$zipName</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">@ARGV</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$status</span> = <span style=" color: #00688B;">$zip</span><span style=" color: #00688B;">-&gt;read</span><span style=" color: #000000;">(</span> <span style=" color: #00688B;">$zipName</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #CD5555;">&quot;Read of $zipName failed\n&quot;</span> <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #00688B;">$status</span> != <span style=" color: #000000;">AZ_OK</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$zip</span><span style=" color: #00688B;">-&gt;extractTree</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+<h3>Anwendungsbeispiel:</h3>
+<pre>
+$ perl unzipAll.pl X.zip
+</pre>
+
+<h2>Known Bugs</h2>
+
+<p>
+Mit <a href="http://search.cpan.org/perldoc?Archive::Zip">Archive::Zip</a> erstellte Archive lassen sich nicht immer mit Windows-Bordmitteln öffnen. <a href="http://news.perlfoundation.org/2008/05/2008q2_grant_proposal_fixing_b.html">Die Behebung dieses Fehlers ist derzeit in Arbeit</a>. Achten Sie ggf. auf neuere Versionen.
+</p>
+
+<h2>Siehe auch:</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Archive::Zip">Archive::Zip</a></li>
+<li><a href="http://rt.cpan.org/Public/Dist/Display.html?Name=Archive-Zip">Bug reports for Archive::Zip</a></li>
+<li><a href="http://news.perlfoundation.org/2008/05/2008q2_grant_proposal_fixing_b.html">2008Q2 Grant Proposal - Fixing Bugs in the Archive::Zip Perl Module</a></li>
+<li><a href="http://thomas-fahle.blogspot.com/2008/04/command-line-zip-fr-windows.html">Command Line Zip für Windows</a></li>
+<li><a href="http://www.hackszine.com/blog/archive/2007/01/command_line_zip_for_windows.html">Hackszine.com: Command Line Zip for Windows</a></li>
+</ul>

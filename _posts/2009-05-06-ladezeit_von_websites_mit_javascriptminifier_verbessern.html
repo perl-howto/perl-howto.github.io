@@ -1,0 +1,43 @@
+---
+layout: post
+title: Ladezeit von Websites mit JavaScript::Minifier verbessern
+date: '2009-05-06 18:05:00 +0000'
+mt_id: 140
+blog_id: 1
+post_id: 140
+permalink: /2009/05/ladezeit_von_websites_mit_javascriptminifier_verbessern.html
+categories:
+- cgi
+---
+<p>
+Gemäß <a href="http://developer.yahoo.com/">Yahoo! Developer Network</a> gibt es dreizehn einfache Regeln um die Ladezeit einer Website zur verringern: <a href="http://developer.yahoo.com/performance/rules.html">Thirteen Simple Rules for Speeding Up Your Web Site</a>.
+</p>
+<p>
+<a href="http://developer.yahoo.com/performance/rules.html#minify">Regel Nr. Zehn: Minify JavaScript</a> empfiehlt alle unnötigen Zeichen aus <a href="http://de.wikipedia.org/wiki/JavaScript">JavaScript</a> zu entfernen, also beispielsweise überflüssigen <a href="http://de.wikipedia.org/wiki/Leerraum">Whitespace</a> und Kommentare.
+</p>
+<p>
+Mit  <a href="http://search.cpan.org/perldoc?JavaScript::Minifier">JavaScript::Minifier</a> von <a href="http://search.cpan.org/~pmichaux/">Peter Michaux</a> geht das ganz einfach:
+</p>
+
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">JavaScript::Minifier</span> <span style=" color: #CD5555;">qw(minify)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">open</span><span style=" color: #000000;">(</span><span style=" color: #000000;">INFILE</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;myScript.js&#39;</span><span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">open</span><span style=" color: #000000;">(</span><span style=" color: #000000;">OUTFILE</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;&gt;&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&#39;myScript-min.js&#39;</span><span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">minify</span><span style=" color: #000000;">(</span><span style=" color: #000000;">input</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">*INFILE</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">outfile</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">*OUTFILE</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">close</span><span style=" color: #000000;">(</span><span style=" color: #000000;">INFILE</span><span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">close</span><span style=" color: #000000;">(</span><span style=" color: #000000;">OUTFILE</span><span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+</pre>
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?JavaScript::Minifier">JavaScript::Minifier</a></li>
+<li><a href="http://www.fayland.org/blog/2007/07/javascript-minfier.html">Fayland and Perl Programming: Javascript Minifier</a>; dort gibt es auch ein kleines Programm, das alle JavaScript-Dateien in einem Verzeichnis komprimiert.</li>
+<li><a href="http://www.crockford.com/javascript/jsmin.html">Douglas Crockford's JSMin</a></li>
+<li><a href="http://developer.yahoo.com/yui/compressor/">YUI Compressor</a></li>
+</ul>

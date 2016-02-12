@@ -1,0 +1,92 @@
+---
+layout: post
+title: Sys::Hostname oder Net::Domain - Hostname ermitteln
+date: '2012-10-01 12:00:31 +0000'
+mt_id: 232
+blog_id: 1
+post_id: 232
+permalink: /2012/10/syshostname_oder_netdomain_-_hostname_ermitteln.html
+categories:
+- '101'
+---
+<p>
+Der <a href="http://de.wikipedia.org/wiki/Hostname">Hostname</a> ist die eindeutige Bezeichnung eines Rechners in einem Netzwerk.
+Meist wird ein <a href="http://de.wikipedia.org/wiki/Domain">Fully Qualified Domain Name (FQDN)</a> als Hostname verwendet.
+Bei Rechnern in einem LAN wird allerdings manchmal auch der Domain-Teil (hostdomain) weggelassen und nur der lokale Part (hostname) verwendet. 
+</p>
+<p>
+Die Ermittlung des Hostnamens ist nicht immer einfach, daher verwenden die beiden nachfolgend vorgestellen Module intern zahlreiche Methoden, um den Hostnamen herauszufinden.  
+</p>
+
+<p>&nbsp;</p>
+
+<h2>Sys::Hostname</h2>
+<p>
+<a href="http://perldoc.perl.org/Sys/Hostname.html">Sys::Hostname</a> von David Sundstrom, seit Perl 5.6 Bestandteil der Standard-Distribution, stellt eine Funktion bereit: <i>hostname()</i>. 
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Sys::Hostname</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">hostname</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm liefert z.B. folgende Ausgabe:
+</p>
+<pre>
+server.example.net
+</pre>
+<p>
+oder auch einfach
+</p>
+<pre>
+server
+</pre>
+<p>&nbsp;</p>
+
+<h2>Net::Domain</h2>
+<p>
+<a href="http://perldoc.perl.org/Net/Domain.html">Net::Domain</a>, seit Perl 5.73 Bestandteil der Standard-Distribution, von Graham Barr verwendet intern deutlich mehr Methoden als Sys::Hostname, um den FQDN des aktuellen Hosts zu ermittlen.  Weiterhin werden auch Funktionen bereitgestellt, um den lokalen bzw. Domain-Teil zu ermitteln.
+</p>
+<ul class="no-bullet">
+<li><i>hostfqdn ()</i>: liefert den FQDN des aktuellen Hosts</li>
+<li><i>domainname ()</i>: Ein Alias f&uuml;r hostfqdn</li>
+<li><i>hostname ()</i>: liefert den lokalen Teil des FQDN</li>
+<li><i>hostdomain ()</i>: liefert den Domain-Teil des FQDN</li>
+</ul>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Net::Domain</span> <span style="color: #CD5555;">qw(hostname hostfqdn hostdomain)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Host FQDN:  &quot;</span><span style="color: #000000;">,</span> <span style="color: #000000;">hostfqdn</span> <span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Hostname:   &quot;</span><span style="color: #000000;">,</span> <span style="color: #000000;">hostname</span> <span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Hostdomain: &quot;</span><span style="color: #000000;">,</span> <span style="color: #000000;">hostdomain</span> <span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm liefert z.B. folgende Ausgabe:
+</p>
+<pre>
+Host FQDN:  server.example.net
+Hostname:   server
+Hostdomain: example.net
+</pre>
+<p>&nbsp;</p>
+
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li>Perldoc: <a href="http://perldoc.perl.org/perlfaq9.html">perlfaq9</a></li>
+<li>Perldoc: <a href="http://perldoc.perl.org/Sys/Hostname.html">Sys::Hostname</a></li>
+<li>The 2004 Perl Advent Calendar: <a href="http://www.perladvent.org/2004/21st/">Sys::Hostname</a></li>
+<li>Perldoc: <a href="http://perldoc.perl.org/Net/Domain.html">Net::Domain</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?Sys%3A%3AHostname%3A%3ALong">Sys::Hostname::Long</a></li>
+<li>Wikipedia: <a href="http://de.wikipedia.org/wiki/Hostname">Hostname</a></li>
+<li>Wikipedia: <a href="http://de.wikipedia.org/wiki/Domain">Domain</a></li>
+</ul>
+<p>&nbsp;</p>

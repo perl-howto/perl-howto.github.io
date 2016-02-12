@@ -1,0 +1,203 @@
+---
+layout: post
+title: Devel::Modlist - welche Module verwendet ein Programm?
+date: '2011-03-28 20:30:00 +0000'
+mt_id: 215
+blog_id: 1
+post_id: 215
+permalink: /2011/03/develmodlist_welche_module_verwendet_ein_programm.html
+categories:
+- '101'
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Devel::Modlist">Devel::Modlist</a> von <a href="http://search.cpan.org/~rjray/">Randy J Ray</a> ermittelt und zeigt die Module, die von einem Perl-Programm genutzt werden, &uuml;bersichtlich an. 
+</p>
+<p>
+&nbsp;
+</p>
+<h2>Verwendete Module auflisten</h2>
+<p>
+<a href="http://search.cpan.org/perldoc?Devel::Modlist">Devel::Modlist</a> wird auf der Kommandozeile aufgerufen.
+</p>
+<pre>
+$ perl -d:Modlist Programm.pl
+</pre>
+<p>
+Angewandt auf ein einfaches Beispielprogramm
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">LWP</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+liefert Devel::Modlist folgende Ausgabe auf <a href="http://de.wikipedia.org/wiki/Standard-Datenstr%C3%B6me">STDERR</a>:
+</p>
+<pre>
+AutoLoader             5.71
+Carp                   1.17
+Config                     
+Config_git.pl              
+Config_heavy.pl            
+DynaLoader             1.10
+Exporter             5.64_01
+Exporter::Heavy      5.64_01
+Fcntl                  1.06
+File::Spec             3.33
+File::Spec::Unix       3.33
+FileHandle             2.02
+HTTP::Date             6.00
+HTTP::Headers         5.835
+HTTP::Message         5.837
+HTTP::Request         5.827
+HTTP::Response        5.836
+HTTP::Status          5.817
+IO                   1.25_02
+IO::File               1.14
+IO::Handle             1.28
+IO::Seekable            1.1
+LWP                   5.837
+LWP::MemberMixin           
+LWP::Protocol         5.829
+LWP::UserAgent        5.835
+SelectSaver            1.02
+Storable               2.25
+Symbol                 1.07
+Time::Local          1.2000
+URI                    1.58
+URI::Escape            3.30
+XSLoader               0.10
+constant               1.20
+overload               1.10
+vars                   1.01
+warnings               1.09
+warnings::register     1.01
+</pre>
+<p>
+&nbsp;
+</p>
+
+<h2>Optionen</h2>
+<p>
+&Uuml;ber Optionen l&auml;sst sich das Verhalten von Devel::Modlist steuern. Die allgemeine Syntax:
+</p>
+<pre>
+ perl -d:Modlist=option1[,option2,...]
+</pre>
+
+<h3>stdout</h3>
+<p>
+Diese Option schickt die Ausgabe von Devel::Modlist zur Standardausgabe <a href="http://de.wikipedia.org/wiki/Standard-Datenstr%C3%B6me">STDOUT</a>
+</p>
+<pre>
+$ perl -d:Modlist=stdout Programm.pl
+</pre>
+
+<h3>nocore</h3>
+<p>
+Bei Verwendung dieser Option werden die verwendeten Core-Module nicht angezeigt:
+</p>
+<pre>
+$ perl -d:Modlist=stdout,nocore Programm.pl
+</pre>
+<p>
+Angewandt auf ein obiges Beispielprogramm, liefert Devel::Modlist folgende Ausgabe 
+</p>
+<pre>
+HTTP::Date             6.00
+HTTP::Headers         5.835
+HTTP::Message         5.837
+HTTP::Request         5.827
+HTTP::Response        5.836
+HTTP::Status          5.817
+LWP                   5.837
+LWP::MemberMixin           
+LWP::Protocol         5.829
+LWP::UserAgent        5.835
+URI                    1.58
+URI::Escape            3.30
+</pre>
+<p>
+&nbsp;
+</p>
+
+<h3>cpan, cpandist</h3>
+<p>
+<em>cpan</em> reduziert die Liste auf Module, die über das Modul <a href="http://search.cpan.org/perldoc?CPAN">CPAN</a> installiert wurden.
+</p>
+<pre>
+perl -d:Modlist=stdout,cpan Programm.pl
+</pre>
+<p>
+Angewandt auf ein obiges Beispielprogramm, liefert Devel::Modlist folgende Ausgabe 
+</p>
+<pre>
+AutoLoader             5.71
+Carp                   1.17
+Config                     
+Config_git.pl              
+Config_heavy.pl            
+Exporter             5.64_01
+File::Spec             3.33
+HTTP::Date             6.00
+HTTP::Headers         5.835
+IO                   1.25_02
+LWP                   5.837
+Storable               2.25
+Time::Local          1.2000
+URI                    1.58
+XSLoader               0.10
+constant               1.20
+</pre>
+<p>
+<em>cpandist</em> funktioniert wie <em>cpan</em>, gibt allerdings den Dateinamen statt des Modulnamen aus: 
+</p>
+<pre>
+perl -d:Modlist=stdout,cpandist Programm.pl
+</pre>
+<p>
+Angewandt auf ein obiges Beispielprogramm, liefert Devel::Modlist folgende Ausgabe 
+</p>
+<pre>
+S/SM/SMUELLER/AutoLoader-5.71.tar.gz
+J/JE/JESSE/perl-5.13.9.tar.gz
+Contact Author The Perl5 Porters Mailing List <perl5-porters@perl.org>
+/opt/perl5.12.2/lib/5.12.2/i686-linux-thread-multi/Config_git.pl
+/opt/perl5.12.2/lib/5.12.2/i686-linux-thread-multi/Config_heavy.pl
+F/FE/FERREIRA/Exporter-5.63.tar.gz
+S/SM/SMUELLER/PathTools-3.33.tar.gz
+G/GA/GAAS/HTTP-Date-6.00.tar.gz
+G/GA/GAAS/HTTP-Message-6.01.tar.gz
+G/GB/GBARR/IO-1.25.tar.gz
+G/GA/GAAS/libwww-perl-6.01.tar.gz
+A/AM/AMS/Storable-2.25.tar.gz
+F/FL/FLORA/Time-Local-1.2000.tar.gz
+G/GA/GAAS/URI-1.58.tar.gz
+S/SA/SAPER/XSLoader-0.10.tar.gz
+S/SA/SAPER/constant-1.19.tar.gz
+</pre>
+<h3>stop</h3>
+<p>
+Die Option <em>stop</em> l&auml;dt das Programm und f&uuml;hrt es <strong>nicht</strong> aus. Die erst zur Laufzeit mit <a href="http://perldoc.perl.org/functions/require.html">require</a> oder <a href"http://perldoc.perl.org/functions/eval.html">eval</a> geladenen Module k&ouml;nnen nicht ermittelt werden.
+</p>
+
+<h3>zerodefault, noversion</h3>
+<p>
+Falls die Versionsnummmer eines Moduls nicht ermittelt werden kann, setzt <em>zerodefault</em> diese einfach auf 0,  <em>noversion</em> unterdr&uuml;ckt die Ausgabe der Versionnummern generell.
+</p>
+<p>
+&nbsp;
+</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Devel::Modlist">Devel::Modlist - Perl extension to collect module use information</a></li>
+<li><a href="http://search.cpan.org/perldoc?Module::ScanDeps">Module::ScanDeps - Recursively scan Perl code for dependencies</a></li>
+<li><a href="http://search.cpan.org/perldoc?Devel::TraceUse">Devel::TraceUse - show the modules your program loads, recursively</a></li>
+<li><a href="http://search.cpan.org/perldoc?CPAN::FindDependencies">CPAN::FindDependencies - find dependencies for modules on the CPAN</a></li>
+<li><a href="http://search.cpan.org/perldoc?Perl::PrereqScanner">Perl::PrereqScanner - a tool to scan your Perl code for its prerequisites</a></li>
+<li><a href="http://search.cpan.org/perldoc?CPAN">CPAN -query, download and build perl modules from CPAN sites</a></li>
+<li><a href="{{ site.url }}/2008/07/cpanfinddependencies.html">Modulabh&auml;ngigkeiten ermitteln mit CPAN::FindDependencies</a></li>
+<li><a href="{{ site.url }}/2010/09/develtraceuse-verwendete-module-ubersichtlich-auflisten.html">Devel::TraceUse - Verwendete Module &Uuml;bersichtlich auflisten</a></li>
+</ul>

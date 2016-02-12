@@ -1,0 +1,63 @@
+---
+layout: post
+title: Doppelt so schnell lesen mit spread0r - Perl Opensource Alternative zu Spritz
+date: '2014-03-22 12:30:00 +0000'
+mt_id: 254
+blog_id: 1
+post_id: 254
+permalink: /2014/03/doppelt_so_schnell_lesen_mit_spread0r_-_perl_opensource_alternative_zu_spritz.html
+categories:
+- blogs
+---
+<p>
+Das Startup <a href="http://www.spritzinc.com/">Spritz</a> hat eine <a href="http://www.spritzinc.com/the-science/">einfache Technik</a> entwickelt, Texte  <a href="http://de.wikipedia.org/wiki/Schnelllesen">überdurchschnittlich schnell zu lesen</a> und dennoch den Inhalt zu verstehen.
+</p>
+<p>
+Die Wörter werden einzeln nacheinander in hoher Geschwindigkeit angezeigt. Um Augenbewegungen zu minimieren und damit die Lesegeschwindigkeit zu erhöhen, wird eine farbige Markierung innerhalb des Wortes als Orientierungsfixpunkt eingeblendet. 
+</p>
+<p>&nbsp;</p>
+
+<h2>spread0r</h2>
+<p>
+<a href="https://github.com/xypiie/spread0r">spread0r</a> ist eine <a href="http://www.perl.org">Perl</a> basierte Implementierung dieser Technik für Textdateien.
+</p>
+<p>
+Anhand der mitgelieferten <a href="https://github.com/xypiie/spread0r/tree/master/books">Beispieltexte</a> kann man sich mit dieser Technik und der Software vertraut machen. Diese Schnelllesetechnik funktioniert nach ein paar Minuten Eingewöhnung erstaunlich gut und macht Spaß.
+</p>
+<p>
+Schauen wir doch, ob sich damit auch die Dokumention von <a href="https://metacpan.org/">CPAN - Modulen</a> schneller lesen lässt.
+</p>
+<p>
+<a href="https://metacpan.org/">CPAN - Module</a> werden üblicherweise in <a href="http://perldoc.perl.org/perlpod.html">Pod</a> dokumentiert. Dieses Format lässt sich sehr einfach in Text <a href="http://perldoc.perl.org/perldoc.html">umwandeln</a>.
+<p>
+<pre>
+$ perldoc -t Moose > Moose.txt
+</pre>
+<p>
+Nun <a href="https://github.com/xypiie/spread0r">spread0r</a> starten und die oben erzeugte Datei als Parameter übergeben:
+</p>
+<pre>
+$ ./spread0r.pl Moose.txt 
+</pre>
+<p>
+<img alt="spread0r.png" src="{{ site.url }}/assets/images/spread0r.png" width="690" height="229" style="text-align: center; display: block; margin: 0 auto 20px;" />
+</p>
+<p>
+Okay - es ist schon etwas gewöhnungsbedürftig.
+</p>
+
+<p>&nbsp;</p>
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="https://github.com/xypiie/spread0r">spread0r- spread0r is a txt reader, which makes your reading twice as fast as usual</a></li>
+<li><a href="http://www.spritzinc.com/">Spritz</a></li>
+<li><a href="http://www.gruenderszene.de/allgemein/spritz-maik-maurer-interview">Lese-Tool Spritz - Wie Euch dieser Gründer fünf Mal schneller lesen lassen will</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Schnelllesen">Schnelllesen</a></li>
+<li><a href="http://hackaday.com/2014/03/03/gritz-an-open-source-speed-reading-tool/">Gritz: An Open Source Speed Reading Tool</a></li>
+<li><a href="https://github.com/OnlyInAmerica/OpenSpritz-Android">OpenSpritz-Android - An Android Spritz ePub Reader</a></li>
+<li><a href="https://github.com/Miserlou/OpenSpritz">OpenSpritz - OpenSpritz is an extremely crude implementation of Spritz in JavaScrip</a></li>
+<li><a href="https://github.com/andrewgiang/SpritzerTextView">SpritzerTextView - An Android Spritz View</a></li>
+<li><a href="https://github.com/pasky/speedread">speedread - A terminal Spritzer</a></li>
+<li><a href="https://github.com/ds300/jetzt">jetzt is a speed-reader extension for Chrome inspired by Spritz.</a></li>
+</ul>

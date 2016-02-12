@@ -1,0 +1,95 @@
+---
+layout: post
+title: Desktop-Notifications mit Gtk2::Notify und Log::Dispatch::Gtk2::Notify
+date: '2010-08-09 20:11:00 +0000'
+mt_id: 195
+blog_id: 1
+post_id: 195
+permalink: /2010/08/desktopnotifications_mit_gtk2notify_und_logdispatchgtk2notify.html
+categories:
+- linux
+---
+<p>
+Dank <a href="http://search.cpan.org/dist/Gtk2-Notify/">Gtk2::Notify</a> von <a href="http://search.cpan.org/~flora/">Florian Ragwitz</a> ist sehr einfach <a href="http://www.galago-project.org/specs/notification/index.php">Desktop-Notifications</a>  via <a href="http://www.freedesktop.org/wiki/Software/dbus">D-Bus</a> in eigene Programme  einzubinden. 
+</p>
+<p>
+<a href="http://search.cpan.org/perldoc?Log::Dispatch::Gtk2::Notify">Log::Dispatch::Gtk2::Notify</a> (ebenfalls von  von <a href="http://search.cpan.org/~flora/">Florian Ragwitz</a>) vereinfacht die Ausgabe von Log-Meldungen als Desktop-Notifikation.
+</p>
+
+<h2>Gtk2::Notify</h2>
+<p>
+&nbsp;
+</p>
+<form mt:asset-id="83" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="Desktop-Notify-01.png" src="{{ site.url }}/assets/images/gtk/Desktop-Notify-01.png" width="330" height="82" style="text-align: center; display: block; margin: 0 auto 20px;" /></form>
+
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Gtk2::Notify</span> -<span style="color: #000000;">init</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;app_name&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$summary</span> = <span style="color: #CD5555;">&#39;Gtk2::Notify&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$message</span> = <span style="color: #CD5555;">&#39;Hallo Welt!&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$icon</span> = <span style="color: #CD5555;">&#39;/usr/share/app-install/icons/podbrowser.png&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$attach_widget</span> = <span style="color: #8B008B; font-weight:bold;">undef</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$notification</span> = <span style="color: #000000;">Gtk2::Notify</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #00688B;">$summary</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$message</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$icon</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$attach_widget</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">$notification</span><span style="color: #00688B;">-&gt;show</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Der Parameter <em>summary</em> erzeugt die Überschrift der Notification, <em>message</em> enthält die eigentliche Nachricht. Die Notification bleibt für 5 Sekunden auf dem Bildschirm stehen. Der optionale Parameter <em>icon</em> bindet ein Icon neben der Nachricht ein. Da die Notification einfach auf dem Desktop angezeigt werden soll  und nicht an einem bestimmten geöffnetem Fenster, wird der Parameter <em>attach_widget</em> einfach auf <em>undef</em> gesetzt. 
+</p>
+<p>
+&nbsp;
+</p>
+
+<h2>Log::Dispatch::Gtk2::Notify</h2>
+
+<p>
+Log::Dispatch::Gtk2::Notify wird als (weiteres) Ausgabeziel zu Log::Dispatch hinzugefügt. Je nach Level der Log-Nachricht wird automatisch ein passendes Icon in die Notification eingefügt.  
+</p>
+<form mt:asset-id="84" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="Desktop-Notify-02.png" src="{{ site.url }}/assets/images/gtk/Desktop-Notify-02.png" width="330" height="82" style="text-align: center; display: block; margin: 0 auto 20px;" /></form>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Log::Dispatch::Gtk2::Notify</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$notify</span> = <span style="color: #000000;">Log::Dispatch::Gtk2::Notify</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span>
+        <span style="color: #000000;">name</span>      <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;notify&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #000000;">min_level</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;debug&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #000000;">app_name</span>  <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;MyApp&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #000000;">title</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;Important Message&#39;</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">$notify</span><span style="color: #00688B;">-&gt;log</span><span style="color: #000000;">(</span><span style="color: #000000;">level</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;alert&#39;</span><span style="color: #000000;">,</span> <span style="color: #000000;">message</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;Hello, World!&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">$notify</span><span style="color: #00688B;">-&gt;log</span><span style="color: #000000;">(</span><span style="color: #000000;">level</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;notice&#39;</span><span style="color: #000000;">,</span> <span style="color: #000000;">message</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;Hello, World!&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+</pre>
+<form mt:asset-id="85" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="Desktop-Notify-03.png" src="{{ site.url }}/assets/images/gtk/Desktop-Notify-03.png" width="329" height="82" style="text-align: center; display: block; margin: 0 auto 20px;" /></form>
+<p>
+&nbsp;
+</p>
+
+
+
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/dist/Gtk2-Notify/">Gtk2::Notify</a></li>
+<li><a href="http://search.cpan.org/dist/Desktop-Notify/">Desktop-Notify</a> - eine Alternative</li>
+<li><a href="http://trac.galago-project.org/wiki/DesktopNotifications">Desktop Notifications framework</a></li>
+<li><a href="http://search.cpan.org/perldoc?Net::DBus">Net::DBus</a></li>
+<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::Gtk2::Notify">Log::Dispatch::Gtk2::Notify</a></li>
+<li><a href="http://search.cpan.org/dist/Log-Dispatch/">Log::Dispatch</a></li>
+<li><a href="{{ site.url }}/2009/08/logdispatch-dispatches-messages-to-one-or-more-outputs.html">Log::Dispatch - Logging mit mehreren Ausgabezielen ganz einfach</a></li>
+<li><a href="http://mschilli.github.com/log4perl/">The log4perl project -- log4j for Perl</a> </li>
+</ul>
+
+<p>
+&nbsp;
+</p>

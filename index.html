@@ -1,0 +1,14 @@
+---
+layout: default
+title: Perl HowTo - Tipps, Tricks und Anleitungen
+#
+# Showing latest post on home page with Jekyll
+# Shamelessly stolen from https://gist.github.com/nimbupani/1421828
+# 
+---
+
+   {% assign post = site.posts.first %}
+   {% assign page = post %}
+   {% assign content = post.content %}
+   {% include entry.html %}
+

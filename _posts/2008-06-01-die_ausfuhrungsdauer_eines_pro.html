@@ -1,0 +1,142 @@
+---
+layout: post
+title: Die Ausführungsdauer eines Programms oder einer Routine mit alarm() begrenzen
+date: '2008-06-01 22:30:00 +0000'
+mt_id: 74
+blog_id: 1
+post_id: 74
+permalink: /2008/06/die_ausfuhrungsdauer_eines_pro.html
+categories:
+- linux
+---
+<p>
+<b>Hinweis:</b> <a href="http://perldoc.perl.org/functions/alarm.html">alarm()</a> steht leider nicht auf allen Betriebssystemen zur Verfügung.
+</p>
+
+
+<ol>
+<li> Fall 1: Einfache Notbremse:<br />
+Sie begrenzen die Laufzeit des gesamten Programms mit alarm(x). Das Programm wird nach spätestens x Sekunden kompromisslos beendet. </li>
+<li> Fall 2: Sie müssen Aufräumarbeiten im Fehlerfall ausführen:</li>
+<ol>
+ <li> Setzen Sie einen eigenen SIGALRM-Handler mit einem Unterprogramm. Dieses stirbt mit die("Ihre ganz spezielle Fehlermeldung"), falls ein entsprechendes Signal eintrifft.</li>
+ <li> Setzen Sie den Timer mit alarm().</li>
+ <li> Führen Sie die Operation, das Unterprogramm usw. einschliesslich Timer in einem eval-Block {}; aus.</li>
+ <li> Schreiben Sie geeignete Routinen für den Fehlerfall.</li>
+</ol>
+</ol>
+
+<h2>Beispiel Fall 1: Einfache Notbremse</h2>
+
+<pre>
+#!/usr/bin/perl
+<span class="k">alarm</span><span class="s">(</span><span class="n">5</span><span class="s">)</span><span class="sc">;</span>  <span class="c"># Höchstens 5 Sekunden</span>
+
+<span class="k">sleep</span><span class="s">(</span><span class="n">6</span><span class="s">)</span><span class="sc">;</span>  <span class="c"># &quot;Langzeitoperation&quot;</span>
+</pre>
+<p>
+liefert "Alarm clock" auf der Console, d.h. das gesamte Programm wird beendet.
+</p>
+
+<p>
+<b>Beispiel Fall 2: Aufräumarbeiten im Fehlerfall</b>
+</p>
+<pre>
+#!/usr/bin/perl
+<span class="k">use</span> <span class="w">warnings</span><span class="sc">;</span>
+<span class="k">use</span> <span class="w">strict</span><span class="sc">;</span>
+
+	<span class="c"># Handler f&uuml;r SIGALRM und Unterprogramm f&uuml;r den Fall der Zeit&uuml;berschreitung</span>
+	<span class="c"># Ich setze $SIG{ALRM} stets in den eval()-Block.</span>
+	<span class="c"># Varianten mit globalen Signalhandlern und Signalhandlern</span>
+	<span class="c"># in Unterprogrammen habe ich auch probiert.</span>
+	<span class="c"># Es funktioniert auf belasteten Maschinen nicht </span>
+	<span class="c"># zufriedenstellend und manchmal gar nicht.</span>
+
+	<span class="c"># eval-block	 </span>
+<span class="k">eval</span> <span class="s">{</span>
+	<span class="k">local</span> <span class="i">$SIG</span>{<span class="w">ALRM</span>} = <span class="k">sub</span> <span class="s">{</span> <span class="k">die</span> <span class="q">&quot;Zeitlimit &uuml;berschritten $!&quot;</span><span class="s">}</span><span class="sc">;</span>
+
+                        <span class="c"># alarm(x) muss in den eval()-Block		</span>
+	<span class="k">alarm</span><span class="s">(</span><span class="n">10</span><span class="s">)</span><span class="sc">;</span>	<span class="c"># Maximale Zeit: 9 bis 10 Sekunden</span>
+	
+	<span class="i">&amp;mach_was</span><span class="s">(</span><span class="s">)</span><span class="sc">;</span>	<span class="c"># Kritische Operation</span>
+	
+	<span class="k">alarm</span><span class="s">(</span><span class="n">0</span><span class="s">)</span><span class="sc">;</span>	<span class="c"># alarm zur&uuml;cksetzen</span>
+
+<span class="s">}</span><span class="sc">;</span> <span class="c">## end of eval</span>
+
+	<span class="c"># Irgendetwas schiefgelaufen?</span>
+<span class="k">if</span> <span class="s">(</span><span class="i">$@</span><span class="s">)</span> <span class="s">{</span>
+		<span class="c"># Zeitlimit ueberschritten?</span>
+		<span class="c"># Stets patternmatching verwenden,</span>
+		<span class="c"># nie eq, da $@ in etwa so aussieht:</span>
+		<span class="c"># &quot;Zeitlimit &uuml;berschritten! died at xxx.pl line xxx&quot;</span>
+	<span class="k">if</span> <span class="s">(</span><span class="i">$@</span> =~ <span class="q">/Zeitlimit/</span><span class="s">)</span> <span class="s">{</span>
+        		<span class="c"># Fehlerbehandlung</span>
+		<span class="i">&amp;Behandle_Fehler_aus_Zeitueberschreitung</span><span class="s">(</span><span class="s">)</span><span class="sc">;</span>
+
+	<span class="s">}</span> <span class="k">else</span> <span class="s">{</span>
+		<span class="c"># Irgendetwas anderes in eval ist schiefgelaufen</span>
+			<span class="c"># alarm zur&uuml;cksetzen, der l&auml;uft noch</span>
+		<span class="k">alarm</span><span class="s">(</span><span class="n">0</span><span class="s">)</span><span class="sc">;</span>
+		
+			<span class="c"># Fehlerbehandlung</span>
+		<span class="i">&amp;Behandle_sonstigen_Fehler</span><span class="s">(</span><span class="s">)</span><span class="sc">;</span>		
+	<span class="s">}</span>
+
+        <span class="c"># Alles hat geklappt</span>
+<span class="s">}</span> <span class="k">else</span> <span class="s">{</span>
+
+        <span class="i">&amp;Mach_weiter</span><span class="s">(</span><span class="s">)</span><span class="sc">;</span>
+<span class="s">}</span>
+
+<span class="k">exit</span><span class="sc">;</span>
+
+<span class="c">#############################################################</span>
+<a name="Behandle_Fehler_aus_Zeitueberschreitung-"></a><span class="k">sub </span><span class="m">Behandle_Fehler_aus_Zeitueberschreitung</span> <span class="s">{</span>
+		<span class="c"># Fehlermeldung ausgeben</span>
+	<span class="k">print</span> <span class="i">STDERR</span> <span class="q">&quot;Gotcha! Du warst zu langsam, Baby.\n&quot;</span><span class="sc">;</span>
+	<span class="c"># your code ...</span>
+        <span class="k">exit</span><span class="sc">;</span>
+<span class="s">}</span>
+<span class="c">#############################################################</span>
+<a name="Behandle_sonstigen_Fehler-"></a><span class="k">sub </span><span class="m">Behandle_sonstigen_Fehler</span> <span class="s">{</span>
+        	<span class="c"># Fehlermeldung ausgeben</span>
+	<span class="k">print</span> <span class="i">STDERR</span> <span class="q">&quot;$@\n&quot;</span><span class="sc">;</span>
+        <span class="c"># your code ... </span>
+        <span class="k">exit</span><span class="sc">;</span>
+<span class="s">}</span>
+<span class="c">#############################################################</span>
+</pre>
+
+<h2>Erläuterungen:</h2>
+<p>
+Die Funktion alarm(x) sendet ein SIGALRM-Signal nach x Sekunden. Jeder Aufruf deaktiviert den vorhergehenden Timer, mit alarm(0) kann der Timer deaktiviert werden. Rückgabewert ist die verbleibende Zeit des vorhergehenden Timers.
+</p>
+<p>
+Verwenden Sie genügend grosse Zeitspannen.<br />
+Auf manchen Systemen wird das Alarm-Signal jeweils zu Beginn einer Sekunde ausgeführt. Ein alarm(1) könnte also sofort ausgeführt werden, bevor Ihr Unterprogramm überhaupt etwas macht.  Ein alarm(3) würde dann in den nächsten 2 bis 3 Sekunden ausgeführt, ein alarm(10) in den nächsten 9 bis 10 Sekunden.
+</p>
+<p>
+Messen Sie vorher unter Praxisbedingungen die Laufzeit und legen Sie dann eine geeignete Zeitspanne fest.
+</p>
+<p>
+Für Zeitmessungen steht Ihnen in Perl <a href="http://perldoc.perl.org/functions/times.html">(times)[0]</a> oder das Standardmodul <a href="http://perldoc.perl.org/Benchmark.html">Benchmark</a> zur Verfügung. Wenn Sie ein UNIX-System verwenden, können Sie auch das time &lt;Programm&gt; verwenden.
+</p>
+<p>
+Wenn Sie eine genauere Auflösung benötigen, müssen Sie auf Betriebssystemfunktionen oder auf <a href="http://search.cpan.org/search?dist=Time-HiRes">Time::HiRes</a> zurückgreifen.
+</p>
+<p>
+Beachten Sie, dass eval {} evt. nur einmal kompiliert wird.
+</p>
+
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li><a href="http://perldoc.perl.org/functions/alarm.html">alarm()</a></li>
+<li><a href="http://perldoc.perl.org/functions/times.html">times()</a></li>
+<li><a href="http://perldoc.perl.org/functions/eval.html">eval()</a></li>
+<li><a href="http://search.cpan.org/search?dist=Time-HiRes">Time::HiRes</a></li>
+<li><a href="http://perldoc.perl.org/perlfaq8.html">perlfaq 8</a></li>
+<li><a href="http://perldoc.perl.org/Benchmark.html">Benchmark</a></li>
+                                                                             

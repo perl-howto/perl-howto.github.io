@@ -1,0 +1,229 @@
+---
+layout: post
+title: Filesys::Df und Filesys::DfPortable - Freien Speicherplatz auf einem Dateisystem
+  ermitteln
+date: '2013-12-04 18:52:00 +0000'
+mt_id: 249
+blog_id: 1
+post_id: 249
+permalink: /2013/12/filesysdf_und_filesysdfportable_-_freien_speicherplatz_auf_einem_dateisystem_ermitteln.html
+categories:
+- windows
+- linux
+---
+<a href="{{ site.url }}/assets_c/2013/12/medium_132244826-thumb-500x375-110.jpg"><img alt="Vorschaubild für medium_132244826.jpg" src="{{ site.url }}/assets_c/2013/12/medium_132244826-thumb-500x375-110-thumb-200x150-111.jpg" width="200" height="150" style="float: right; margin: 0 0 20px 20px;" /></a>
+<p>
+Der freie Speicherplatz auf Festplatten bzw. <a href="http://de.wikipedia.org/wiki/Dateisystem">Dateisystemen</a> kann sowohl mit <a href="https://metacpan.org/release/Filesys-Df">Filesys::Df</a> als auch mit <a href="https://metacpan.org/pod/Filesys::DfPortable"> Filesys::DfPortable</a> von <a href="https://metacpan.org/author/IGUTHRIE">Ian Guthrie</a> einfach ermittelt werden.
+</p>
+<p>
+<a href="https://metacpan.org/pod/Filesys::DfPortable">Filesys::DfPortable</a> funktioniert unter Linux und Windows, während <a href="https://metacpan.org/release/Filesys-Df">Filesys::Df</a> nur mit unixoiden Betriebssystemen funktioniert, dafür aber ein bereits <a href="http://perldoc.perl.org/functions/open.html">geöffnetes</a> Datei Handle als Argument verarbeiten kann.  
+</p>
+
+
+
+<p>&nbsp;</p>
+<h2>Filesys::Df</h2>
+<p>
+Die automatisch importierte Funktion <i>df</i> liefert eine Referenz auf einen Hash mit Informationen über die freien und belegten Blöcke des Dateisystems zurück.
+</p>
+<p>
+Da nicht alle Dateisysteme <a href="http://de.wikipedia.org/wiki/Inode"> Inodes</a> unterstützen, ist es erforderlich, explizit zu fragen, ob Informationen zu Indodes vorliegen.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Filesys::Df</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$df</span> = <span style="color: #00688B;">df</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;/tmp&quot;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>    <span style="color: #228B22;"># Default output is 1K blocks</span>
+
+<span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">defined</span><span style="color: #000000;">(</span><span style="color: #00688B;">$df</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total 1k blocks:             $df-&gt;{blocks}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total 1k blocks free:        $df-&gt;{bfree}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total 1k blocks avail to me: $df-&gt;{bavail}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total 1k blocks used:        $df-&gt;{used}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Percent full:                $df-&gt;{per}\n&quot;</span><span style="color: #000000;">;</span>
+
+    <span style="color: #228B22;"># Only filesystems that support inodes</span>
+    <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">exists</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$df</span>-&gt;{<span style="color: #000000;">files</span>} <span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total inodes:                $df-&gt;{files}\n&quot;</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total inodes free:           $df-&gt;{ffree}\n&quot;</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Inode percent full:          $df-&gt;{fper}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+<span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">warn</span> <span style="color: #CD5555;">&quot;Woops - something went wrong.\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt z.B. folgende Ausgabe:
+</p>
+<pre>
+Total 1k blocks:             423301588
+Total 1k blocks free:        230537836
+Total 1k blocks avail to me: 209035272
+Total 1k blocks used:        192763752
+Percent full:                48
+Total inodes:                26886144
+Total inodes free:           26093840
+Inode percent full:          3
+</pre>
+<p>
+Die Blöckgröße lässt sich über den zweiten Parameter der Funktion <i>df()</i> angeben.  
+Wer lieber in Bytes rechnet, verwendet einfach die Blockgröße 1.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Filesys::Df</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$df</span> = <span style="color: #00688B;">df</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;/tmp&quot;</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">1</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>    <span style="color: #228B22;"># output is bytes</span>
+
+<span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">defined</span><span style="color: #000000;">(</span><span style="color: #00688B;">$df</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total bytes:              $df-&gt;{blocks}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total bytes free:         $df-&gt;{bfree}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total bytes avail to me:  $df-&gt;{bavail}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total bytes used:         $df-&gt;{used}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Percent full:             $df-&gt;{per}%\n&quot;</span><span style="color: #000000;">;</span>
+
+    <span style="color: #228B22;"># Only for filesystems that support inodes</span>
+    <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">exists</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$df</span>-&gt;{<span style="color: #000000;">files</span>} <span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total inodes:             $df-&gt;{files}\n&quot;</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total inodes free:        $df-&gt;{ffree}\n&quot;</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Inode percent full:       $df-&gt;{fper}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+<span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">warn</span> <span style="color: #CD5555;">&quot;Woops - something went wrong.\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt z.B. folgende Ausgabe:
+</p>
+<pre>
+Total bytes:              433460826112
+Total bytes free:         236072210432
+Total bytes avail to me:  214053584896
+Total bytes used:         197388615680
+Percent full:             48%
+Total inodes:             26886144
+Total inodes free:        26093880
+Inode percent full:
+</pre>
+<p>
+<a href="https://metacpan.org/release/Filesys-Df">Filesys::Df</a> kann auch Informationen über ein Dateisystem an Hand eines bereits geöffneten Dateihandles ermitteln. Das ist recht praktisch, wenn man wissen möchte, wie viel Platz für das gerade laufende Perl Programm ($0) noch zur Verfügung steht.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Filesys::Df</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">open</span><span style="color: #000000;">(</span> <span style="color: #000000;">ME</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;&lt;&quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$0</span> <span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;Can&#39;t open myself $!&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$df</span> = <span style="color: #00688B;">df</span><span style="color: #000000;">(</span> \<span style="color: #00688B;">*ME</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">1</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>    <span style="color: #228B22;"># Get information for filesystem at file</span>
+
+<span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">defined</span><span style="color: #000000;">(</span><span style="color: #00688B;">$df</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total bytes:              $df-&gt;{blocks}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total bytes free:         $df-&gt;{bfree}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total bytes avail to me:  $df-&gt;{bavail}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total bytes used:         $df-&gt;{used}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Percent full:             $df-&gt;{per}%\n&quot;</span><span style="color: #000000;">;</span>
+
+    <span style="color: #228B22;"># Only for filesystems that support inodes</span>
+    <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">exists</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$df</span>-&gt;{<span style="color: #000000;">files</span>} <span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total inodes:             $df-&gt;{files}\n&quot;</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total inodes free:        $df-&gt;{ffree}\n&quot;</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Inode percent full:       $df-&gt;{fper}\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+<span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">warn</span> <span style="color: #CD5555;">&quot;Woops - something went wrong.\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Ausgabe wie oben.
+</p>
+
+<p>&nbsp;</p>
+<h2>Filesys::DfPortable</h2>
+<p>
+<a href="https://metacpan.org/pod/Filesys::DfPortable">Filesys::DfPortable</a> funktioniert, wie bereits gesagt, unter Linux und Windows und ist <a href="https://metacpan.org/release/Filesys-Df">Filesys::Df</a> ziemlich ähnlich.
+</p>
+Die automatisch importierte Funktion <i>dfportable</i> liefert eine Referenz auf einen Hash mit Informationen über die freien und belegten Blöcke des Dateisystems zurück.
+</p>
+<p>
+Die Blöckgröße lässt sich über den zweiten Parameter der Funktion <i>dfportable()</i> angeben. Default Blockgröße ist dieses Mal 1, also Ausgabe in Bytes.  
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Filesys::DfPortable</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$dfp</span> = <span style="color: #00688B;">dfportable</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;C:&quot;</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">1024</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span> <span style="color: #228B22;"># Display output in 1K blocks</span>
+
+<span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">defined</span><span style="color: #000000;">(</span><span style="color: #00688B;">$dfp</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+   <span style="color: #8B008B; font-weight:bold;">print</span><span style="color: #CD5555;">&quot;Total 1k blocks:             $dfp-&gt;{blocks}\n&quot;</span><span style="color: #000000;">;</span>
+   <span style="color: #8B008B; font-weight:bold;">print</span><span style="color: #CD5555;">&quot;Total 1k blocks free:        $dfp-&gt;{bfree}\n&quot;</span><span style="color: #000000;">;</span>
+   <span style="color: #8B008B; font-weight:bold;">print</span><span style="color: #CD5555;">&quot;Total 1k blocks avail to me: $dfp-&gt;{bavail}\n&quot;</span><span style="color: #000000;">;</span>
+   <span style="color: #8B008B; font-weight:bold;">print</span><span style="color: #CD5555;">&quot;Total 1k blocks used:        $dfp-&gt;{bused}\n&quot;</span><span style="color: #000000;">;</span>
+   <span style="color: #8B008B; font-weight:bold;">print</span><span style="color: #CD5555;">&quot;Percent full:                $dfp-&gt;{per}\n&quot;</span><span style="color: #000000;">;</span>
+
+   <span style="color: #228B22;"># Only filesystems that support inodes</span>
+   <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">exists</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$dfp</span>-&gt;{<span style="color: #000000;">files</span>} <span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total inodes:                $dfp-&gt;{files}\n&quot;</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Total inodes free:           $dfp-&gt;{ffree}\n&quot;</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Inode percent full:          $dfp-&gt;{fper}\n&quot;</span><span style="color: #000000;">;</span>
+   <span style="color: #000000;">}</span>
+
+<span style="color: #000000;">}</span> <span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">warn</span> <span style="color: #CD5555;">&quot;Woops - something went wrong.\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm erzeugt z.B. folgende Ausgabe:
+</p>
+
+<pre>
+Total 1k blocks:             26109948
+Total 1k blocks free:        4299136
+Total 1k blocks avail to me: 4299136
+Total 1k blocks used:        21810812
+Percent full:                84
+</pre>
+<p>
+Statt des Laufwerksbuchstabens können auch <a href="http://de.wikipedia.org/wiki/Uniform_Naming_Convention">UNC Pfade</a> wie '\\\\Server\\Freigabe' verwendet werden.
+</p>
+<p>
+Filesys::DfPortable unterstützt, wie Filesys::Df, Inodes - das ist meiner Ansicht nach unter Portabilitätsaspekten etwas sinnfrei, da Windows Inodes erst gar unterstützt.
+</p>
+<p>
+Wer unter <a href="http://en.wikipedia.org/wiki/Windows">Windows</a> einfach nur wissen möchte, wieviel Speicherplatz noch verfügbar ist, und daher nicht alle <em>Bells and whistles</em> von <a href="https://metacpan.org/pod/Win32::DriveInfo">Win32::DriveInfo</a> benötigt,  gewinnt mit <a href="https://metacpan.org/pod/Filesys::DfPortable">Filesys::DfPortable</a> ein wenig Portabilität.
+</p>
+
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Filesys%3A%3ADf">Filesys::Df - Perl extension for filesystem disk space information</a></li>
+<li><a href="http://search.cpan.org/perldoc?Filesys%3A%3ADfPortable">Filesys::DfPortable - Perl extension for filesystem disk space information</a></li>
+<li><a href="http://search.cpan.org/perldoc?Win32%3A%3ADriveInfo">Win32::DriveInfo</a></li>
+<li><a href="http://search.cpan.org/perldoc?Filesys%3A%3ADiskSpace"> Filesys::DiskSpace</a></li>
+<li><a href="http://search.cpan.org/perldoc?Filesys%3A%3ADiskFree">Filesys::DiskFree</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Df_%28Unix%29">df (Unix)</a></li>
+</ul>
+
+<p>&nbsp;</p>
+<h2>Bildnachweis</h2>
+<p>
+photo credit: <a href="http://www.flickr.com/photos/uwehermann/132244826/">Uwe Hermann</a> via <a href="http://photopin.com">photopin</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">cc</a>
+</p>
+<p>&nbsp;</p>

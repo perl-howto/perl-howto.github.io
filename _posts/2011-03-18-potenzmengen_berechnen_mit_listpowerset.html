@@ -1,0 +1,122 @@
+---
+layout: post
+title: Potenzmengen berechnen mit List::PowerSet
+date: '2011-03-18 15:50:00 +0000'
+mt_id: 214
+blog_id: 1
+post_id: 214
+permalink: /2011/03/potenzmengen_berechnen_mit_listpowerset.html
+categories:
+- '101'
+---
+<p>
+<a href="http://de.wikipedia.org/wiki/Potenzmenge">Potenzmengen</a> (engl. Powerset) lassen sich mit dem CPAN-Modul <a href="http://search.cpan.org/perldoc?List::PowerSet">List::PowerSet</a> von <a href="http://search.cpan.org/~nikc/">Nik Clayton</a> einfach berechnen.
+</p>
+<p>
+&nbsp;
+</p>
+
+<h2>powerset() und powerset_lazy()</h2>
+<p>
+List::PowerSet stellt zwei Funktionen, <em>powerset()</em> und <em>powerset_lazy()</em>, bereit.
+</p>
+<h3>powerset()</h3>
+<p>
+<em>powerset()</em> nimmt eine Liste (Menge) entgegen und gibt eine Referenz auf eine Liste von Referenzen auf Arrays zur&uuml;ck - jede Array Referenz enth&auml;lt eine Teilmenge.
+</p>
+<p>
+Beispiel:
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">List::PowerSet</span> <span style="color: #CD5555;">qw/powerset/</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@input_list</span> = <span style="color: #CD5555;">qw/ x y z /</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$powerset</span> = <span style="color: #00688B;">powerset</span><span style="color: #000000;">(</span><span style="color: #00688B;">@input_list</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ps</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@$powerset</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;[ @$ps ]\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe: 
+</p>
+<pre>
+[ x y z ]
+[ y z ]
+[ x z ]
+[ z ]
+[ x y ]
+[ y ]
+[ x ]
+[  ]
+</pre>
+
+<h3>powerset_lazy()</h3>
+<p>
+<em>powerset_lazy()</em> nimmt, wie <em>powerset()</em>, eine Liste entgegen und liefert eine Referenz auf eine Subroutine zur&uuml;ck, die als 
+Iterator verwendet werden kann. Bei jedem Aufruf des Iterators wird eine weitere Teilmenge als Referenz auf einen Array zur&uuml;ckgegeben. 
+</p>
+<p>
+<em>powerset_lazy()</em> bietet sich vor allem bei umfangreichen Listen an. Im Gegensatz zu <em>powerset()</em> werden nicht alle Teilmengen 
+auf ein Mal berechnet, sondern <a href="http://perldesignpatterns.com/?LazyEvaluation">lazy evaluiert</a>.
+</p>
+<p>
+Beispiel:
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">List::PowerSet</span> <span style="color: #CD5555;">qw/powerset_lazy/</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@input_list</span> = <span style="color: #CD5555;">qw/ x y z /</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ps_iterator</span> = <span style="color: #00688B;">powerset_lazy</span><span style="color: #000000;">(</span> <span style="color: #00688B;">@input_list</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">while</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$set</span> = <span style="color: #00688B;">$ps_iterator</span>-&gt;<span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+
+    <span style="color: #228B22;"># $set is the next powerset entry</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;[ @$set ]\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe: 
+</p>
+<pre>
+[ x y z ]
+[ y z ]
+[ x z ]
+[ z ]
+[ x y ]
+[ y ]
+[ x ]
+[  ]
+</pre>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?List::PowerSet">List::PowerSet</a></li>
+<li><a href="http://search.cpan.org/perldoc?Data::PowerSet">Data::PowerSet</a></li>
+<li><a href="http://search.cpan.org/perldoc?Data::PowerSet::Hash">Data::PowerSet::Hash</a></li>
+<li><a href="http://hop.perl.plover.com/Examples/">Higher-Order Perl</a></li>
+<li><a href="http://www.catonmat.net/blog/perl-one-liners-explained-part-three/">Famous Perl One-Liners Explained, Part III: Calculations</a></li>
+<li><a href="http://perldoc.perl.org/perlreftut.html">perlreftut - Mark's very short tutorial about references</a></li>
+<li><a href="http://perldoc.perl.org/perllol.html">perllol - Manipulating Arrays of Arrays in Perl</a></li>
+<li>Wikipedia: <a href="http://de.wikipedia.org/wiki/Potenzmenge">Potenzmenge</a></li>
+<li>Mathepedia: <a href="http://www.mathepedia.de/Potenzmenge.aspx">Potenzmenge</a></li>
+<li>mathe-lexikon.at: <a href="http://www.mathe-lexikon.at/mengenlehre/grundlagen/potenzmenge.html">Potenzmenge</a></li>
+</ul>
+<p>
+&nbsp;
+</p>

@@ -1,0 +1,109 @@
+---
+layout: post
+title: Locale::Currency - ISO 4217 - Norm für Währungs-Abkürzungen
+date: '2008-09-16 19:05:00 +0000'
+mt_id: 96
+blog_id: 1
+post_id: 96
+permalink: /2008/09/localecurrency_iso_4217_norm_fur_wahrungs-abkurzungen.html
+categories:
+- '101'
+- finance
+---
+<p>
+<a href="http://de.wikipedia.org/wiki/ISO_4217">ISO 4217 </a>ist die von der Internationalen Organisation für Normung publizierte Norm für Währungs-Abkürzungen, die im internationalen Zahlungsverkehr zur eindeutigen Identifizierung benutzt werden sollen.
+</p>
+<p>
+<a href="http://search.cpan.org/perldoc?Locale::Currency">Locale::Currency</a> von <a href="http://search.cpan.org/~neilb/">Neil Bowers</a> ermöglicht den Zugriff auf die drei Buchstaben langen Abkürzungen (ISO-Codes). Der Zugriff auf die numerischen Währungscodes ist nicht implementiert.
+</p>
+<p>
+Mit Hilfe dieses Moduls lässt sich z.B. leicht prüfen, ob ein gültiger ISO-Code vorliegt.
+</p>
+
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Locale::Currency</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$|</span> = <span style=" color: #B452CD;">1</span><span style=" color: #000000;">;</span>    <span style=" color: #228B22;"># turn off buffering</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">Bitte W&auml;hrungscode eingeben: &quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">chomp</span><span style=" color: #000000;">(</span><span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$code</span> = <span style=" color: #CD5555;">&lt;STDIN&gt;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$curr</span> = <span style=" color: #00688B;">code2currency</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$code</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #8B008B; font-weight:bold;">defined</span> <span style=" color: #00688B;">$curr</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$code = $curr\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;&#39;$code&#39; ist kein g&uuml;ltiger W&auml;hrungscode!\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Wenn man das Programm als <em>localecurrency.pl</em>  speichert und anschließend auf der Kommandozeile aufruft, ergibt sich beispielsweise folgende Ausgabe.
+</p>
+<pre>
+$ perl localecurrency.pl 
+Bitte Währungscode eingeben: EUR
+EUR = Euro
+
+$ perl localecurrency.pl 
+Bitte Währungscode eingeben: USD
+USD = US Dollar
+
+$ perl localecurrency.pl 
+Bitte Währungscode eingeben: XYZ
+'XYZ' ist kein gültiger Währungscode!
+</pre>
+<p>
+Weiterhin kann aus dem Namen der Währung der ISO-Code ermittelt werden.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Locale::Currency</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$|</span> = <span style=" color: #B452CD;">1</span><span style=" color: #000000;">;</span>    <span style=" color: #228B22;"># turn off buffering</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Bitte W&auml;hrungsname eingeben: &quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">chomp</span><span style=" color: #000000;">(</span><span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$currency</span> = <span style=" color: #CD5555;">&lt;STDIN&gt;</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$code</span> = <span style=" color: #00688B;">currency2code</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$currency</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #8B008B; font-weight:bold;">defined</span> <span style=" color: #00688B;">$code</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$currency = $code\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;&#39;$currency&#39; ist kein g&uuml;ltiger W&auml;hrungsname!\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+
+</pre>
+<p>
+Wenn man das Programm als <em>localecurrency2.pl</em>  speichert und anschließend auf der Kommandozeile aufruft, ergibt sich beispielsweise folgende Ausgabe.
+</p>
+<pre>
+$ perl localecurrency2.pl
+Bitte Währungsname eingeben: EURO
+EURO = eur
+
+$ perl localecurrency2.pl
+Bitte Währungsname eingeben: USD
+'USD' ist kein gültiger Währungsname!
+
+$ perl localecurrency2.pl
+Bitte Währungsname eingeben: US Dollar
+US Dollar = usd
+</pre>
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Locale::Currency">Locale::Currency</a></li>
+<li><a href="http://de.wikipedia.org/wiki/ISO_4217">ISO 4217 </a></li>
+<li><a href="http://www.iso.org/iso/en/prods-services/popstds/currencycodeslist.html">Liste der ISO 4217 Währungscodes</a></li>
+<li><a href="{{ site.url }}/2008/09/tagesaktuelle-wahrungsumrechnu.html">Tagesaktuelle Währungsumrechnung</a>
+<li><a href="{{ site.url }}/2008/09/localecountry-iso-3166-norm-fu.html">Locale::Country - ISO 3166 - Norm für Kodierung von geographischen Einheiten</a></li>
+</ul>

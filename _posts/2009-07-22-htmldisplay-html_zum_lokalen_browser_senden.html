@@ -1,0 +1,114 @@
+---
+layout: post
+title: HTML::Display - HTML zum lokalen Browser senden
+date: '2009-07-22 19:45:00 +0000'
+mt_id: 157
+blog_id: 1
+post_id: 157
+permalink: /2009/07/htmldisplay-html_zum_lokalen_browser_senden.html
+categories:
+- lwp
+---
+<p>
+<form mt:asset-id="53" class="mt-enclosure mt-enclosure-image" style="display: inline;"><a href="{{ site.url }}/assets/images/HTML-Display/HTML-Display-File.png"><img alt="HTML-Display-File_Vorschau.png" src="{{ site.url }}/assets/images/HTML-Display/HTML-Display-File_Vorschau.png" width="256" height="192" style="float: left; margin: 0 20px 20px 0;" /></a></form>
+Dank <a href="http://search.cpan.org/perldoc?HTML::Display">HTML::Display</a> von <a href="http://search.cpan.org/~corion/">Max Maischein</a> lassen sich einzelne <a href="http://de.wikipedia.org/wiki/HTML">HTML</a>-Seiten ganz einfach von Perl aus zum <a href="http://de.wikipedia.org/wiki/Browser">Browser</a> schicken und in diesem anzeigen.
+</p>
+<p>
+Extrem praktisch, wenn man  z.B. einen dynamischen generierten Report als HTML-Datei speichern und diesen gleich im lokalen Browser anzeigen lassen möchte. Fast schon eine Fernsteuerung für Browser.
+</p>
+<p>
+<a href="http://search.cpan.org/perldoc?HTML::Display">HTML::Display</a> funktioniert auf den gängigen Betriebssystemem mit den meisten Browsern, wie z.B. Internet Explorer oder Firefox. Bisher habe ich es allerdings nur mit Windows XP SP3 und Ubuntu 8.04 ausprobiert.
+</p>
+<p>
+&nbsp;
+</p>
+<p>
+&nbsp;
+</p>
+
+
+<h2>Beispiel: lokale HTML-Datei zum Browser des Users senden</h2>
+
+
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">HTML::Display</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$browser</span> = <span style=" color: #000000;">HTML::Display</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$!</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">warn</span> <span style=" color: #CD5555;">&quot;# Displaying HTML using &quot;</span> . <span style=" color: #8B008B; font-weight:bold;">ref</span> <span style=" color: #00688B;">$browser</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$location</span> = <span style=" color: #CD5555;">&quot;index.html&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">display</span><span style=" color: #000000;">(</span>  <span style=" color: #000000;">file</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$location</span><span style=" color: #000000;"> )</span> <span style=" color: #000000;">;</span>
+</pre>
+<p>
+Die dazugehörige HTML-Datei <em>index.html</em> im selben Verzeichnis.
+</p>
+<pre>
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;
+HTML-Display rocks
+&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;HTML-Display rocks&lt;/h1&gt;
+&lt;p&gt;
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, 
+sed diam nonumy eirmod tempor invidunt ut labore et 
+dolore magna aliquyam erat, sed diam voluptua. At vero 
+eos et accusam et justo duo dolores et ea rebum. Stet 
+clita kasd gubergren, no sea takimata sanctus est Lorem 
+ipsum dolor sit amet.
+&lt;/p&gt;
+&lt;p&gt;
+Duis autem vel eum iriure dolor in hendrerit in vulputate velit 
+esse molestie consequat, vel illum dolore eu feugiat nulla 
+facilisis at vero eros et accumsan et iusto odio dignissim qui 
+blandit praesent luptatum zzril delenit augue duis dolore te 
+feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer 
+adipiscing elit, sed diam nonummy nibh euismod tincidunt ut 
+laoreet dolore magna aliquam erat volutpat.
+&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<p>
+&nbsp;
+</p>
+
+<h2>Beispiel: Webseite zum Browser des Users senden</h2>
+<p>
+Dazu wird zunächst die Website mit <a href="http://search.cpan.org/perldoc?LWP::Simple">LWP::Simple</a> geholt und dann an <a href="http://search.cpan.org/perldoc?HTML::Display">HTML::Display</a> weitergereicht.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">HTML::Display</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">LWP::Simple</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$browser</span> = <span style=" color: #000000;">HTML::Display</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">warn</span> <span style=" color: #CD5555;">&quot;# Displaying HTML using &quot;</span> . <span style=" color: #8B008B; font-weight:bold;">ref</span> <span style=" color: #00688B;">$browser</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$location</span> = <span style=" color: #CD5555;">&quot;{{ site.url }}/&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$html</span> = <span style=" color: #000000;">get</span> <span style=" color: #00688B;">$location</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">display</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">html</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$html</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">location</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #00688B;">$location</span><span style=" color: #000000;"> )</span> <span style=" color: #000000;">;</span>
+</pre>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?HTML::Display">HTML::Display - display HTML locally in a browser</a></li>
+<li><a href="http://search.cpan.org/perldoc?LWP::Simple">LWP::Simple - simple procedural interface to LWP</a></li>
+</ul>

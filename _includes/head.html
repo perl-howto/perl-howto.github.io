@@ -1,0 +1,109 @@
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}</title>
+  <meta name="description" content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | replace: '"' '' | truncate: 160 }}{% else %}{{ site.description | strip_newlines }}{% endif %}" />
+
+  <meta name="keywords" content="Perl, Perl5, Programmierung, Howto, Anleitung, Tutorial" />
+  <meta name="Content-Language" content="German, Deutsch, de, at, ch" />
+
+  <meta name="Author" content="{% if page.author_full_name %}{{ page.author_full_name }}{% else %}{{ 'Thomas Fahle' }}{%endif%}" />
+
+  <meta property="og:site_name" content="Perl Howto"/>
+  <meta property="og:type" content="article" />
+  <meta property="og:locale" content="de_DE"/>
+  <meta property="og:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}" />
+  <meta property="og:url" content="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}" />
+  <meta property="og:description" content="{{ site.description | strip_newlines }}" />
+
+  <meta name="generator" content="Jekyll v{{ jekyll.version }}" />
+
+  <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}" />
+  <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ "/feed.xml" | prepend: site.baseurl | prepend: site.url }}" /> 
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/foundation/6.1.2/foundation.min.css" type="text/css" />
+
+
+  {% if page.previous.url %} <link rel="prev" href="{{page.previous.url}}" /> {% endif %}
+  {% if page.next.url %} <link rel="next" href="{{page.next.url}}" /> {% endif %}
+
+
+<style>
+
+pre
+{
+        font-family: "Courier", "Bitstream Vera Sans Mono", monospace;
+        background-color: white;
+        padding-top: 0.5em;
+        padding-left: 0.5em;
+        padding-bottom: 0.5em;
+        white-space: pre;
+        border-color: navy;
+        border-width: 1px;
+        border-style: dashed;
+        line-height: 1.3em;
+        margin-left: 0.5em;
+        margin-right: 0.5em;
+        margin-bottom: .75em;
+        clear: both;
+}
+
+#header { 
+    border-color: #111343;  
+    background: #3c419a url({{ site.url }}/assets/images/header.gif) repeat-x bottom right;
+    border-top-width: 10px;
+    border-top-style: solid;
+}
+
+#header-content {
+    margin: 30px 30px 40px 20px;
+}
+
+#header-name {
+    color: #fff; 
+    font-size: 34px;
+    font-weight: bold;
+}
+
+#header-description {
+    color: #fff;
+    margin: 0;
+}
+
+#header a {
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#header a:hover {
+    text-decoration: underline;
+}
+
+/* Perltidy CSS */
+.c  { color: #228B22;} /* comment */
+.cm { color: #000000;} /* comma */
+.co { color: #000000;} /* colon */
+.h  { color: #CD5555; font-weight:bold;} /* here-doc-target */
+.hh { color: #CD5555; font-style:italic;} /* here-doc-text */
+.i  { color: #00688B;} /* identifier */
+.j  { color: #CD5555; font-weight:bold;} /* label */
+.k  { color: #8B008B; font-weight:bold;} /* keyword */
+.m  { color: #FF0000; font-weight:bold;} /* subroutine */
+.n  { color: #B452CD;} /* numeric */
+.p  { color: #000000;} /* paren */
+.pd { color: #228B22; font-style:italic;} /* pod-text */
+.pu { color: #000000;} /* punctuation */
+.q  { color: #CD5555;} /* quote */
+.s  { color: #000000;} /* structure */
+.sc { color: #000000;} /* semicolon */
+.v  { color: #B452CD;} /* v-string */
+.w  { color: #000000;} /* bareword */
+
+</style>
+
+</head>
+
+

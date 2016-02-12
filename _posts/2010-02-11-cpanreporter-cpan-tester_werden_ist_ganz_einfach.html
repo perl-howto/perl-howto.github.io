@@ -1,0 +1,142 @@
+---
+layout: post
+title: CPAN::Reporter - CPAN-Tester werden ist ganz einfach
+date: '2010-02-11 21:30:00 +0000'
+mt_id: 178
+blog_id: 1
+post_id: 178
+permalink: /2010/02/cpanreporter-cpan-tester_werden_ist_ganz_einfach.html
+categories:
+- '101'
+---
+<p>
+<strong>Achtung:</strong> Es gibt eine <a href="{{ site.url }}/2010/07/cpan-tester-20-cpan-tester-werden-ist-ganz-einfach.html">neueren Artikel</a>  für die Version 2.0 des <a href="http://www.cpantesters.org/">CPAN Testers Project</a>:  <a href="{{ site.url }}/2010/07/cpan-tester-20-cpan-tester-werden-ist-ganz-einfach.html">CPAN Tester 2.0 - CPAN Tester werden ist ganz einfach</a>
+</p>
+
+<p>
+&nbsp;
+</p>
+<p>
+&nbsp;
+</p>
+
+<p>
+&nbsp;
+</p>
+
+<hr />
+
+<p>
+&nbsp;
+</p>
+
+<p>
+&nbsp;
+</p>
+
+<p>
+&nbsp;
+</p>
+
+
+<p>
+Das  <a href="http://www.cpantesters.org/">CPAN Testers Project</a> möchte möglichst viele <a href="http://www.cpan.org/">CPAN</a>-<a href="http://search.cpan.org/">Module</a> auf möglichst vielen Plattformen testen. Diese Testergebnisse bieten CPAN-Autoren und Nutzern wertvolles Feedback und helfen die Qualität der CPAN-Module zu verbessern und somit den Wert des CPAN zu erhöhen.
+</p>
+<p>
+Dank des CPAN-Moduls <a href="http://search.cpan.org/perldoc?CPAN::Reporter">CPAN::Reporter</a> von <a href="http://search.cpan.org/~dagolden/">David Golden</a> kann jeder, der ein Modul auf seinem Rechner installiert, einen Test-Report automatisch erzeugen und zu den CPAN-Testern übermitteln.
+</p>
+
+<h2>Installation und grundlegende Konfiguration</h2>
+<pre>
+$ cpan
+cpan> install CPAN::Reporter
+cpan> reload cpan
+cpan> o conf init test_report
+ <test_report>
+Email test reports if CPAN::Reporter is installed (yes/no)? yes
+email_from? ["Your Name" &lt;your_email@example.com>] 
+cc_author? [default:yes pass:no] no
+edit_report? [default:ask/no pass:no] 
+send_report? [default:ask/yes pass:yes na:no] 
+smtp_server?
+
+cpan> o conf test_report  1
+
+cpan> o conf commit
+</pre>
+<p>
+Aus diesen Angaben wird eine Konfigurationsdatei <em>config.ini</em> im Unterverzeichnis <em>.cpanreporter</em> im Heimatverzeichnis des aktuellen Benutzers angelegt.
+</p>
+<p>
+Da die Testergebnisse per E-Mail verschickt werden, funktioniert diese Konfiguration nur dann, wenn man über einen Mail-Server mit gültigem <a href="http://de.wikipedia.org/wiki/MX_Resource_Record">MX-Record</a> verfügt. (Bei Servern, die direkt ans Internet angebunden sind, ist das meist kein Problem.) Ansonsten wird die Testmail als Spam zurückgewiesen. 
+<p>
+<p>
+</p>
+<h2>Konfiguration Versand über ISP</h2>
+<p>
+Wer die Testergebnisse über einen <a href="http://de.wikipedia.org/wiki/Internetdienstanbieter">ISP</a> versenden möchte, der <a href="http://de.wikipedia.org/wiki/SMTP-Auth">SMTP-Auth</a> in Verbindung mit  <a href="http://de.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol">STARTTLS</a> verwendet, installiert zunächst das CPAN-Modul <a href="http://search.cpan.org/perldoc?Net::SMTP::TLS">Net::SMTP::TLS</a> und passt die Konfigurationsdatei <em>config.ini</em> von Hand an.
+</p>
+<p>
+Beispiel für den Versand via <a href="http://www.strato.de/">Strato AG</a>:
+</p>
+<pre>
+edit_report=default:ask/no pass/na:no
+email_from="Thomas Fahle" &lt;cpan@thomas-fahle.de>
+send_report=default:ask/yes pass/na:yes
+transport=Net::SMTP::TLS User cpan@thomas-fahle.de Password geheym Port 587
+smtp_server=smtp.strato.de
+cc_author=no
+</pre>
+<p>
+Da in dieser Datei das Passwort im Klartext steht, sollte man zu mindestens die Rechte für den Zugriff auf die Datei und auf das Verzeichnis <em>.cpanreporter</em> einschränken, z.B. <em>chmod 600 config.ini</em>.  
+</p>
+<p>
+</p>
+<h2>Testberichte zeitverzögert senden</h2>
+<p>
+Da die Übermittlung eines Testberichts meist zwischen drei und fünf Sekunden benötigt, bietet sich bei größeren Installationen an, die Reports zwischen zu speichern und erst später zu senden. Dazu dient die Option <em>transport=File</em>.
+</p>
+<p>
+Beispiel:
+</p>
+<pre>
+edit_report=default:ask/no pass/na:no
+email_from="Thomas Fahle" &lt;cpan@thomas-fahle.de>
+send_report=default:ask/yes pass/na:yes
+cc_author=no
+<b>transport=File</b> /home/tf/.cpanreporter/reports
+</pre>
+<p>
+Nun werden die Reports im Ordner .cpanreporter/reports/, den man von Hand anlegen muss, zwischengespeichert.
+</p>
+<p>
+Die gespeicherten Berichte lassen sich mit dem Programm <a href="http://www.simplicidade.org/notes/archives/2009/10/a_faster_config.html">x-perl-send-test-reports</a> (<a href="http://github.com/melo/scripts/raw/master/bin/x-perl-send-test-reports">Download</a>) von <a href="http://www.simplicidade.org/notes/">Pedro Melo</a> sehr einfach versenden:
+</p>
+<pre>
+$ perl x-perl-send-test-reports.pl \
+--from '"Thomas Fahle" &lt;cpan@thomas-fahle.de>' \
+--transport "Net::SMTP::TLS User cpan@thomas-fahle.de  Password geheym Port 587" \
+--clean \
+--server smtp.strato.de \
+/home/tf/.cpanreporter/report
+</pre>
+<p>
+</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?CPAN::Reporter">CPAN::Reporter</a></li>
+<li><a href="http://search.cpan.org/perldoc?Net::SMTP::TLS">Net::SMTP::TLS</a></li>
+<li><a href="http://www.cpantesters.org/">CPAN Testers project</a></li>
+<li><a href="http://wiki.cpantesters.org/">The CPAN Testers Wiki</a></li>
+<li>The CPAN Testers Wiki: <a href="http://wiki.cpantesters.org/wiki/CPANInstall">CPAN + CPAN::Reporter Installation</a></li>
+<li>The CPAN Testers Wiki: <a href="http://wiki.cpantesters.org/wiki/CPANConfiguration">CPAN + CPAN-Reporter Configuration</a></li>
+<li><a href="http://stats.cpantesters.org/testers.html">TOP TESTERS OF ALL TIME</a></li>
+<li><a href="http://www.simplicidade.org/notes/archives/2009/10/a_faster_config.html">A faster configuration for CPAN::Reporter</a></li>
+<li><a href="http://github.com/jlavallee/CPAN-Awesomeness-talk">CPAN-Awesomeness-talk</a></li>
+</ul>
+<p>
+</p>
+<pre>
+"A person who never made a mistake never tried anything new."
+Albert Einstein:
+</pre>

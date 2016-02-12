@@ -1,0 +1,177 @@
+---
+layout: post
+title: Log::Dispatch - Logging mit mehreren Ausgabezielen ganz einfach
+date: '2009-08-03 20:35:00 +0000'
+mt_id: 159
+blog_id: 1
+post_id: 159
+permalink: /2009/08/logdispatch_dispatches_messages_to_one_or_more_outputs.html
+categories:
+- profiler
+---
+<form mt:asset-id="57" class="mt-enclosure mt-enclosure-image" style="display: inline;"><a href="http://www.flickr.com/photos/waldopepper/2605227469/"><img alt="logs.jpg" src="{{ site.url }}/assets/images/logs.jpg" width="240" height="180" style="float: right; margin: 0 20px 20px 0;" /></a></form>
+<p>
+<a href="http://search.cpan.org/perldoc?Log::Dispatch">Log::Dispatch</a> von <a href="http://search.cpan.org/~drolsky/">Dave Rolsky</a> erlaubt die Ausgabe von Log-Nachrichten an mehrere unterschiedliche Ausgabeziele.
+</p>
+<p>
+Vom einfachen Logging in eine Datei, Speicherung in einer Datenbank-Tabelle, Syslog oder EventLog, Versenden einer E-Mail mit Logdatei als Attachment oder als Kurznachricht auf einen Twitter-Account ist so ziemlich alles möglich, was das Herz begehrt.
+</p>
+<p>
+&nbsp;
+</p>
+
+<h2>Loglevel</h2>
+<p>
+Über Loglevel (Prioritäten) läßt sich einfach steuern, ob der Dispatcher die ihm übergebenen Nachrichten tatsächlich weiter gibt oder einfach unterdrückt.
+</p>
+<p>
+Log::Dispatch legt dazu ähnlich wie <a href="http://de.wikipedia.org/wiki/Syslog">syslog</a> acht Stufen für die Dringlichkeit (Priorität) der Log-Nachricht fest:
+</p>
+<ol start=0>
+	<li>debug</li>
+	<li>info</li>
+	<li>notice</li>
+	<li>warning</li>
+	<li>error</li>
+	<li>critical</li>
+	<li>alert</li>
+	<li>emergency</li>
+</ol>
+<p>
+&nbsp;
+</p>
+<h2>Dispatcher erzeugen</h2>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Log::Dispatch</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$ld</span> = <span style=" color: #000000;">Log::Dispatch</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+<p>
+&nbsp;
+</p>
+
+
+<h2>Ausgabeziele und Annahmeprioritäten festlegen</h2>
+<p>
+Ein Dispatcher kann mehrere Ausgabeziele bedienen.
+</p>
+<p>
+Über Loglevel lässt sich hier festlegen, für welche Prioritäten das Ausgabeziel Nachrichten annimmt und loggt. 
+</p>
+
+
+<h3>Ausgabe der Lognachrichten in eine Datei</h3>
+<pre>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Log::Dispatch::File</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$ld</span><span style=" color: #00688B;">-&gt;add</span><span style=" color: #000000;">(</span>
+	<span style=" color: #000000;">Log::Dispatch::File</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span>
+		<span style=" color: #000000;">name</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;to_file&#39;</span><span style=" color: #000000;">,</span>
+		<span style=" color: #000000;">filename</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;logdatei.log&#39;</span><span style=" color: #000000;">,</span>
+		<span style=" color: #000000;">mode</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;append&#39;</span><span style=" color: #000000;">,</span>
+		<span style=" color: #000000;">min_level</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;debug&#39;</span><span style=" color: #000000;">,</span>
+		<span style=" color: #000000;">max_level</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;alert&#39;</span><span style=" color: #000000;">,</span>
+	<span style=" color: #000000;">)</span>
+<span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+
+<h3>Logging via syslogd</h3>
+<pre>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Log::Dispatch::Syslog</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$ld</span><span style=" color: #00688B;">-&gt;add</span><span style=" color: #000000;">(</span>
+	<span style=" color: #000000;">Log::Dispatch::Syslog</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span>
+		<span style=" color: #000000;">name</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;to_syslog&#39;</span><span style=" color: #000000;">,</span>
+                <span style=" color: #228B22;"># Muss in /etc/syslog.conf eingerichtet sein</span>
+		<span style=" color: #000000;">facility</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;local5&#39;</span><span style=" color: #000000;">,</span>
+		<span style=" color: #000000;">min_level</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;debug&#39;</span><span style=" color: #000000;">,</span>
+		<span style=" color: #000000;">max_level</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;emergency&#39;</span><span style=" color: #000000;">,</span>
+	<span style=" color: #000000;">)</span>
+<span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+
+<h3>Ausgabe der Lognachrichten auf dem Bildschirm (STDERR)</h3>
+<pre>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Log::Dispatch::Screen</span><span style=" color: #000000;">;</span>
+<span style=" color: #00688B;">$ld</span><span style=" color: #00688B;">-&gt;add</span><span style=" color: #000000;">(</span>
+	<span style=" color: #000000;">Log::Dispatch::Screen</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span>
+		<span style=" color: #000000;">name</span>      <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;screen&#39;</span><span style=" color: #000000;">,</span>
+               <span style=" color: #000000;">min_level</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;debug&#39;</span><span style=" color: #000000;">,</span>
+               <span style=" color: #000000;">stderr</span>    <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">1</span><span style=" color: #000000;">,</span> 
+	<span style=" color: #000000;">)</span>
+<span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Log It</h2>
+<p>
+Nach so viel Vorbereitung ist das eigentliche Absetzen der Lognachrichten ganz einfach.
+</p>
+<pre>
+<span style=" color: #00688B;">$ld</span><span style=" color: #00688B;">-&gt;log</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">level</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;notice&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">message</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;Starte $0\n&quot;</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #228B22;"># Oder kuerzer</span>
+<span style=" color: #00688B;">$ld</span><span style=" color: #00688B;">-&gt;notice</span><span style=" color: #000000;">(</span> <span style=" color: #CD5555;">&quot;Starte $0\n&quot;</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$ld</span><span style=" color: #00688B;">-&gt;log</span><span style=" color: #000000;">(</span> <span style=" color: #000000;">level</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;emergency&#39;</span><span style=" color: #000000;">,</span> <span style=" color: #000000;">message</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&quot;Die Huette brennt\n&quot;</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+<span style=" color: #228B22;"># Oder kuerzer</span>
+<span style=" color: #00688B;">$ld</span><span style=" color: #00688B;">-&gt;emergency</span><span style=" color: #000000;">(</span> <span style=" color: #CD5555;">&quot;Die Huette brennt\n&quot;</span> <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+<p>
+Im Programm selbst wird nur festgelegt, was mit welcher Priorität geloggt werden kann. Ob die Nachricht auch wirklich geloggt wird, hängt von der Konfiguration der Ziele ab.
+</p>
+<p>
+Man kann also ein Programm mit sehr vielen Log-Anweisungen versehen, das hilft beim Debuggen. Für den laufenden Betrieb lässt sich die Geschwätzigkeit des Programm einfach durch Änderung der Konfiguration senken.
+</p>
+<p>
+&nbsp;
+</p>
+
+
+<h2>Log4perl und Log::Dispatch</h2>
+<p>
+Als Alternative bietet sich das erstklassige <a href="http://mschilli.github.com/log4perl/">Log4perl</a> von <a href="http://perlmeister.com/">Michael Schilli</a> an. Log4perl, die Perl Implementierung von <a href="http://logging.apache.org/log4j/">log4j</a>,  nutzt übrigens Log::Dispatch recht intensiv.
+</p>
+<p>
+Es schadet daher nichts, sich in  Log::Dispatch einzuarbeiten, auch wenn man dann auf log4perl umsteigt.
+</p>
+<p>
+&nbsp;
+</p>
+
+
+<h2>Siehe auch:</h2>
+
+<ul class="no-bullet">
+	<li><a href="http://search.cpan.org/perldoc?Log::Dispatch">Log::Dispatch</a></li>
+       <li>Dave Rolsky: <a href="http://www.houseabsolute.com/presentations/exceptions/start.html">Perl Modules for Exceptions, Logging, and Parameter Validation</a></li>
+<li><a href="http://mschilli.github.com/log4perl/">Log4perl</a> - The log4perl project -- log4j for Perl</li>
+	<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::ApacheLog">Log::Dispatch::ApacheLog</a></li>
+	<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::Email">Log::Dispatch::Email</a></li>
+	<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::Email::MailSend">Log::Dispatch::Email::MailSend</a></li>
+	<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::Email::MailSender">Log::Dispatch::Email::MailSender</a></li>
+	<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::Email::MailSendmail">Log::Dispatch::Email::MailSendmail</a></li>
+	<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::Email::MIMELite">Log::Dispatch::Email::MIMELite</a></li>
+	<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::File">Log::Dispatch::File</a></li>
+<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::FileRotate">Log::Dispatch::FileRotate</a></li>
+	<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::File::Locked">Log::Dispatch::File::Locked</a></li>
+	<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::Handle">Log::Dispatch::Handle</a></li>
+	<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::Output">Log::Dispatch::Output</a></li>
+	<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::Screen">Log::Dispatch::Screen</a></li>
+	<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::Syslog">Log::Dispatch::Syslog</a></li>
+<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::Win32EventLog">Log::Dispatch::Win32EventLog</a></li>
+<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::FileRotate">Log::Dispatch::FileRotate </a></li>
+<li><a href="http://search.cpan.org/perldoc?Log::Dispatch::Twitter">Log::Dispatch::Twitter</a></li>
+</ul>
+<p>
+&nbsp;
+</p>
+
+<h2>Bildnachweis</h2>
+<p>
+<a href="http://www.flickr.com/photos/waldopepper/2605227469/">LOGS, LOGS, LOGS, LOGS</a> von <a href="http://www.flickr.com/photos/waldopepper/">waldopepper</a> (<a href="http://creativecommons.org/licenses/by-nc/2.0/deed.de">Lizenz</a>). 
+</p>

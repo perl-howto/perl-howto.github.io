@@ -1,0 +1,342 @@
+---
+layout: post
+title: CPAN-Module für Ubuntu mit dem Debian Package Manager installieren
+date: '2008-06-23 23:30:16 +0000'
+mt_id: 77
+blog_id: 1
+post_id: 77
+permalink: /2008/06/cpanmodule_fur_ubuntu_mit_dem.html
+categories:
+- linux
+---
+<p>
+Die für <a href="http://www.ubuntu.com/">Ubuntu</a> bereitgestellten <a href="http://packages.ubuntu.com/hardy/perl/">CPAN-Pakete</a> sind leider nicht sonderlich zahlreich und auch nicht immer ganz taufrisch. 
+</p>
+<p>
+Die Installation mittels 
+</p>
+<pre>
+perl -MCPAN -e shell
+</pre>
+<p>
+ignoriert das Debian-Package-Management leider vollständig. Für gestandene Systemadminstratoren ein Alptraum.
+</p>
+<p>
+Erfreulicherweise gibt es mehrere Möglichkeiten aktuelle CPAN-Module für Debian basierte Linuxe im Einklang mit dem Debian-Paketmanagement zu installieren.
+</p>
+<ol>
+<li><a href="http://debian.pkgs.cpan.org/">Debianisierte CPAN-Pakete</a></li>
+<li><a href="http://search.cpan.org/perldoc?cpan2dist">cpan2dist</a></li>
+<li><a href="http://packages.debian.org/search?keywords=dh-make-perl">dh-make-perl </a> </li>
+</ol>
+
+
+<h2>Methode 1: Debianisierte CPAN-Pakete</h2>
+<p>
+Für die Installation von CPAN-Modulen auf Debian basierten Linuxen gibt es bereits aktuelle debianisierte CPAN-Pakete bei <a href="http://debian.pkgs.cpan.org/">http://debian.pkgs.cpan.org/</a>.
+</p>
+
+<p>
+<strong>Schritt 1: /etc/apt/sources.list anpassen</strong>
+</p>
+<p>
+Dazu einfach folgende Zeile in /etc/apt/sources.list einfügen
+</p>
+<pre>
+deb http://debian.pkgs.cpan.org/debian unstable main
+</pre>
+
+<p>
+<strong>Schritt 2: Repository-Liste aktualisieren</strong>
+</p>
+<pre>
+$ sudo apt-get update
+....
+Ign http://debian.pkgs.cpan.org unstable Release.gpg               
+Ign http://debian.pkgs.cpan.org unstable/main Translation-de
+Ign http://debian.pkgs.cpan.org unstable Release
+Ign http://debian.pkgs.cpan.org unstable/main Packages
+Hole:1 http://debian.pkgs.cpan.org unstable/main Packages [32,6kB]
+Es wurden 32,6kB in 1s geholt (19,6kB/s)
+Paketlisten werden gelesen... Fertig
+</pre>
+
+<p>
+<strong>Schritt 3: Repository durchsuchen</strong>
+</p>
+<p>
+Alle Debian-CPAN-Pakete sind mit dem Prefix cpan- gekennzeichnet, so kann man sie von den Standardpaketen unterscheiden.
+</p>
+<pre>
+$ apt-cache search cpan-
+bioperl - Perl tools for computational molecular biology
+libcpan-distnameinfo-perl - Extract distribution name and version from a distribution filename
+libcpan-mini-perl - create a minimal mirror of CPAN
+libparse-cpan-packages-perl - Perl module to parse 02packages.details.txt.gz
+libtest-reporter-perl - sends test results to cpan-testers@perl.org
+liblingua-en-numbers-ordinate-perl - Perl-Modul zur Konvertierung von Kardinalzahlen in Ordinalzahlen
+.....
+</pre>
+
+<p>
+<strong>Schritt 4: CPAN-Module installieren</strong>
+</p>
+<p>
+Beispiel YAML installieren
+</p>
+<pre>
+$ sudo apt-get install cpan-libyaml-perl
+
+Paketlisten werden gelesen... Fertig
+Abhängigkeitsbaum wird aufgebaut       
+Reading state information... Fertig
+Die folgenden NEUEN Pakete werden installiert:
+  cpan-libyaml-perl
+0 aktualisiert, 1 neu installiert, 0 zu entfernen und 0 nicht aktualisiert.
+Es müssen noch 0B von 47,6kB Archiven geholt werden.
+After this operation, 381kB of additional disk space will be used.
+WARNUNG: Die folgenden Pakete können nicht authentifiziert werden!
+  cpan-libyaml-perl
+Diese Pakete ohne Überprüfung installieren [j/N]? j
+Wähle vormals abgewähltes Paket cpan-libyaml-perl.
+(Lese Datenbank ... 187518 Dateien und Verzeichnisse sind derzeit installiert.)
+Entpacke cpan-libyaml-perl (aus .../cpan-libyaml-perl_0.66-1_all.deb) ...
+Richte cpan-libyaml-perl ein (0.66-1) ...
+</pre>
+<p>
+Prüfen, ob das Paket installiert wurde.
+</p>
+<pre>
+$ dpkg -l | grep cpan-libyaml
+ii  cpan-libyaml-perl	0.66-1	YAML Ain't Markup Language (tm)
+</pre>
+<p>
+Installierte YAML-Version prüfen:
+</p>
+<pre>
+$ perl -MYAML -le "print YAML->VERSION";
+0.66
+</pre>
+<p>
+Ein Blick auf <a href="http://search.cpan.org/perldoc?YAML">YAML auf CPAN</a>, zeigt uns, das die aktuelle Version installiert wurde. 
+</p>
+<p>
+So einfach geht's. Sehr schön.
+</p>
+<p>
+<strong>Parallele Installation der Pakete</strong>
+</p>
+<p>
+Es ist ohne weiteres möglich, debianisierte CPAN-Pakete und Ubuntu Pakete gleichzeitig zu installieren.
+</p>
+<pre>
+$ sudo apt-get install libyaml-perl
+$ sudo apt-get install cpan-libyaml-perl
+
+$ dpkg -l | grep yaml
+ii  cpan-libyaml-perl	0.66-1	YAML Ain't Markup Language (tm)
+ii  libyaml-perl	0.62-1	YAML Ain't Markup Language (tm)
+</pre>
+<p>
+Die beiden Module werden in unterschiedliche Verzeichnisstrukturen installiert, was sich einfach prüfen lässt.
+</p>
+<pre>
+$ dpkg -L libyaml-perl
+...
+ /usr/share/doc/libyaml-perl 
+ /usr/share/perl5/YAML.pm
+...
+$ dpkg -L cpan-libyaml-perl
+...
+/usr/share/doc/cpan-libyaml-perl 
+/usr/local/share/perl/5.8.8/YAML  
+...
+</pre>
+<p>
+Welche Modulversion verwendet wird, hängt vom @INC ab, i.d.R. wird die debianisierte CPAN-Paket-Version vor der Ubuntu-Version geladen.
+</p>
+
+<p>
+Das gilt auch für mitgelieferte Komandozeilen-Tools.
+</p>
+<pre>
+$ which ysh 
+/usr/local/bin/ysh
+
+$ dpkg -S  /usr/local/bin/ysh 
+cpan-libyaml-perl: /usr/local/bin/ysh
+
+$ dpkg -S  /usr/bin/ysh 
+libyaml-perl: /usr/bin/ysh
+</pre>
+<p>
+Welches der beiden Tools verwendet wird, hängt von der Umgebungsvariable $PATH ab.
+</p>
+
+<h2>Methode 2: Debian-Pakete mit cpan2dist selbst erstellen</h2>
+
+<p>Wer jetzt immer noch nicht fündig geworden ist, kann mit <a href="http://search.cpan.org/perldoc?cpan2dist">cpan2dist</a> auch selbst Debian-Pakete erstellen.
+</p>
+
+<p>
+Zunächst die benötigten Pakete installierten
+</p>
+
+<pre>
+$ sudo apt-get install cpan-libcpanplus-perl            
+$ sudo apt-get install cpan-libcpanplus-dist-build-perl
+$ sudo apt-get install cpan-libcpanplus-dist-deb-perl
+</pre>
+
+<p>
+<strong>Beispiel: Debian-Paket für <a href="http://search.cpan.org/perldoc?HTML::Template::Compiled">HTML::Template::Compiled</a> erstellen 
+</strong></p>
+<p>
+cpan2dist kann auch alle Abhängigkeiten auflösen (--buildprereq).
+</p>
+<pre>
+$ cpan2dist --format CPANPLUS::Dist::Deb --buildprereq HTML::Template::Compiled
+...
+Created 'CPANPLUS::Dist::Deb' distribution for HTML::Template::Compiled to:
+~/.cpanplus/5.8.8/dist/debian/main/pool/cpan-lib/h/cpan-libhtml-template-compiled-perl/cpan-libhtml-template-compiled-perl_0.91-1_all.deb
+</pre>
+<p>
+Ins das o.g. Verzeichnis wechseln
+</p>
+<pre>
+$ cd ~/.cpanplus/5.8.8/dist/debian/main/pool/cpan-lib/h/cpan-libhtml-template-compiled-perl
+$ ls
+
+cpan-libhtml-template-compiled-perl_0.91-1_all.deb  cpan-libhtml-template-compiled-perl_0.91-1_i386.changes
+cpan-libhtml-template-compiled-perl_0.91-1.diff.gz  cpan-libhtml-template-compiled-perl_0.91.orig.tar.gz
+cpan-libhtml-template-compiled-perl_0.91-1.dsc
+</pre>
+<p>
+und das Paket inspizieren
+</p>
+<pre>
+$ dpkg -I cpan-libhtml-template-compiled-perl_0.91-1_all.deb
+
+ neues Debian-Paket, Version 2.0.
+ Größe 66034 Byte: control-Archiv= 1454 Byte.
+     405 Byte,    11 Zeilen      control              
+    3328 Byte,    35 Zeilen      md5sums              
+ Package: cpan-libhtml-template-compiled-perl
+ Version: 0.91-1
+ Architecture: all
+ Maintainer: cpanplus@example.com
+ Installed-Size: 452
+ Depends: libpathtools-perl | cpan-libpathtools-perl, libtest-simple-perl | cpan-libtest-simple-perl, perl (>= 5.8.8)
+ Provides: libhtml-template-compiled-perl
+ Section: perl
+ Priority: optional
+ Description: Simple and fast templating module
+  Simple and fast templating module
+</pre>
+<p>
+Das CPAN-Modul kann jetzt mit <a href="http://de.wikipedia.org/wiki/Dpkg">dpkg</a> installiert werden.
+</p>
+<pre>
+$ sudo dpkg -i cpan-libhtml-template-compiled-perl_0.91-1_all.deb 
+Wähle vormals abgewähltes Paket cpan-libhtml-template-compiled-perl.
+(Lese Datenbank ... 188201 Dateien und Verzeichnisse sind derzeit installiert.)
+Entpacke cpan-libhtml-template-compiled-perl (aus cpan-libhtml-template-compiled-perl_0.91-1_all.deb) ...
+Richte cpan-libhtml-template-compiled-perl ein (0.91-1) ...
+</pre>
+
+<p>
+Prüfen ob das Paket installiert wurde.
+</p>
+
+<pre>
+$ dpkg -l | grep compiled
+ii  cpan-libhtml-template-compiled-perl	0.91-1 Simple and fast templating module
+</pre>
+
+<p>
+Noch schnell die installierte HTML::Template::Compiled Version prüfen:
+</p>
+
+<pre>
+$ perl -MHTML::Template::Compiled -le "print HTML::Template::Compiled->VERSION";
+0.91
+</pre>
+
+<p>
+Cool!
+</p>
+
+<h2>Methode 3: dh-make-perl</h2>
+<p>
+<a href="http://packages.debian.org/search?keywords=dh-make-perl">dh-make-perl </a>  ist eine weitere einfache Möglichkeit CPAN-Pakete zu debianisieren.</p>
+<p>
+Zunächst  dh-make-perl installieren
+</p>
+<pre>
+$ sudo apt-get install dh-make-perl
+</pre>
+<p>
+<strong>Beispiel: Debian-Paket für <a href="http://search.cpan.org/perldoc?HTML::Template">HTML::Template</a> erstellen 
+</strong></p>
+<p>
+</p>
+<pre>
+$ mkdir /tmp/debian/
+$ cd /tmp/debian/
+$ dh-make-perl --build --cpan HTML::Template
+...
+$  ls -l
+drwxr-xr-x 7  ...  HTML-Template-2.9
+-rw-r--r-- 1  ...    libhtml-template-perl_2.9-1_all.deb
+</pre>
+<p>
+und das Paket inspizieren
+</p>
+<pre>
+dpkg -I libhtml-template-perl_2.9-1_all.deb 
+ neues Debian-Paket, Version 2.0.
+ Größe 64106 Byte: control-Archiv= 1044 Byte.
+    1052 Byte,    24 Zeilen      control              
+     554 Byte,     7 Zeilen      md5sums              
+ Package: libhtml-template-perl
+ Version: 2.9-1
+ Architecture: all
+ Maintainer: .............
+ Installed-Size: 208
+ Depends: perl (>= 5.6.0-16)
+ Section: perl
+ Priority: optional
+ Homepage: http://search.cpan.org/dist/HTML-Template/
+ Description: Perl module to use HTML Templates from CGI scripts
+  This module attempts to make using HTML templates simple and natural.
+  It extends standard HTML with a few new HTML-esque tags - &lt;TMPL_VAR>,
+  &lt;TMPL_LOOP>, &lt;TMPL_INCLUDE>, &lt;TMPL_IF>, &lt;TMPL_ELSE> and &lt;TMPL_UNLESS>.
+  The file written with HTML and these new tags is called a template.
+  It is usually saved separate from your script - possibly even created
+  by someone else!  Using this module you fill in the values for the
+  variables, loops and branches declared in the template.  This allows
+  you to separate design - the HTML - from the data, which you generate
+  in the Perl script.
+  .
+  This module is licensed under the GPL.  See the LICENSE section
+  below for more details.
+  .
+  This description was automagically extracted from the module by dh-make-perl.
+</pre>
+<p>
+Das CPAN-Modul kann jetzt mit <a href="http://de.wikipedia.org/wiki/Dpkg">dpkg</a> installiert werden.
+</p>
+<pre>
+$ sudo dpkg -i libhtml-template-perl_2.9-1_all.deb 
+</pre>
+
+<h2>Welche der drei Methoden soll ich verwenden?</h2>
+<p>
+Hier meine persönliche Vorgehensweise:
+</p>
+<ol>
+<li>T<strong>op-Favorit</strong>:<a href="http://debian.pkgs.cpan.org/">debianisierte CPAN-Pakete</a>.</li>
+<li><a href="http://search.cpan.org/perldoc?cpan2dist">cpan2dist</a>, falls ich mit Methode 1 nicht fündig werde. </li>
+<li><a href="http://packages.debian.org/search?keywords=dh-make-perl">dh-make-perl </a> verwende ich so gut wie nie.</li>
+</ol>
+

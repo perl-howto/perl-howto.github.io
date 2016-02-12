@@ -1,0 +1,196 @@
+---
+layout: post
+title: Show me the money - Finance::YahooQuote
+date: '2009-06-11 21:20:00 +0000'
+mt_id: 147
+blog_id: 1
+post_id: 147
+permalink: /2009/06/show_me_the_money-financeyahooquote.html
+categories:
+- finance
+- lwp
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Finance::YahooQuote">Finance::YahooQuote</a> von <a href="http://search.cpan.org/~edd/">Dirk Eddelbuettel</a> vereinfacht die Ermittlung der Börsenkurse von <a href="http://finance.yahoo.com/">Yahoo! Finance</a> und dient als Grundlage für den <a href="http://dirk.eddelbuettel.com/code/smtm.html">graphischen Stockticker SMTM</a>.
+</p>
+<form mt:asset-id="49" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="DAX.png" src="{{ site.url }}/assets/images/finance/DAX.png" width="442" height="266"  style="" /></form>
+
+<h2>Beispiel: Aktueller Stand des DAX</h2>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Finance::YahooQuote</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$symbol</span> = <span style=" color: #CD5555;">&#39;^GDAXI&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@quote</span> = <span style=" color: #000000;">getonequote</span> <span style=" color: #00688B;">$symbol</span><span style=" color: #000000;">;</span> <span style=" color: #228B22;"># Get a quote for a single symbol</span>
+
+<span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #8B008B; font-weight:bold;">scalar</span> <span style=" color: #00688B;">@quote</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 0 Symbol: $quote[0]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 1 Company Name: $quote[1]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 2 Last Price: $quote[2]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 3 Last Trade Date: $quote[3]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 4 Last Trade Time: $quote[4]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 5 Change: $quote[5]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 6 Percent Change: $quote[6]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 7 Volume: $quote[7]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 8 Average Daily Vol: $quote[8]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 9 Bid: $quote[9]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;10 Ask: $quote[10]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;11 Previous Close: $quote[11]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;12 Today&#39;s Open: $quote[12]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;13 Day&#39;s Range: $quote[13]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;14 52-Week Range: $quote[14]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;15 Earnings per Share: $quote[15]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;16 P/E Ratio: $quote[16]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;17 Dividend Pay Date: $quote[17]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;18 Dividend per Share: $quote[18]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;19 Dividend Yield: $quote[19]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;20 Market Capitalization: $quote[20]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;21 Stock Exchange: $quote[21]\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span> 
+<span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Ooops\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+ 0 Symbol: ^GDAXI
+ 1 Company Name: DAX
+ 2 Last Price: 5107.26
+ 3 Last Trade Date: 6/11/2009
+ 4 Last Trade Time: 11:45am
+ 5 Change: +56.08
+ 6 Percent Change: +1.11%
+ 7 Volume: 0
+ 8 Average Daily Vol: 0
+ 9 Bid: N/A
+10 Ask: N/A
+11 Previous Close: 5051.18
+12 Today's Open: 5039.97
+13 Day's Range: 5038.03 - 5120.87
+14 52-Week Range: 3588.89 - 6855.84
+15 Earnings per Share: N/A
+16 P/E Ratio: N/A
+17 Dividend Pay Date: N/A
+18 Dividend per Share: N/A
+19 Dividend Yield: N/A
+20 Market Capitalization: N/A
+21 Stock Exchange: XETRA
+</pre>
+
+<h2>Beispiel: Aktueller Kurs der adidas Aktie</h2>
+<p>
+Durch <em>useExtendedQueryFormat</em> können weitere Felder, wie <a href="http://de.wikipedia.org/wiki/Earnings_per_share">Earnings per Share</a>, ermittelt werden:
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Finance::YahooQuote</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$symbol</span> = <span style=" color: #CD5555;">&#39;ADS.DE&#39;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">useExtendedQueryFormat</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span> 
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">@quote</span> = <span style=" color: #000000;">getonequote</span> <span style=" color: #00688B;">$symbol</span><span style=" color: #000000;">;</span> <span style=" color: #228B22;"># Get a quote for a single symbol</span>
+
+<span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #8B008B; font-weight:bold;">scalar</span> <span style=" color: #00688B;">@quote</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 0 Symbol: $quote[0]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 1 Company Name: $quote[1]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 2 Last Price: $quote[2]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 3 Last Trade Date: $quote[3]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 4 Last Trade Time: $quote[4]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 5 Change: $quote[5]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 6 Percent Change: $quote[6]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 7 Volume: $quote[7]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 8 Average Daily Vol: $quote[8]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot; 9 Bid: $quote[9]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;10 Ask: $quote[10]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;11 Previous Close: $quote[11]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;12 Today&#39;s Open: $quote[12]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;13 Day&#39;s Range: $quote[13]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;14 52-Week Range: $quote[14]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;15 Earnings per Share: $quote[15]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;16 P/E Ratio: $quote[16]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;17 Dividend Pay Date: $quote[17]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;18 Dividend per Share: $quote[18]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;19 Dividend Yield: $quote[19]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;20 Market Capitalization: $quote[20]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;21 Stock Exchange: $quote[21]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;22 Short ratio: $quote[22]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;23 1yr Target Price: $quote[23]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;24 EPS Est. Current Yr: $quote[24]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;25 EPS Est. Next Year: $quote[25]\n&quot;</span> <span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;26 EPS Est. Next Quarter: $quote[26]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;27 Price/EPS Est. Current Yr: $quote[27]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;28 Price/EPS Est. Next Yr: $quote[28]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;29 PEG Ratio: $quote[29]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;30 Book Value: $quote[30]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;31 Price/Book: $quote[31]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;32 Price/Sales: $quote[32]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;33 EBITDA: $quote[33]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;34 50-day Moving Avg: $quote[34]\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;35 200-day Moving Avg: $quote[35]\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span> 
+<span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;Ooops\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+ 0 Symbol: ADS.DE
+ 1 Company Name: ADIDAS
+ 2 Last Price: 27.88
+ 3 Last Trade Date: 6/11/2009
+ 4 Last Trade Time: 11:35am
+ 5 Change: +0.17
+ 6 Percent Change: +0.61%
+ 7 Volume: 1324113
+ 8 Average Daily Vol: 1747360
+ 9 Bid: 27.80
+10 Ask: 27.84
+11 Previous Close: 27.71
+12 Today's Open: 27.59
+13 Day's Range: 27.48 - 28.30
+14 52-Week Range: 21.22 - 45.12
+15 Earnings per Share: 0.00
+16 P/E Ratio: N/A
+17 Dividend Pay Date: N/A
+18 Dividend per Share: 0.50
+19 Dividend Yield: 1.80
+20 Market Capitalization: N/A
+21 Stock Exchange: XETRA
+22 Short ratio: N/A
+23 1yr Target Price: N/A
+24 EPS Est. Current Yr: 0.00
+25 EPS Est. Next Year: 0.00
+26 EPS Est. Next Quarter: 0.00
+27 Price/EPS Est. Current Yr: N/A
+28 Price/EPS Est. Next Yr: N/A
+29 PEG Ratio: N/A
+30 Book Value: 0.00
+31 Price/Book: N/A
+32 Price/Sales: N/A
+33 EBITDA: 0
+34 50-day Moving Avg: 26.7369
+35 200-day Moving Avg: 26.1586
+</pre>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Finance::YahooQuote">CPAN: Finance::YahooQuote</a></li>
+<li>Dirk Eddelbuettel: <a href="http://dirk.eddelbuettel.com/code/yahooquote.html">Finance::YahooQuote</a></li>
+<li><a href="http://finance.yahoo.com/">Yahoo! Finance</a></li>
+<li><a href="http://docs.yahoo.com/info/misc/disclaimer.html">Yahoo! - Important Disclaimers and Legal Information</a></li>
+<li>Dirk Eddelbuettel: <a href="http://dirk.eddelbuettel.com/code/beancounter.html">BeanCounter portfolio performance toolkit</a> </li>
+<li>Dirk Eddelbuettel: <a href="http://dirk.eddelbuettel.com/code/smtm.html">SMTM Perl/Tk global stock ticker</a></li>
+</ul>

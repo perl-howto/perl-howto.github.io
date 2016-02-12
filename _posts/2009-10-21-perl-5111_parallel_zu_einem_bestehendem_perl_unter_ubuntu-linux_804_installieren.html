@@ -1,0 +1,160 @@
+---
+layout: post
+title: perl-5.11.1 parallel zu einem bestehendem Perl unter Ubuntu-Linux 8.04 installieren
+date: '2009-10-21 23:00:00 +0000'
+mt_id: 167
+blog_id: 1
+post_id: 167
+permalink: /2009/10/perl-5111_parallel_zu_einem_bestehendem_perl_unter_ubuntu-linux_804_installieren.html
+categories:
+- '101'
+---
+<p>
+<a href="http://search.cpan.org/~jesse/perl-5.11.1/">Perl 5.11.1</a> ist <a href="http://markmail.org/message/yuy7zo6rlpy6btnq">seit dem 20. Oktober 2009 verfügbar</a>. Die Neuerungen sind ausführlich in den <a href="http://search.cpan.org/src/JESSE/perl-5.11.1/Changes">Perl 5.11.1 Changes</a> bzw. in <a href="http://cpansearch.perl.org/src/JESSE/perl-5.11.1/pod/perl5111delta.pod">perldelta - what is new for perl v5.11.1</a> beschrieben.
+</p>
+<p>
+Es handelt sich um einen Developer-Release, der ausdrücklich nicht für produktive Zwecke gedacht ist.
+</p>
+<p>
+Wer die neue Entwickler-Version einfach einmal ausprobieren möchte, kann Perl 5.11.1 aus den Sourcen parallel zu einem bestehenden Perl installieren.
+</p>
+
+<h2>Installation perl-5.11.1</h2>
+<p>
+<strong>Ziel:</strong> Perl 5.11.1 soll parallel zu dem bestehenden Perl 5.8.8 in das Verzeichnis<em> /opt/perl511</em> installiert werden.
+</p>
+<pre>
+$ sudo mkdir /opt/perl511
+ 
+$ sudo chmod 755 /opt/perl511
+ 
+$ sudo chown root:root /opt/perl511
+
+$ cd /tmp
+
+$ wget http://search.cpan.org/CPAN/authors/id/J/JE/JESSE/perl-5.11.1.tar.gz
+ 
+$ tar -xzf perl-5.11.1.tar.gz 
+ 
+$ cd perl-5.11.1/
+
+$ vi README
+
+$ perldoc INSTALL 
+
+$ ./Configure -des -Dprefix=/opt/perl511 -Dusedevel
+ 
+$ make
+ 
+$ make test
+ 
+$ sudo make install
+</pre>
+<p>
+Jetzt sollten zwei verschiedene Perl-Versionen auf dem System vorhanden sein:
+</p>
+<pre>
+$  /opt/perl511/bin/perl5.11.1 -v
+
+This is perl, v5.11.1 (*) built for i686-linux
+
+Copyright 1987-2009, Larry Wall
+
+Perl may be copied only under the terms of either the Artistic License or the
+GNU General Public License, which may be found in the Perl 5 source kit.
+
+Complete documentation for Perl, including FAQ lists, should be found on
+this system using "man perl" or "perldoc perl".  If you have access to the
+Internet, point your browser at http://www.perl.org/, the Perl Home Page.
+</pre>
+<p>
+und
+</p>
+<pre>
+$ perl -v
+
+This is perl, v5.8.8 built for i486-linux-gnu-thread-multi
+
+Copyright 1987-2006, Larry Wall
+
+Perl may be copied only under the terms of either the Artistic License or the
+GNU General Public License, which may be found in the Perl 5 source kit.
+
+Complete documentation for Perl, including FAQ lists, should be found on
+this system using "man perl" or "perldoc perl".  If you have access to the
+Internet, point your browser at http://www.perl.org/, the Perl Home Page.
+
+</pre>
+<h2>Die neue Version verwenden</h2>
+<p>
+Für Perl 5.11.1 muss stets der volle Pfad angegeben werden. (Die Umgebungsvariable $PATH bleibt unverändert.) Entweder in der <a href="http://de.wikipedia.org/wiki/Shebang">Shebang-Zeile</a> 
+</p>
+<pre>
+<strong>#!/opt/perl511/bin/perl5.11.1</strong>
+use strict;
+use warnings;
+</pre>
+<p>
+oder auf der Kommandozeile:
+</p>
+<pre>
+$ <strong>/opt/perl511/bin/perl5.11.1</strong> meinprogramm.pl
+</pre>
+
+<h2>CPAN-Module installieren</h2>
+<p>
+CPAN-Module lassen sich wie gehabt per <a href="http://search.cpan.org/perldoc?CPAN">CPAN-Shell</a> installieren
+</p>
+<pre>
+$  sudo /opt/perl511/bin/cpan5.11.1
+
+cpan shell -- CPAN exploration and modules installation (v1.9451)
+Enter 'h' for help.
+
+cpan[1]> install YAML
+
+....
+Appending installation info to <strong>/opt/perl511/lib/5.11.1/i686-linux/perllocal.pod</strong>
+
+</pre>
+<h2>Bugreports</h2>
+<p>
+Evtl. vorkommende Fehler können einfach über das mitgelieferte Tool <em>perlbug </em>übermittelt werden:
+</p>
+<pre>
+$ /opt/perl511/bin/perlbug5.11.1 
+This program provides an easy way to create a message reporting
+a bug in the core perl distribution (along with tests or
+patches) to the volunteers who maintain perl at
+perlbug@perl.org.  To send a thank-you note to perl-
+thanks@perl.org instead of a bug report, please run
+'perlthanks'.
+</pre>
+<h2>Danke sagen</h2>
+<p>
+Wer sich bei den Entwicklern bedanken möchte, verwendet das mitgelieferte Tool <em>perlthanks</em>
+</p>
+<pre>
+$  /opt/perl511/bin/perlthanks5.11.1 
+
+This program provides an easy way to send a thank-you message
+back to the authors and maintainers of perl.
+
+If you wish to submit a bug report, please run it without the -T
+flag (or run the program perlbug rather than perlthanks)
+</pre>
+<p>
+Die Entwickler Abigail, Alex Vandiver, brian d foy, Chris Williams, Craig A. Berry, David Fifield, David Golden, demerphq, Eric Brine, Geoffrey T. Dairiki, George Greer, H.Merijn Brand, Jan Dubois, Jerry D. Hedden, Jesse Vincent, Josh ben Jore, Max Maischein, Nicholas Clark, Rafael Garcia-Suarez, Simon Schubert, Sisyphus, Smylers, Steve Hay, Steve Peters, Vincent Pit und Yves Orton freuen sich bestimmt.
+</p>
+
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/~jesse/perl-5.11.1/">Perl 5.11.1</a></li>
+<li><a href="http://search.cpan.org/src/JESSE/perl-5.11.1/Changes">Perl 5.11.1 Changes</a></li>
+<li><a href="http://cpansearch.perl.org/src/JESSE/perl-5.11.1/pod/perl5111delta.pod">perldelta - what is new for perl v5.11.1</a></li>
+<li><a href="http://cpansearch.perl.org/src/JESSE/perl-5.11.1/pod/perl5110delta.pod">perl5110delta - what is new for perl v5.11.0</a></li>
+<li><a href="http://markmail.org/message/yuy7zo6rlpy6btnq">Perl 5.11.1 now available</a></li>
+<li>Perl-News: <a href="http://perl-nachrichten.de/index.cgi/details/581">Perl 5.11.1 ist da!</a></li>
+<li>Heise.de: <a href="http://www.heise.de/open/meldung/Perl-5-11-freigegeben-808840.html">Perl 5.11 freigegeben</a></li>
+</ul>

@@ -1,0 +1,159 @@
+---
+layout: post
+title: Perlprogramme inline mit POD dokumentieren
+date: '2008-05-16 14:11:47 +0000'
+mt_id: 57
+blog_id: 1
+post_id: 57
+permalink: /2008/05/perlprogramme_inline_mit_pod_d.html
+categories:
+- '101'
+---
+<h2>Was ist POD und wozu wird es verwendet?</h2>
+
+<ul class="no-bullet">
+	<li>POD ist eine Abkürzung für "Plain Old Documentation".</li>
+        <li>POD ermöglicht Dokumentation in den Quelltext von Perl-Programmen einzufügen.</li>
+	<li>POD vermeidet die Suche nach der Dokumentation (Source und Dokumentation sind in einer Datei).</li>
+	<li>POD ist einfach und schnell (es gibt nur sehr wenige Kommandos).</li>
+	<li>POD senkt die Kosten für die technische Dokumentation ( mehrere Ausgabeformate sind möglich).</li>
+</ul>
+
+<h2>Werkzeuge zur Umwandlung von POD in andere Formate</h2>
+
+<ul class="no-bullet">
+	<li><a href="http://www.perl.com/doc/manual/html/utils/pod2html.html">pod2html</a> - erzeugt html aus POD</li>
+	<li><a href="http://perldoc.perl.org/pod2latex.html">pod2latex</a> - generiert LaTeX aus POD</li>
+	<li><a href="http://perldoc.perl.org/pod2man.html">pod2man</a> - erzeugt Manpages aus POD</li>
+	<li><a href="http://perldoc.perl.org/pod2text.html">pod2text</a> - erzeugt einfachen Text aus POD</li>
+</ul>
+<h2>Allgemeines</h2>
+<p>
+Die Anzahl der Kommandos ist bewusst klein gehalten.
+</p>
+<p>
+POD-Kommandos müssen am <strong>Anfang einer Zeile</strong> stehen, um als Kommandos erkannt zu werden.
+</p>
+<p>
+Sie können POD-Kommandos überall im Source-Code verwenden, d.h. Sie können Dokumentation und Programm mischen.
+</p>
+<p>
+Sie sollten eine Leerzeile zwischen den einzelnen Kommandos einfügen, damit die verschiedenen Interpreter mit Ihrer Dokumentation zurechtkommen.
+</p>
+<p>
+Leerzeilen werden als Abschnittsende interpretiert.
+</p>
+<p>
+Der Formatierer (Filter) setzt nicht gekennzeichneten Text in Abschnitte. Das Format der Abschnitte hängt vom Filter ab.
+</p>
+<p>
+Eingerückter Text wird als Programmcode interpretiert und automatisch ohne Zeilenumbruch im bewährten <em>Schreibmaschinenstil</em> gesetzt.
+ </p>
+<h2>Start und Ende</h2>
+<dl>
+<dt>=pod</dt>
+<dd>Beginn der Dokumentation. Optional, Sie können auch irgendein POD-Kommando verwenden.
+</dd>
+<dt>=cut</dt>
+<dd>Ende der Dokumentation. Zurück zu Perl. Sinnvoll, wenn Sie Code und Dokumentation mischen. 
+</dd>
+</dl>
+<p>
+<b>Hinweis:</b> Häufig beginnt die Dokumentation nach dem Ende des
+Sourcecodes, z.B.:
+</p>
+<pre>
+__END__
+
+=pod
+
+=head1 Name
+......
+</pre>
+<p>
+Lassen Sie eine Leerzeile zwischen der __END__-Anweisung
+und dem darauffolgenden POD-Kommando. Ansonsten erkennt der Filter das
+erste POD-Kommando häufig nicht.
+</p>
+
+<h2>Überschriften</h2>
+<dl>
+<dt>=head1</dt>
+<dd>Überschrift der Ebene 1<p></dd>
+<dt>=head2</dt>
+<dd>Überschrift der Ebene 2<p></dd>
+</dl>
+<p>Beispiel</p>
+<pre>
+=head1 Eine Überschrift der ersten Ebene
+
+=head2 Eine Überschrift der zweiten Ebene
+
+=head2 Eine Überschrift der zweiten Ebene
+
+=head1 Eine Überschrift der ersten Ebene
+</pre>
+
+<h2>Listeneinträge</h2>
+<dl>
+ <dt>=over N</dt>
+ <dd>Um N Spalten einrücken<p></dd>
+ <dt>=item Text</dt>
+ <dd>Listeneintrag<p></dd>
+ <dt>=back</dt>
+ <dd>Einrücken aufheben<p></dd>
+</dl>
+
+<p>Beispiel:</p>
+<pre>
+=over 4
+
+=item  Listenpunkt
+Text, der zu diesem Listeneintrag gehört.
+
+=item Nächster Listenpunkt
+Text, der zu diesem Listeneintrag gehört.
+
+=back
+</pre>
+
+<h2>Textformatierungen</h2>
+<dl>
+<dt>I&lt;TEXT&gt;</dt>
+<dd><i>Kursivdruck</i> zum Hervorheben von Variablen
+</dd>
+<dt>B&lt;TEXT&gt;</dt>
+<dd><b>Fettdruck</b> zum Hervorheben von Programmen und Aufzählungspunkten.
+</dd>
+<dt>S&lt;TEXT&gt;</dt>
+<dd>Text ohne Zeilenumbrüche
+</dd>
+<dt>C&lt;TEXT&gt;</dt>
+<dd><code>Code</code>
+</dd>
+<dt>L&lt;name&gt;</dt>
+<dd>Link zu manpage<br>
+Das Literal  manpage wird von den meisten Filtern automatisch
+angehängt. Es reicht also, wenn Sie <i>L&lt;foo(1)&gt;</i> schreiben.
+</dd>
+<dt>F&lt;File&gt;</dt>
+<dd>Dateinamen</dd>
+<dt>X&lt;Index&gt;</dt>
+	<dd>Indexeintrag</dd>
+<dt>E&lt;Escape&gt;</dt>
+	<dd>1. E&lt;ISO-Latin-1-Entities&gt;<br>
+ Beispiele:<br>
+ E&lt;gt&gt; = &gt;, E&lt;lt&gt; = &lt;,	E&lt;Otilde&gt; = &#213;
+ </dd>
+	<dd>2. E&lt;ASCII&gt;<br>
+	Beispiel: E&lt;186&gt; = &#186;
+  </dd>
+</dl>
+
+<h2>Siehe auch</h2>
+<p>Werfen Sie einen Blick in den Source-Code verschiedener Perl-Module und legen Sie einfach los: so lernen Sie es am schnellsten.
+</p>
+<ul class="no-bullet">
+	<li><a href="http://de.wikipedia.org/wiki/Plain_Old_Documentation">Wikipedia: Plain Old Documentation</a></li>
+	<li><a href="http://perldoc.perl.org/perlpod.html">perldoc: perlpod</a></li>
+</ul>

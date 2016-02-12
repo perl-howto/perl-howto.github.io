@@ -1,0 +1,514 @@
+---
+layout: post
+title: Perl in the Cloud - OpenShift Express by Red Hat - Installation, Initialisierung
+  und Konfiguration
+date: '2011-11-24 12:22:45 +0000'
+mt_id: 225
+blog_id: 1
+post_id: 225
+permalink: /2011/11/perl_in_the_cloud_openshift_express_by_red_hat_installation_initialisierung_und_konfiguration.html
+categories:
+- cloud
+---
+<p>
+<a href="https://openshift.redhat.com/app/">OpenShift by Red Hat</a> soll die Entwicklung von Open-Source-Anwendungen f&uuml;r die Cloud vereinfachen.
+ Dieser <a href="http://de.wikipedia.org/wiki/Platform_as_a_Service">Plattform-as-a-Service</a> stellt eine Infrastruktur f&uuml;r verschiedene Programmiersprachen und Web-Frameworks zur Verf&uuml;gung. 
+</p>
+<p>
+<a href="http://www.de.redhat.com/">Red Hat</a> unterscheidet zwischen den Produktvarianten <a href="https://openshift.redhat.com/app/express">Express</a>, <a href="https://openshift.redhat.com/app/flex">Flex</a> und <a href="https://openshift.redhat.com/app/power">Power</a>.
+</p>
+<p>
+Die kostenlose Express Variante (<a href="https://openshift.redhat.com/app/login">Registrierung erforderlich</a>) erlaubt u.a. die Verwendung der dynamischen Programmiersprache <a href="http://www.perl.org">Perl</a> in Version 5.10.1, der Datenbanken <a href="http://dev.mysql.com/">MySQL</a> in Version 5.1 oder <a href="http://www.sqlite.org/">SQLite</a> in Version 3 und (ganz wichtig) die Installation von <a href="http://www.cpan.org/">CPAN</a>-<a href="http://search.cpan.org/">Modulen</a>.
+</p>
+<p>
+Die bekannten und beliebten Perl Web-Frameworks <a href="http://perldancer.org/">Dancer</a>, <a href="http://mojolicio.us/">Mojolicious</a> und <a href="http://www.catalystframework.org/">Catalyst</a> k&ouml;nnen verwendet werden.
+</p>
+<p>
+&nbsp;
+</p>
+
+<h2>Schritt f&uuml;r Schritt</h2>
+<p>
+Dieser Beitrag geht zuerst Schritt f&uuml;r Schritt durch die Installation, Initialisierung und Konfiguration von OpenShift Express. Danach wird ein betont einfaches, aber n&uuml;tzliches Perl-Programm erstellt und gezeigt, wie dieses in die Cloud ausgeliefert (deployed) wird. 
+</p>
+<p>
+&nbsp;
+</p>
+<h2>Registrierung</h2>
+<p>
+Zur Verwendung von OpenShift Express ist eine <a href="https://openshift.redhat.com/app/login">Registrierung</a> mit einer g&uuml;ltigen E-Mail-Adresse erfoderlich. Alternativ kann auch ein bestehender <a href="http://rhn.redhat.com/">RHN-Account</a> verwendet werden.
+</p>
+<p>
+&nbsp;
+</p>
+<h2>Installation der Client-Tools</h2>
+<p>
+OpenShift funktioniert unter <a href="https://www.redhat.com/openshift/kb/kb-e1000/installing-openshift-express-client-tools-on-non-rpm-based-systems">Mac OSX, Linux und Windows</a> - f&uuml;r diesen Beitrag verwende ich <a href="http://www.centos.org/">CentOS 6</a> (64-Bit in einer eigenen virtuellen Maschine).
+</p>
+<p>
+F&uuml;r die Client-Tools bietet RedHat eine eigenes YUM-Repository an, das <a href="https://openshift.redhat.com/app/express#quickstart">wie folgt installiert</a> wird.
+</p>
+<pre>
+# wget https://openshift.redhat.com/app/repo/openshift.repo
+# mv openshift.repo /etc/yum.repos.d
+</pre>
+<p>
+Damit alle Paket-Abh&auml;nigkeiten aufgel&ouml;st werden, musste ich auch die <a href="http://fedoraproject.org/wiki/EPEL">EPEL</a>- und <a href="http://wiki.centos.org/AdditionalResources/Repositories/RPMForge">RPMForge</a>-Repositories <a href="http://wiki.centos.org/AdditionalResources/Repositories">hinzuf&uuml;gen</a>.
+</p>
+<p>
+Nun k&ouml;nnen die Client-Tools installiert werden:
+</p>
+<pre>
+# yum install rhc
+</pre>
+<p>
+&nbsp;
+</p>
+<h2>Initialisierung</h2>
+<p>
+Alle Apps eines Users werden in einen eigenen Namensraum (Domain) installiert. Apps sind dann nach dem Schema <i>http://$app-$domain.rhcloud.com</i> &ouml;ffentlich erreichbar. Dazu gleich mehr.
+</p>
+<p>
+Das Kommando <i>rhc-create-domain</i> erzeugt einen neuen Namensraum, die Konfigurationsdatei <i>express.conf</i> und <a href="http://de.wikipedia.org/wiki/Secure_Shell">SSH-Schl&uuml;ssel</a> (<i>libra_id_rsa</i>) zur <a href="http://git-scm.com/">Git</a>-Authentifizierung.
+</p>
+<pre>
+$ rhc-create-domain -n yourdomain -l user@example.com
+Password: &lt;user password>
+
+Generating Openshift Express ssh key to /home/UserName/.ssh/libra_id_rsa
+Generating public/private RSA key pair.
+Created directory '/home/UserName/.ssh'.
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/UserName/.ssh/libra_id_rsa.
+Your public key has been saved in /home/UserName/.ssh/libra_id_rsa.pub.
+.
+.
+Contacting https://openshift.redhat.com
+Adding rhlogin to /home/UserName/.openshift/express.conf
+Creation successful
+
+You may now create an application.  Please make note of your local config file
+in /home/UserName/.openshift/express.conf which has been created and populated for
+you.
+</pre>
+<p>
+Jetzt noch Git (minimal) konfigurieren
+</p>
+<pre>
+$ git config --global user.name "Your Name"
+$ git config --global user.email you@example.com
+</pre>
+<p>
+und dann kann endlich die erste App erstellt werden.
+</p>
+
+<p>
+&nbsp;
+</p>
+<h2>Appger&uuml;st erzeugen</h2>
+<p>
+Das Kommando <i>rhc-create-app </i> erzeugt das Ger&uuml;st der neuen App.  &Uuml;ber die  Option <i>-a</i> wird der Name der Applikation angegeben. Die Option <i>-t</i> legt den Typ der Applikation, hier perl-5.10, fest. Typen werden in der <a href="https://docs.redhat.com/docs/en-US/OpenShift_Express/1.0/html/User_Guide/index.html">Dokumentation</a> auch gerne als <i>cartridge</i> bezeichnet. 
+</p>
+<pre>
+$ rhc-create-app -a X1 -t perl-5.10 
+Password: 
+
+Attempting to create remote application space: X1
+Now your new domain name is being propagated worldwide (this might take a minute)...
+Pulling new repo down
+Warning: Permanently added 'x1-thomasfahle.rhcloud.com,184.73.107.7' (RSA) to the list of known hosts.
+Confirming application 'X1' is available
+  Attempt # 1
+
+Success!  Your application 'X1' is now published here:
+
+      http://X1-thomasfahle.rhcloud.com/
+
+The remote repository is located here:
+
+    ssh://ce3eb6cc3b1942a2a61a76db6ff63274@X1-thomasfahle.rhcloud.com/~/git/X1.git/
+
+To make changes to 'X1', commit to X1/.
+
+Successfully created application: X1
+</pre>
+<p>
+Die neu erstellte Applikation mit dem Namen <i>X1</i> innerhalb des Namensraumes <i>thomasfahle</i> ist sofort unter der URL<i> http://x1-thomasfahle.rhcloud.com/</i> erreichbar.
+</p>
+<form mt:asset-id="102" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="Welcome-to-OpenShift-klein.png" src="{{ site.url }}/assets/images/openshift/Welcome-to-OpenShift-klein.png" width="411" height="354" style="text-align: center; display: block; margin: 0 auto 20px;" /></form>
+<p>
+Wer lieber seine eigene Domain verwenden m&ouml;chte und &uuml;ber einen eigenen Nameserver verf&uuml;gt, kann einen <a href="https://www.redhat.com/openshift/faq/i-have-deployed-my-app-but-i-don%E2%80%99t-like-telling-people-to-visit-myapp-myusernamerhcloudcom-how-c">DNS Alias einrichten</a>.
+</p>
+
+<p>
+&nbsp;
+</p>
+<h2>Orientierung im Gel&auml;nde</h2>
+
+<p>
+Die neu erstellte Applikation befindet sich im Verzeichnis <i>$app</i>, hier X1.
+</p>
+
+<pre>
+$ tree X1
+X1
+|-- deplist.txt
+|-- libs
+|-- misc
+|-- perl
+|   |-- health_check.pl
+|   `-- index.pl
+`-- README
+</pre>
+<p>
+Das Verzeichnis <i>perl</i> ist die DocumentRoot der Webapp. Alle hier abgelegten Dateien sind &ouml;ffentlich. Die Datei <i>index.pl</i> dient als DirectoryIndex. 
+</p>
+<p>
+Die Datei <i>deplist.txt</i> nimmt eine Liste der zu installierenden CPAN-Module auf, pro Zeile ein Modul ohne Versionsnummer.<br />
+<a href="https://github.com/openshift/dancer-example/blob/master/deplist.txt">Beispiel</a>: 
+</p>
+<pre>
+Test::Base
+YAML
+Dancer
+Plack::Handler::Apache2
+</pre>
+<p>
+Das Verzeichnis <i>misc</i> ist nicht &ouml;ffentlich und kann f&uuml;r eigene Zwecke genutzt werden.
+</p>
+<p>
+Das Verzeichnis <i>libs</i> ist ebenfalls nicht &ouml;ffentlich und dient als Speicherort f&uuml;r eigene Module.
+</p>
+<p>
+Sinn und Zweck der Datei <i>health_check.pl</i> ist mir nicht ganz klar geworden.  
+</p>
+<p>
+Weiterhin gibt es noch ein verstecktes Verzeichnis <i>.openshift</i> zur Steuerung des Build-Prozesses. Dazu sp&auml;ter mehr.
+</p>
+
+<p>
+&nbsp;
+</p>
+<h2>Das erste Programm: Umgebungsvariablen</h2>
+<p>
+Einige Konfigurationseinstellungen, z.B. f&uuml;r Datenbanken, sind als Umgebungsvariablen abgelegt.
+</p>
+<p> Daher erstellen wir als erstes einfaches Beispiel keine Hallo-Welt-App, sondern eine n&uuml;tzliche App, welche die Umgebungsvariablen anzeigt.
+</p>
+<p>
+Das Programm wird unter dem Namen <i>printenv.pl</i> im Ordner <i>perl</i> abgelegt.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;">#  printenv -- demo CGI program which just prints its environment</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Content-type: text/plain\n\n&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$key</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">sort</span><span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">keys</span><span style="color: #000000;">(</span><span style="color: #00688B;">%ENV</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$val</span> = <span style="color: #00688B;">$ENV</span>{<span style="color: #00688B;">$key</span>}<span style="color: #000000;">;</span>
+    <span style="color: #00688B;">$val</span> =~ <span style="color: #CD5555;">s|\n|\\n|g</span><span style="color: #000000;">;</span>
+    <span style="color: #00688B;">$val</span> =~ <span style="color: #CD5555;">s|&quot;|\\&quot;|g</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">qq~$key = $val\n~</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+<span style="color: #8B008B; font-weight:bold;">exit</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Zur Ver&ouml;ffentlichung (Deployment) der App verwendet OpenShift <a href="http://git-scm.com/">Git</a>. Sobald die Datei hinzugef&uuml;gt und commited wurde, kann diese per git push in die Cloud ausgeliefert werden.
+</p>
+<pre>
+$ git add printenv.pl
+$ git commit -m 'Umgebungsvariablen App'
+$ git push
+
+Counting objects: 6, done.
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (4/4), 594 bytes, done.
+Total 4 (delta 1), reused 0 (delta 0)
+remote: Stopping application...
+remote: Waiting for stop to finish
+remote: Done
+remote: Running .openshift/action_hooks/pre_build
+remote: strict is up to date. (1.04)
+remote: skipping F/FL/FLORA/perl-5.15.4.tar.gz
+remote: Running .openshift/action_hooks/build
+remote: Running .openshift/action_hooks/deploy
+remote: Starting application...
+remote: Done
+remote: Running .openshift/action_hooks/post_deploy
+To ssh://ce3eb6cc3b1942a2a61a76db6ff63274@X1-thomasfahle.rhcloud.com/~/git/X1.git/
+   ee74341..e31f2ec  master -> master
+</pre>
+<p>
+Das Programm ist nun unter der URL <i>http://x1-thomasfahle.rhcloud.com/printenv.pl</i> erreichbar.
+</p>
+<p>
+<b>Hinweis:</b> Alle Daten innerhalb des Git-Repositories werden dabei auf dem OpenShift Express Server zun&auml;chst gel&ouml;scht und dann neu eingespielt.
+</p>
+<p>
+<b>Hinweis:</b> Da Umgebungsvariablen auch Benutzernamen und Passw&ouml;rter enthalten k&ouml;nnen, sollte dieses Programm <b>nicht</b> auf dem Cloud-Server verbleiben.
+</p>
+<p>
+Zum Bau und zur Auslieferung der Applikation werden die Programme im Ordner <i>.openschift/action_hooks/</i> ausgef&uuml;hrt. Um sich die Umgebungsvariablen anzeigen zu lassen, gen&uuml;gt es in die Datei <i>build</i> die Anweisung <i>export</i> einzuf&uuml;gen. Dann werden die Umgebungsvariablen bei jedem push angezeigt. 
+</p>
+<pre>
+$ cat .openshift/action_hooks/build 
+#!/bin/bash
+# This is a simple build script and will be executed on your CI system if 
+# available.  Otherwise it will execute while your application is stopped
+# before the deploy step.  This script gets executed directly, so it
+# could be python, php, ruby, etc.
+export
+</pre>
+<p>
+Eigene Umgebungsvariablen k&ouml;nnen derzeit nicht gesetzt werden.
+</p>
+<p>
+&nbsp;
+</p>
+<h2>Logfiles</h2>
+<p>
+Das Kommando <i>rhc-tail-files</i> erm&ouml;glicht den Zugriff auf die Logdateien auf dem Cloud-Server. 
+</p>
+<pre>
+$ rhc-tail-files -a X1 
+Password: 
+
+Attempting to tail files: X1/logs/*
+Use ctl + c to stop
+
+==> X1/logs/error_log-20111122-000000-EST <==
+[Tue Nov 22 16:43:18 2011] [notice] Apache/2.2.15 (Unix) mod_perl/2.0.4 Perl/v5.10.1 configured -- resuming normal operations
+
+==> X1/logs/access_log-20111122-000000-EST <==
+xx.xxx.xxx.IP - - [22/Nov/2011:16:47:04 -0500] "GET /printenv.pl HTTP/1.0" 200 2323 "-" "Mozilla/5.0 (X11; U; Linux i686; de; rv:1.9.2.24) Gecko/20111107 Ubuntu/10.04 (lucid) Firefox/3.6.24"
+</pre>
+<p>
+Der Zugriff auf die <i>error_log</i> Dateien erleichert das Debuggen erheblich.
+</p>
+<p>
+&nbsp;
+</p>
+<h2>Snapshots</h2>
+<p>
+Das Kommando <i>rhc-snapshot</i> erstellt einen Snapshot der Applikation und liefert diesen als gezippte tar Datei zur&uuml;: 
+</p>
+<pre>
+$ rhc-snapshot  -a X1 
+Password: 
+
+Pulling down a snapshot to X1.tar.gz
+
+Stopping application...
+Waiting for stop to finish
+Done
+Creating and sending tar.gz
+Starting application...
+Done
+</pre>
+<p>
+Wenn man die Datei X1.tar.gz auspackt, sieht man alle Verzeichnisse und Dateien der Applikation.
+</p>
+<pre>
+$ tar -xzvf X1.tar.gz
+$ cd app-verzeichnis
+
+$ tree
+.
+|-- git
+|   `-- X1.git
+|       |-- branches
+|       |-- config
+|       |-- description
+|       |-- HEAD
+|       |-- hooks
+|       |   |-- applypatch-msg.sample
+|       |   |-- commit-msg.sample
+|       |   |-- post-commit.sample
+|       |   |-- post-receive
+|       |   |-- post-receive.sample
+|       |   |-- post-update.sample
+|       |   |-- pre-applypatch.sample
+|       |   |-- pre-commit.sample
+|       |   |-- prepare-commit-msg.sample
+|       |   |-- pre-rebase.sample
+|       |   |-- pre-receive
+|       |   `-- update.sample
+|       |-- info
+|       |   |-- exclude
+|       |   `-- refs
+|       |-- objects
+|       |   |-- 0a
+|       |   |   `-- bed1546ab3d6aee5b42c68f57100f52949b4bf
+|       |   |-- 10
+|       |   |   `-- cd54466b8f66bb40d6c50ab5519bf7727e51dd
+|       |   |-- 1d
+|       |   |   `-- b60ffa4e6b41be6ed92a6a2b3343c70b301fb6
+|       |   |-- 2f
+|       |   |   `-- a0243ca6abb34233618e9ea809871be855a225
+|       |   |-- 40
+|       |   |   |-- 0b36608e5e4405636bf7394c546ec18de53252
+|       |   |   `-- c24d558d8a1196d4170f56182b8f69fbe6741f
+|       |   |-- 5e
+|       |   |   `-- 1c48b299eb8c1fd204b69e520236d3a2a3217e
+|       |   |-- 6a
+|       |   |   `-- e37b40a1cd342e2661bdf06b65fc4731e1af1e
+|       |   |-- 9b
+|       |   |   `-- 594ba566f5036940fd00dfeca9cd38e51579a8
+|       |   |-- a5
+|       |   |   `-- 7d1f5806d714a998130b9517a4240de0c39fe3
+|       |   |-- b5
+|       |   |   `-- 3bde9fe6346b3d54d39b9d970308cc25080cbe
+|       |   |-- c0
+|       |   |   `-- df17bb0b3dbdb4da6c06ad6fe4e070e3061485
+|       |   |-- c1
+|       |   |   `-- d6344439cdc822df02c54bb39aabb5ccd4a7de
+|       |   |-- d5
+|       |   |   `-- 64d0bc3dd917926892c55e3706cc116d5b165e
+|       |   |-- df
+|       |   |   `-- 8d841a9e8c1afd175e0061bb7b762d708b0c58
+|       |   |-- e3
+|       |   |   `-- 1f2ec741b91b2d4ddc9500991cc660a8cf037d
+|       |   |-- e6
+|       |   |   `-- 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
+|       |   |-- ed
+|       |   |   `-- 5eb993715da4af89ce517eedb2c3879994e10e
+|       |   |-- ee
+|       |   |   `-- 74341ac408153e9bfe02fe55669533ccdfdbba
+|       |   |-- f1
+|       |   |   `-- 25e7fa5f3603669e173695b284d170ddd7b62f
+|       |   |-- info
+|       |   |   `-- packs
+|       |   `-- pack
+|       |       |-- pack-e8aca9b5d216bb7c5a7ac884d5cdcb6c0a9faabe.idx
+|       |       `-- pack-e8aca9b5d216bb7c5a7ac884d5cdcb6c0a9faabe.pack
+|       |-- packed-refs
+|       `-- refs
+|           |-- heads
+|           |   `-- master
+|           `-- tags
+`-- X1
+    |-- ci
+    |-- conf
+    |   `-- magic -> /etc/httpd/conf/magic
+    |-- conf.d
+    |-- <b>data</b>
+    |-- logs
+    |   |-- access_log-20111122-000000-EST
+    |   |-- access_log-20111123-000000-EST
+    |   |-- error_log-20111122-000000-EST
+    |   `-- error_log-20111123-000000-EST
+    |-- modules -> /usr/lib64/httpd/modules
+    |-- perl5lib
+    |-- repo -> runtime/repo
+    |-- run
+    |-- runtime
+    |   `-- repo
+    |       |-- deplist.txt
+    |       |-- libs
+    |       |-- misc
+    |       |-- perl
+    |       |   |-- health_check.pl
+    |       |   |-- index.pl
+    |       |   `-- printenv.pl
+    |       `-- README
+    `-- tmp
+
+45 directories, 53 files
+</pre>
+<p>
+&nbsp;
+</p>
+<h2>Persistent Storage</h2>
+<p>
+Wie oben bereits erw&auml;hnt, werden bei der Auslieferung (git push) alle Dateien, die sich innerhalb des Git-Repositories befinden, auf dem Cloud-Server gel&ouml;scht und neu eingespielt. 
+</p>
+<p>
+Persistente Daten, z.B. SQLite Dateien, m&uuml;ssen daher ausserhalb des Git-Repositories auf dem Server aufbewahrt werden. Dazu stellt OpenShift Express den Ordner <i>data</i> zur Verf&uuml;gung. 
+</p>
+<p>
+Der Pfad zum Ordner <i>data</i> kann aus der Umgebungsvariablen <i>OPENSHIFT_DATA_DIR</i> <a href="https://www.redhat.com/openshift/blogs/whats-new-in-openshift-express-august-2011">ermittelt</a> werden.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Content-type: text/plain\n\n&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$data_dir</span> = <span style="color: #00688B;">$ENV</span>{<span style="color: #000000;">OPENSHIFT_DATA_DIR</span>}<span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$file</span> = <span style="color: #CD5555;">&#39;test.txt&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">open</span> <span style="color: #000000;">(</span><span style="color: #000000;">OUT</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;&gt;&quot;</span> <span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;$data_dir/$file&quot;</span> <span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #00688B;">$!</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #000000;">(</span> <span style="color: #B452CD;">1</span> .. <span style="color: #B452CD;">10</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">OUT</span> <span style="color: #CD5555;">&quot;$_\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+<span style="color: #8B008B; font-weight:bold;">close</span><span style="color: #000000;">(</span><span style="color: #000000;">OUT</span><span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #00688B;">$!</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">exit</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Die im Ordner <i>data</i> gespeicherten Daten lassen sich per <i>rhc-snapshot</i> vom Cloud-Server holen. 
+</p>
+<pre>
+$ tree
+.
+|-- ci
+|-- conf
+|   `-- magic -> /etc/httpd/conf/magic
+|-- conf.d
+|-- <b>data</b>
+|   `<b>-- test.txt</b>
+|-- logs
+|   |-- access_log-20111122-000000-EST
+|   |-- access_log-20111123-000000-EST
+|   |-- error_log-20111122-000000-EST
+|   `-- error_log-20111123-000000-EST
+|-- modules -> /usr/lib64/httpd/modules
+|-- perl5lib
+|-- repo -> runtime/repo
+|-- run
+|-- runtime
+|   `-- repo
+|       |-- deplist.txt
+|       |-- libs
+|       |-- misc
+|       |-- perl
+|       |   |-- health_check.pl
+|       |   |-- index.pl
+|       |   |-- printenv.pl
+|       |   |-- read.pl
+|       |   `-- write.pl
+|       `-- README
+`-- tmp
+</pre>
+
+<p>
+&nbsp;
+</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="https://openshift.redhat.com/app/">OpenShift by Red Hat</a></li>
+<li><a href="https://openshift.redhat.com/app/express">OpenShift Express</a></li>
+<li><a href="https://docs.redhat.com/docs/en-US/OpenShift_Express/1.0/html/User_Guide/index.html">User Guide - Using OpenShift Express to manage your applications in the cloud</a></li>
+<li><a href="https://www.redhat.com/openshift/faq/">Frequently Asked Questions > OpenShift FAQ</a></li>
+<li><a href="https://www.redhat.com/openshift/kb/kb-e1013-how-to-onboard-a-perl-application">OpenShift Knowledge Base - How to onboard a Perl application</a></li>
+<li><a href="https://github.com/openshift">OpenShift Beispiele auf GitHub</a></li>
+<li><a href="https://www.redhat.com/openshift/kb/kb-e1014-how-to-deploy-the-perl-dancer-framework-on-openshift-express">OpenShift Knowledge Base - How to deploy the Perl Dancer framework on OpenShift Express</a></li>
+<li><a href="https://github.com/openshift/dancer-example">openshift / dancer-example</a></li>
+<li><a href="https://www.redhat.com/openshift/kb/kb-e1000/installing-openshift-express-client-tools-on-non-rpm-based-systems">OpenShift Knowledge Base - Installing OpenShift Express client tools on Mac OSX, Linux, and Windows</a></li>
+<li>man 5 express.conf - configuration file for OpenShift Express</li>
+<li>man 1 rhc-create-domain - creates a new OpenShift Express domain namespace with a user</li>
+<li>man 1 rhc-create-app - creates a new hosted application at rhcloud.com</li>
+<li>man 1 rhc-tail-files - Tail files from remote running applications in real-time</li>
+<li>man 1 rhc-user-info - Displays information about a user on the rhcloud.com system</li>
+<li>man 1 rhc-chk - Diagnoses the connection between this client and the OpenShift servers</li>
+<li>man 1 rhc-ctl-app - Control an existing rhcloud.com application</li>
+<li>man 1 rhc-snapshot - Pulls down an application snapshot as gzipped tarfile</li>
+<li><a href="https://www.redhat.com/openshift/faq/i-have-deployed-my-app-but-i-don%E2%80%99t-like-telling-people-to-visit-myapp-myusernamerhcloudcom-how-c">OpenShift Knowledge Base - I have deployed my app, but I don&#39;t like telling people to visit &lt;my_app>-&lt;my_username>.rhcloud.com. How can I set up my own domain name to point to my app?</a></li>
+<li><a href="https://www.redhat.com/openshift/kb/kb-e1011-redirecting-your-server-to-openshift-express-with-modrewrite">OpenShift Knowledge Base - Redirecting your server to OpenShift Express with mod_rewrite</a></li>
+<li><a href="http://www.linux-magazin.de/Heft-Abo/Ausgaben/2011/10/Open-Shift?category=0">Linux Magazin - Cloud-K&uuml;che - Red Hat Open Shift: Plattform für Webentwickler und Hoster</a></li>
+</ul>
+

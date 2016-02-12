@@ -1,0 +1,87 @@
+---
+layout: post
+title: CSS::Compressor - Schnelle und effiziente CSS Komprimierung
+date: '2012-12-27 11:51:14 +0000'
+mt_id: 236
+blog_id: 1
+post_id: 236
+permalink: /2012/12/csscompressor_-_schnelle_und_effiziente_css_komprimierung.html
+categories:
+- cgi
+---
+<p>
+<a href="https://metacpan.org/module/CSS%3A%3ACompressor">CSS::Compressor - Perl extension for CSS minification</a>, ein Perl-Port des bekannten <a href="http://developer.yahoo.com/yui/compressor/">Yahoo YUICompressor</a>, bietet eine effiziente Kompression von CSS-Dateien und startet sehr viel schneller als sein Vorbild.
+</p>
+<p>
+Das Modul <a href="https://metacpan.org/module/CSS%3A%3ACompressor">CSS::Compressor</a> wurde eigentlich f&uuml;r den internen Gebrauch von <a href="http://www.booking.com/">Booking.com</a> <a href="http://blog.booking.com/efficient-css-compression-in-perl.html">entwickelt</a> und nun als Open Source Software ver&ouml;ffentlicht.
+</p>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Beispiel</h2>
+
+<p>
+Das folgende Beispielprogramm nimmt Dateinamen auf der Kommandozeile <a href="http://perldoc.perl.org/perlvar.html">entgegen</a>, liest den Inhalt der CSS-Datei mit  <a href="http://search.cpan.org/perldoc?File%3A%3ASlurp">File::Slurp</a> in eine skalare Variable ein, komprimiert das CSS mit <i>css_compress()</i> und schreibt das Ergebnis in eine neue Datei.
+</p>
+
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">CSS::Compressor</span> <span style="color: #CD5555;">qw( css_compress )</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">File::Slurp</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@css_files</span> = <span style="color: #00688B;">@ARGV</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$css_file</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@css_files</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$big</span>      = <span style="color: #00688B;">read_file</span><span style="color: #000000;">(</span><span style="color: #00688B;">$css_file</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$small</span>    = <span style="color: #000000;">css_compress</span> <span style="color: #00688B;">$big</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$out_file</span> = <span style="color: #00688B;">$css_file</span><span style="color: #000000;">;</span>
+    <span style="color: #00688B;">$out_file</span>    =~ <span style="color: #CD5555;">s#css$#min-css#is</span><span style="color: #000000;">;</span>
+    <span style="color: #00688B;">write_file</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$out_file</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$small</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Aufruf/Verwendung:
+</p>
+<pre>
+$ chmod 755 css.pl
+$ ./css.pl ./css_tests/*.css
+</pre>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Geschwindigkeitsvergleich</h2>
+<p>
+Die <a href="http://blog.booking.com/efficient-css-compression-in-perl.html">angepriesene deutliche Geschwindigkeitsverbesserung</a> kann unter Linux einfach mit <a href="http://linux.die.net/man/1/time">Bordmitteln</a> nachgepr&uuml;ft werden:
+</p>
+<pre>
+$ time ./css.pl ./css_tests/*.css
+$ time yui-compressor -o '.css$:-min.css' ./css_tests/*.css
+</pre>
+<p>
+Auf meinen Testservern (Ubuntu 12.04) l&auml;uft <a href="https://metacpan.org/module/CSS%3A%3ACompressor">CSS::Compressor</a> 30 bis 40% schneller als <a href="http://packages.ubuntu.com/de/precise/yui-compressor">YUICompressor</a>.
+</p>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li><a href="https://metacpan.org/module/CSS%3A%3ACompressor">CSS::Compressor - Perl extension for CSS minification</a></li>
+<li><a href="http://blog.booking.com/efficient-css-compression-in-perl.html">Efficient CSS Compression in Perl</a></li>
+<li><a href="https://metacpan.org/module/CSS::Packer">CSS::Packer - Another CSS minifier</a></li>
+<li><a href="http://developer.yahoo.com/yui/compressor/">YUIcompressor project homepage</a></li>
+<li><a href="https://github.com/yui/yuicompressor">YUIcompressor source repository</a></li>
+<li><a href="{{ site.url }}/2009/05/ladezeit-von-websites-mit-javascriptminifier-verbessern.html">Ladezeit von Websites mit JavaScript::Minifier verbessern</a></li>
+</ul>
+
+<p>
+&nbsp;
+</p>

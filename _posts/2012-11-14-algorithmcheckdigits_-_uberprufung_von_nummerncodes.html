@@ -1,0 +1,163 @@
+---
+layout: post
+title: Algorithm::CheckDigits - Überprüfung von Nummerncodes
+date: '2012-11-14 22:15:00 +0000'
+mt_id: 233
+blog_id: 1
+post_id: 233
+permalink: /2012/11/algorithmcheckdigits_-_uberprufung_von_nummerncodes.html
+categories:
+- '101'
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Algorithm%3A%3ACheckDigits">Algorithm::CheckDigits - Perl extension to generate and test check digits</a> von 
+<a href="http://search.cpan.org/~mamawe/">Mathias Weidner</a> vereinfacht die &Uuml;berpr&uuml;fung von Nummerncodes, wie <a href="http://de.wikipedia.org/wiki/Umsatzsteuer-Identifikationsnummer">Umsatzsteuer-Identifikationsnummern</a>, <a href="http://de.wikipedia.org/wiki/Internationale_Standardbuchnummer">ISBNs</a>, <a href="http://de.wikipedia.org/wiki/Betriebsnummer">Betriebsnummern</a>, <a href="http://www.pruefziffernberechnung.de/B/Blutbeutel.shtml">Blutbeutel Eurocodes</a> und zahlreichen mehr.   
+</p>
+<p>
+Dabei bietet Algorithm::CheckDigits eine konsistente Schnittstelle zu allen Berechnungsmethoden an.
+</p>
+<p>
+Mit <i>CheckDigits()</i> wird das gew&uuml;nschte Berechnungsverfahren gew&auml;hlt und man erh&auml;lt das passende Objekt zur&uuml;ck.  Die Methode <i>is_valid()</i> pr&uuml;ft den Nummerncode, <i>basenumber()</i> liefert die Basiszahl und <i>checkdigit()</i> liefert die  Pr&uuml;fziffer f&uuml;r die Basiszahl zur&uuml;ck.
+</p>
+
+<p>
+&nbsp;
+</p>
+<h2>Alle verf&uuml;gbaren Berechnungsmethoden auflisten</h2>
+<p>
+Eine &Uuml;bersicht aller verf&uuml;gbaren Berechnungsmethoden liefert <i>method_list</i>.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Algorithm::CheckDigits</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@ml</span> = <span style="color: #000000;">Algorithm::CheckDigits</span><span style="color: #000000;">-&gt;method_list</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$method</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">@ml</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+	<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;$method\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm liefert folgende (deutlich gek&uuml;rzte) Ausgabe:
+</p>
+<pre>
+2aus5
+ahv_ch
+amex
+bahncard
+betriebsnummer
+blutbeutel
+...
+ustid_at
+ustid_be
+ustid_de
+...
+verhoeff
+visa
+wagonnr_br
+</pre>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Beispiel: Umsatzsteuer-Identifikationsnummer Deutschland</h2>
+<p>
+Das folgende Beispiel testet eine deutsche Umsatzsteuer-Identifikationsnummer. 
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Algorithm::CheckDigits</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ustid_de</span> = <span style="color: #00688B;">CheckDigits</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;ustid_de&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;">#Umsatzsteuernummer: DE175903868</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ustid</span> = <span style="color: #CD5555;">&#39;175903868&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$ustid_de</span><span style="color: #00688B;">-&gt;is_valid</span><span style="color: #000000;">(</span><span style="color: #00688B;">$ustid</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;UmsatzsteuerID: $ustid ist okay.\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cd</span> = <span style="color: #00688B;">$ustid_de</span><span style="color: #00688B;">-&gt;checkdigit</span><span style="color: #000000;">(</span><span style="color: #00688B;">$ustid</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$bn</span> = <span style="color: #00688B;">$ustid_de</span><span style="color: #00688B;">-&gt;basenumber</span><span style="color: #000000;">(</span><span style="color: #00688B;">$ustid</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Checkdigit: $cd\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Basiszahl: $bn\n&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #000000;">}</span>
+<span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;UmsatzsteuerID: $ustid ist NICHT okay.\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm liefert folgende Ausgabe:
+</p>
+<pre>
+UmsatzsteuerID: 175903868 ist okay.
+Checkdigit: 8
+Basiszahl: 17590386
+</pre>
+<p>
+Umsatzsteuer-Identifikationsnummern aus &Ouml;sterreich lassen sich mit der Methode <i>ustid_at</i> checken. Ebenso lassen sich Umsatzsteuer-Identifikationsnummern aus den Niederlanden mittels <i>ustid_nl</i> testen.
+</p>
+
+<p>
+&nbsp;
+</p>
+<h2>Beispiel: ISBN-10</h2>
+<p>
+Das folgende Beispiel testet eine 10-stellige ISBN. 13-stellige ISBN lassen sich mit <i>isbn13</i> pr&uuml;fen.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Algorithm::CheckDigits</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$isbn10_cd</span> = <span style="color: #00688B;">CheckDigits</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;isbn&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$isbn</span> = <span style="color: #CD5555;">&#39;386899145X&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$isbn10_cd</span><span style="color: #00688B;">-&gt;is_valid</span><span style="color: #000000;">(</span><span style="color: #00688B;">$isbn</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;ISBN-10: $isbn ist okay.\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cd</span> = <span style="color: #00688B;">$isbn10_cd</span><span style="color: #00688B;">-&gt;checkdigit</span><span style="color: #000000;">(</span><span style="color: #00688B;">$isbn</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$bn</span> = <span style="color: #00688B;">$isbn10_cd</span><span style="color: #00688B;">-&gt;basenumber</span><span style="color: #000000;">(</span><span style="color: #00688B;">$isbn</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Checkdigit: $cd\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Basiszahl: $bn\n&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #000000;">}</span>
+<span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;ISBN-10: $isbn ist NICHT okay.\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm liefert folgende Ausgabe:
+</p>
+<pre>
+ISBN-10: 386899145X ist okay.
+Checkdigit: X
+Basiszahl: 386899145
+</pre>
+
+<p>
+&nbsp;
+</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Algorithm%3A%3ACheckDigits">Algorithm::CheckDigits</a></li>
+<li><a href="http://www.pruefziffernberechnung.de/">www.pruefziffernberechnung.de</a></li>
+<li><a href="http://search.cpan.org/perldoc?Business%3A%3AISBN">Business::ISBN</a></li>
+<li><a href="http://search.cpan.org/perldoc?Test%3A%3AISBN">Test::ISBN</a></li>
+<li><a href="http://search.cpan.org/perldoc?Business%3A%3ACardInfo">Business::CardInfo</a></li>
+</ul>
+
+<p>
+&nbsp;
+</p>

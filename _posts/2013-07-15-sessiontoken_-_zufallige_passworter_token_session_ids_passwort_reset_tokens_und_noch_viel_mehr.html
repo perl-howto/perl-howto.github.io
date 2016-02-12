@@ -1,0 +1,129 @@
+---
+layout: post
+title: ' Session::Token - Zufällige Passwörter, Token, Session IDs, Passwort Reset
+  Tokens und noch viel mehr'
+date: '2013-07-15 21:40:00 +0000'
+mt_id: 240
+blog_id: 1
+post_id: 240
+permalink: /2013/07/sessiontoken_-_zufallige_passworter_token_session_ids_passwort_reset_tokens_und_noch_viel_mehr.html
+categories:
+- kryptographie
+---
+<p>
+<a href="https://metacpan.org/module/Session::Token">Session::Token</a> von <a href="https://metacpan.org/author/FRACTAL">Doug Hoyte</a>
+bietet eine <a href="http://www.burtleburtle.net/bob/rand/isaacafa.html">sichere</a>, schnelle und wirklich einfach zu nutzende Schnittstelle um <a href="http://de.wikipedia.org/wiki/Session-ID">Session IDs</a>, Zufallspassw&ouml;rter, zuf&auml;llige Identifier, Reset Codes f&uuml;r Passw&ouml;rter und vieles mehr zu erzeugen.  
+</p>
+
+<p>&nbsp;</p>
+<h2>Beispiele: Zuf&auml;llige Session Token</h2>
+<p>
+Das folgende Beispiel erzeugt einen zuf&auml;lligen String mit mindestens 128 Bit Entropie.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Session::Token</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$token</span> = <span style="color: #000000;">Session::Token</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">-&gt;get</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Token: $token\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Token: 2sSNJqxSf2U3lP2by9fRfs
+</pre>
+<p>
+Die Mindestentropie des zuf&auml;lligen Tokens l&auml;sst sich &uuml;ber den Parameter <i>entropy </i> einstellen:
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Session::Token</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$token</span> = <span style="color: #000000;">Session::Token</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">entropy</span> <span style="color: #000000;">=&gt;</span> <span style="color: #B452CD;">256</span><span style="color: #000000;">)</span><span style="color: #00688B;">-&gt;get</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Token: $token\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Token: PA5M2r9XOMl7i8scMAaLo7KiBPFu2QH1jqP6huqId0N
+</pre>
+<p>Falls mehrere Tokens ben&ouml;tigt werden, bietet sich aus Effizienzgr&uuml;nden, die einmalige Erzeugung eines Generators an, der wiederholt zur Erzeugung zuf&auml;lliger Token aufgerufen wird.</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Session::Token</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$generator</span> = <span style="color: #000000;">Session::Token</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$token</span> = <span style="color: #00688B;">$generator</span><span style="color: #00688B;">-&gt;get</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Token: $token\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+
+<p>&nbsp;</p>
+<h2>Beispiele: Zufallspasswort</h2>
+<p>
+Die L&auml;nge des zuf&auml;lligen Passworts kann &uuml;ber den Parameter <i>length</i> eingestellt werden.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Session::Token</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$token</span> = <span style="color: #000000;">Session::Token</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span> <span style="color: #000000;">length</span> <span style="color: #000000;">=&gt;</span> <span style="color: #B452CD;">8</span> <span style="color: #000000;">)</span><span style="color: #00688B;">-&gt;get</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Token: $token\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Token: zJPtFyyH
+</pre>
+<p>
+Wem das voreingestellte Alphabet nicht gen&uuml;gt, kann ein eigenes &uuml;ber den Parameter <i>alphabet</i> einstellen. 
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Session::Token</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$token</span> = <span style="color: #000000;">Session::Token</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span> <span style="color: #000000;">length</span> <span style="color: #000000;">=&gt;</span> <span style="color: #B452CD;">8</span><span style="color: #000000;">,</span> 
+   <span style="color: #000000;">alphabet</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;ABCDEFGHIJKLMNOPQRSTUVW1234567890!&quot;&Acirc;&sect;$%&amp;/()=?&#39;</span> <span style="color: #000000;">)</span><span style="color: #00688B;">-&gt;get</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;Token: $token\n&quot;</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Token: H/VJ)G/6
+</pre>
+
+
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="https://metacpan.org/module/Session::Token">Session::Token - Secure, efficient, simple random session token generation</a></li>
+<li><a href="http://neilb.org/reviews/passwords.html">Neil Bowers: CPAN modules for generating passwords</a></li>
+<li><a href="http://www.burtleburtle.net/bob/rand/isaacafa.html">ISAAC: a fast cryptographic random number generator</a></li>
+<li><a href="https://github.com/hoytech/Session-Token">The Session::Token github repo</a></li>
+</ul>
+<p>&nbsp;</p>

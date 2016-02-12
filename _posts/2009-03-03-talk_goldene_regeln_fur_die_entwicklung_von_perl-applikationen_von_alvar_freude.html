@@ -1,0 +1,110 @@
+---
+layout: post
+title: 'Talk:  Goldene Regeln für die Entwicklung von Perl-Applikationen von Alvar
+  Freude'
+date: '2009-03-03 18:30:00 +0000'
+mt_id: 119
+blog_id: 1
+post_id: 119
+permalink: /2009/03/talk_goldene_regeln_fur_die_entwicklung_von_perl-applikationen_von_alvar_freude.html
+categories:
+- talks
+- '101'
+---
+<p>
+<a href="http://alvar.a-blast.org/">Alvar Freude</a> hat auf dem <a href="http://www.perl-workshop.de/de/2009/index.html">11. Deutschen Perl-Workshop</a> das sehr gute <a href="http://www.perl-workshop.de/talks/153/view">Tutorial</a> <em>Goldene Regeln für die Entwicklung von Perl-Applikationen</em> <a href="http://alvar.a-blast.org/vortraege/perl-workshop/42-goldene-regeln.pdf">(Slides)</a> gehalten. 
+</p>
+
+<p>
+Der Vortrag hat mir sehr gut gefallen und ich unterstütze die von Alvar genannten Regeln.  Alvars Verdienst ist daher auch die Veranschaulichung und Ordnung dieser Regeln. 
+</p>
+<p>
+Für alle, die nicht auf dem <a href="http://www.perl-workshop.de/de/2009/index.html">11. Deutschen Perl-Workshop</a> waren, eine Liste der insgesamt 42 Regeln (garniert von mir mit einigen Links zu den dort erwähnten Modulen und zu weiterführenden Artikeln).
+</p>
+
+<h2><a href="http://alvar.a-blast.org/vortraege/perl-workshop/42-goldene-regeln.pdf">Alavars 42 Goldene Regeln für Perl-Applikationen</a></h2>
+<p>
+Oder: Wie sichert sich ein Perl-Entwickler vor dem <a href="http://www.bofh.org.uk/2005/08/12/the-psychopath-who-knows-where-you-live">Psychopathen</a> mit der <a href="http://www.perl-blog.de/2008/11/psychopath-mit-kettensaege.html">Kettensäge</a>
+</p>
+
+<h3>Vorbereitung</h3>
+
+<ul class="no-bullet">
+<li>Regel 1: Aktuelles, <a href="http://www.perlfoundation.org/perl5/index.cgi?perl_best_admin_practices">eigenes</a> Perl</li>
+<li>Regel 2: <a href="http://strawberryperl.com/">Erdbeeren</a> vor die Fenster</li>
+<li>Regel 3: Entwicklungsumgebung</li>
+<li>Regel 4: Versionskontrollsystem</li>
+</ul>
+
+<h3>Arbeitsweisen</h3>
+<ul class="no-bullet">
+<li>Regel 5: Code Planen</li>
+<li>Regel 6: Architektur überprüfen</li>
+<li>Regel 7: Schreibe erst die Tests!</li>
+<li>Regel 8: Objektorientierung nutzen</li>
+<li>Regel 9: Code Review</li>
+</ul>
+
+<h3>CPAN-Tauglichkeit</h3>
+<ul class="no-bullet">
+<li>Regel 10: Schreibe keine Skripte</li>
+<li>Regel 11: Nutze <a href="http://search.cpan.org/perldoc?Module::Starter">Module::Starter</a></li>
+<li>Regel 12: Nutze <a href="http://search.cpan.org/perldoc?Module::Build">Module::Build</a></li>
+</ul>
+
+<h3>Vorsicht vor dem Psychopathen</h3>
+<ul class="no-bullet">
+<li>Regel 13: Schreibe einfachen Code</li>
+<li>Regel 14: Keine globalen Variablen</li>
+<li>Regel 15: Nutze <a href="http://perltidy.sourceforge.net/">Perl::Tidy</a></li>
+<li>Regel 16: Kommentiere ausführlich</li>
+<li>Regel 17: Namenskonventionen</li>
+<li>Regel 18: Altlasten</li>
+<li>Regel 19: <a href="http://refcards.com/docs/vromansj/perl-best-practices/refguide.pdf">Perl Best Practices</a></li>
+<li>Regel 20: <a href="http://search.cpan.org/perldoc?Test::Perl::Critic">Test::Perl::Critic</a></li>
+<li>Regel 21: Schreibe Tests!</li>
+<li>Regel 22: Teste klein und groß</li>
+<li>Regel 23: Kein <a href="http://perldoc.perl.org/functions/sprintf.html">printf</a>-Debugging</li>
+<li>Regel 24: Nutze <a href="http://search.cpan.org/perldoc?Devel::Cover">Devel::Cover</a></li>
+</ul>
+
+<h3>CPAN</h3>
+<ul class="no-bullet">
+<li>Regel 25: Nutze das <a href="http://www.perl.com/CPAN">CPAN</a></li>
+<li>Regel 26: Sei aktuell</li>
+<li>Regel 27: Lokaler <a href="{{ site.url }}/2008/06/making-your-own-cpanmini.html">CPAN-Mirror</a></li>
+</ul>
+
+<h3>Moderne Techniken</h3>
+<ul class="no-bullet">
+<li>Regel 28: Verteile Code mit <a href="http://search.cpan.org/perldoc?PAR">PAR</a></li>
+<li>Regel 29: Tests und Staging</li>
+<li>Regel 30: Nutze <a href="http://www.iinteractive.com/moose/">Moose</a></li>
+<li>Regel 31: Oder <a href="http://search.cpan.org/perldoc?Class::Accessor">Class::Accessor</a></li>
+<li>Regel 32: Damian Conways Module</li>
+<li>Regel 33: Nutze <a href="http://search.cpan.org/perldoc?DBIx::Class">DBIx::Class</a></li>
+<li>Regel 34: Nutze <a href="{{ site.url }}/2008/07/file-homedir-heimatverzeichnis-ermitteln.html">File::HomeDir</a></li>
+<li>Regel 35: Nutze Perls Möglichkeiten</li>
+<li>Regel 36: Temporäre Dateien (<a href="{{ site.url }}/2008/07/temporare-dateien-sicher-erzeugen.html">File::Temp</a>)</li>
+<li>Regel 37: Nutze <a href="http://log4perl.sourceforge.net/">Log::Log4perl</a></li>
+</ul>
+
+<h3>Web-Entwicklung</h3>
+<ul class="no-bullet">
+<li>Regel 38: Schreibe keine CGIs!</li>
+<li>Regel 39: <a href="http://www.fastcgi.com">FastCGI</a> zur Beschleunigung</li>
+<li>Regel 40: <a href="http://perl.apache.org/">mod_perl</a></li>
+<li>Regel 41: Kein HTML im Code</li>
+<li>Regel 42: Nutze <a href="http://www.perlfoundation.org/perl5/index.cgi?web_frameworks">Web-Frameworks</a></li>
+</ul>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://alvar.a-blast.org/vortraege/perl-workshop/42-goldene-regeln.pdf">Slides des Tutorials 42 Goldene Regeln für Perl-Applikationen</a></li>
+<li>Perl-Blog: <a href="http://www.perl-blog.de/2009/02/42-goldene-perl-regeln.html">Vortrag: 42 Goldene Regeln für Perl-Applikationen</a></li>
+<li>Matthias Dietrich <a href="http://www.rainboxx.de/2008/10/schreib-deinen-code-als-wurde.html">Schreib deinen Code, als würde er auf's CPAN kommen</a></li>
+<li>Perl5 Wiki: <a href="http://www.perlfoundation.org/perl5/index.cgi?perl_best_admin_practices">Perl Best Admin Practices</a></li>
+<li><a href="http://www.modernperlbooks.com/">Modern Perl Books</a></li>
+<li><a href="http://conferences.yapceurope.org/gpw2009/wiki?node=Slides">Vortragsfolien des 11. Deutschen Perlworkshops</a></li>
+</ul>

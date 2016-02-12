@@ -1,0 +1,189 @@
+---
+layout: post
+title: CPAN Tester 2.0 - CPAN Tester werden ist ganz einfach
+date: '2010-07-17 13:45:00 +0000'
+mt_id: 192
+blog_id: 1
+post_id: 192
+permalink: /2010/07/cpan_tester_20_cpan_tester_werden_ist_ganz_einfach.html
+categories:
+- '101'
+---
+<p>
+Das <a href="http://www.cpantesters.org/">CPAN Testers Project</a> möchte möglichst viele CPAN-Module auf möglichst vielen Plattformen testen. Diese Testergebnisse bieten CPAN-Autoren und Nutzern wertvolles Feedback und helfen die Qualität der CPAN-Module zu verbessern und somit den Wert des CPAN zu erhöhen. 
+</p>
+<p>
+Dank des CPAN-Moduls <a href="http://search.cpan.org/perldoc?CPAN::Reporter">CPAN::Reporter</a> von <a href="http://search.cpan.org/~dagolden/">David Golden</a> kann jeder, der ein Modul auf seinem Rechner installiert, einen Test-Report automatisch erzeugen und zu den CPAN-Testern übermitteln. 
+</p>
+<p>
+Wegen des starken Wachstums des CPAN-Testers Projects in den letzten Jahren ist eine neue leistungsfähige skalierbare Lösung erforderlich.
+</p>
+<p>
+Seit dem 5. Juli 2010 steht<a href="http://blogs.perl.org/users/cpan_testers/2010/07/announcing-cpan-testers-20.html"> CPAN Testers 2.0 zur Verfügung</a>.
+</p>
+<p>
+Die wesentlichen Neuerungen:
+</p>
+<ul class="no-bullet">
+<li>Test-Reports können auch über HTTP eingereicht werden.</li>
+<li>Test-Reports, Tester und Distributionen werden über eine Meta-Datenbank 
+verwaltet</li>
+</ul>
+<p>
+Die alte Schnittstelle über SMTP wird am <strong>31.08.2010</strong> eingestellt.
+</p>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Installation</h2>
+<p>
+CPAN::Reporter benötigt das Modul CPAN ab Version 1.9301 und weitere Module, wie z.B. Module::Build, in möglichst aktuellen Versionen - hier bietet sich ein allgemeines Update via Bundle::CPAN an. Weiterhin werden Module für den neuen Transportmechanismus über HTTP benötigt.
+</p>
+<pre>
+ cpan> install Bundle::CPAN
+ cpan> reload CPAN
+ 
+ cpan> install CPAN::Reporter
+ cpan> install Test::Reporter
+ cpan> install Test::Reporter::Transport::Metabase
+ cpan> install Metabase::Client::Simple
+ cpan> install Metabase::Fact
+ </pre>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Konfiguration</h2>
+<p>
+Die Konfiguration erfolgt in zwei Schritten.
+</p>
+<p> 
+Im <strong>ersten Schritt</strong> werden einige einfache Fragen beantwortet und daraus eine grundlegende Konfiguration erzeugt. 
+</p>
+<pre>
+ cpan> o conf init test_report
+</pre>
+<p>
+Zunächst wird festgelegt, ob die Testergebnisse zu den CPAN Testern versandt werden sollen.
+</p>
+<pre>
+ <test_report>
+ Email test reports if CPAN::Reporter is installed (yes/no)? [no] yes
+
+ Would you like me configure CPAN::Reporter now? [yes] yes
+</pre>
+<p>
+Falls ja wird als nächstes die E-Mail Adresse des Test Reporters abgefragt.  Wer über eine PAUSE-ID verfügt, trägt bitte die dort hinterlegte E-Mail-Adresse (pauseid@cpan.org) ein; ansonsten ist jede gültige Adresse okay.
+</p>
+<pre>
+ email_from? [] "Vorname Nachname" &lt;e-mail@adresse.tld>
+</pre>
+<p>
+Die Testergebnisse wurden bisher an die Mailserver von perl.org gesandt werden. Da der Versand jetzt über HTTP erfolgt, bleibt dieses Feld einfach leer.
+</p>
+<pre>
+ smtp_server? [] 
+</pre>
+<p>
+Die Testergebnisse können vor dem Versand noch mit einem Editor bearbeitet werden. Als Tester kann man hier noch Hinweise für den Autor einfügen.
+Die vorgeschlagene Standardkonfiguration sendet die Reports im Erfolgsfall automatisch und fragt im Misserfolgsfall nach, ob der Report vor dem Versand editiert werden soll.
+</p>
+<pre>
+ edit_report? [default:ask/no pass/na:no] 
+</pre>
+<p>
+Nun muss die Konfiguration noch gespeichert werden.
+</p>
+<pre>
+ cpan> o conf commit
+</pre>
+<p>
+Die Konfigurationsdatei <em>config.ini</em> befindet sich im Heimatverzeichnis des aktuellen Benutzers im Unterverzeichnis <em>.cpanreporter</em> und kann mit einem beliebigen Text-Editor bearbeitet werden.
+</p>
+<pre>
+edit_report=default:ask/no pass/na:no
+email_from="Thomas Fahle" &lt;cpan@thomas-fahle.de>
+send_report=default:ask/yes pass/na:yes
+</pre>
+
+<p>
+In diese Datei wird nun als <strong>zweiter Schritt</strong> der neue Transportmechanismus von Hand eingetragen.
+</p>
+<pre>
+email_from="Thomas Fahle" &lt;cpan@thomas-fahle.de>
+send_report=default:ask/yes pass/na:yes
+edit_report=default:ask/no pass/na:no
+<strong>transport = Metabase uri http://metabase.cpantesters.org/beta/ id_file /home/tf/.cpanreporter/metabase_id.json</strong>
+</pre>
+<p>
+Der Transportmechanismus erwartet eine Profildatei (<em>id_file</em>) mit einem <em>Shared Secret</em>. 
+</p>
+<p>
+Dieses Profil dient z.B. zu richtigen Zuordnung der Tests und Tester im  <a href="http://stats.cpantesters.org/testers.html">CPAN Testers Leaderboard</a>.
+</p>
+<p>
+Wer bereits Tests zu den CPAN-Testern geliefert hat, erhält eine vorgefertigte Profildatei nach <a href="http://metabase.cpantesters.org/claimid/">Anforderung</a> per E-Mail.
+</p>
+<p>
+Neue Tester (m/w) können die Profildatei einfach mit dem Kommandozeilentool <em>metabase-profile</em> erstellen:
+</p>
+<pre>
+$ metabase-profile
+
+Enter full name: Thomas Fahle
+Enter email address: cpan@thomas-fahle.de
+Enter password/secret: 1234567890
+
+Writing profile to '<strong>metabase_id.json</strong>'
+</pre>
+<p>
+Diese Datei wird nun im Verzeichnis <em>~./cpanreporter</em> abgelegt. 
+</p>
+<p>
+Da in dieser Datei das Passwort im Klartext steht, sollte man zu mindestens die Rechte für den Zugriff auf die Datei und auf das Verzeichnis <em>.cpanreporter</em> einschränken, z.B. <em>chmod 600 metabase_id.json</em>. 
+</p>
+<p>
+&nbsp;
+</p>
+
+<h2>Hinweis zur Privatsphäre</h2>
+<p>
+Testberichte enthalten Informationen über das Testsystem, wie Umgebungsvariablen, Betriebssystem, installierte Bibliotheken usw.
+</p>
+<p>
+Wer sich Sorgen um die Privatsphäre macht, sollte die Berichte zuvor editieren. Die dazu passende Konfiguration:
+</p>
+<pre>
+ edit_report=default:ask/yes pass/na:yes
+</pre>
+
+<p>
+&nbsp;
+</p>
+
+<h2>Werde CPAN-Tester</h2>
+<p>
+Es ist wirklich einfach CPAN-Test-Reporter zu sein. Je größer das Netzwerk der Tester, um so besser. Werde CPAN-Test-Reporter.
+</p>
+<p>
+&nbsp;
+</p>
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://www.dagolden.com/index.php/889/how-to-join-the-cpan-testers-2-0-public-beta/">How to join the CPAN Testers 2.0 Public Beta</a></li>
+<li><a href="http://blog.cpantesters.org/diary/83">Announcing CPAN Testers 2.0</a></li>
+<li>CPAN Testers Wiki: <a href="http://wiki.cpantesters.org/wiki/GettingStarted">Getting Started</a></li>
+<li><a href="http://wiki.cpantesters.org/wiki/QuickHowToCT20">Quick HowTo for CPAN Testers 2.0</a></li>
+<li><a href="http://www.cpantesters.org/">CPAN Testers project</a></li>
+<li><a href="http://wiki.cpantesters.org/">The CPAN Testers Wiki</a></li>
+<li><a href="http://stats.cpantesters.org/testers.html">CPAN Testers Leaderboard</a></li>
+<li><a href="http://search.cpan.org/perldoc?CPAN::Reporter">CPAN::Reporter</a></li>
+<li><a href="http://search.cpan.org/perldoc?Test::Reporter::Transport::Metabase">Test::Reporter::Transport::Metabase</a></li>
+<li><a href="http://search.cpan.org/perldoc?Metabase::Client::Simple">Metabase::Client::Simple</a></li>
+<li><a href="http://search.cpan.org/perldoc?Metabase::Fact">Metabase::Fact</a></li>
+<li><a href="http://search.cpan.org/perldoc?Test::Reporter">Test::Reporter</li>
+</ul>

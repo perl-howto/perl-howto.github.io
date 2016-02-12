@@ -1,0 +1,65 @@
+---
+layout: post
+title: GraphViz::ISA - @ISA graphisch darstellen
+date: '2010-12-01 21:15:00 +0000'
+mt_id: 208
+blog_id: 1
+post_id: 208
+permalink: /2010/12/graphvizisa_isa_graphisch_darstellen.html
+categories:
+- '101'
+- profiler
+---
+<p>
+<a href="http://search.cpan.org/perldoc?GraphViz::ISA">GraphViz::ISA - Graphing class hierarchies at run-time</a> von <a href="http://search.cpan.org/~marcel/">Marcel Grünauer</a> ermöglicht die graphische Darstellung des <a href="http://perldoc.perl.org/perlobj.html">@ISA</a>.
+</p>
+
+<h2>Beispiel</h2>
+<p>
+Das folgende <a href="https://github.com/hanekomu/GraphViz-ISA/blob/master/eg/isatest.pl">Beispielprogramm</a> habe ich der Distribution von  <a href="http://search.cpan.org/perldoc?GraphViz::ISA">GraphViz::ISA</a> entnommen:
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #228B22;"># The hierarchy shown here is based on an example Damian Conway&#39;s book</span>
+<span style="color: #228B22;"># &quot;Object Oriented Perl&quot;</span>
+<span style="color: #228B22;">#</span>
+<span style="color: #228B22;"># Usage:  ./isatest.pl &gt;isa.png</span>
+<span style="color: #228B22;">#</span>
+<span style="color: #228B22;">######################################################################</span>
+<span style="color: #228B22;"># https://github.com/hanekomu/GraphViz-ISA/blob/master/eg/isatest.pl #</span>
+<span style="color: #228B22;">######################################################################</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">GraphViz::ISA</span><span style="color: #000000;">;</span>
+<a name="Coder::new"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">Coder::new</span>      <span style="color: #000000;">{</span> <span style="color: #8B008B; font-weight:bold;">bless</span> <span style="color: #000000;">{</span><span style="color: #000000;">}</span><span style="color: #000000;">,</span> <span style="color: #000000;">(</span><span style="color: #8B008B; font-weight:bold;">ref</span><span style="color: #000000;">(</span><span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> || <span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> <span style="color: #000000;">}</span>
+<a name="Documenter::new"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">Documenter::new</span> <span style="color: #000000;">{</span> <span style="color: #8B008B; font-weight:bold;">bless</span> <span style="color: #000000;">{</span><span style="color: #000000;">}</span><span style="color: #000000;">,</span> <span style="color: #000000;">(</span><span style="color: #8B008B; font-weight:bold;">ref</span><span style="color: #000000;">(</span><span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> || <span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> <span style="color: #000000;">}</span>
+<span style="color: #00688B;">@Programmer::ISA</span> = <span style="color: #CD5555;">qw(Coder Documenter)</span><span style="color: #000000;">;</span>
+<a name="Obfuscator::new"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">Obfuscator::new</span> <span style="color: #000000;">{</span> <span style="color: #8B008B; font-weight:bold;">bless</span> <span style="color: #000000;">{</span><span style="color: #000000;">}</span><span style="color: #000000;">,</span> <span style="color: #000000;">(</span><span style="color: #8B008B; font-weight:bold;">ref</span><span style="color: #000000;">(</span><span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> || <span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> <span style="color: #000000;">}</span>
+<span style="color: #00688B;">@Perl::Hacker::ISA</span> = <span style="color: #CD5555;">qw(Programmer Obfuscator)</span><span style="color: #000000;">;</span>
+<a name="Writer::new"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">Writer::new</span>           <span style="color: #000000;">{</span> <span style="color: #8B008B; font-weight:bold;">bless</span> <span style="color: #000000;">{</span><span style="color: #000000;">}</span><span style="color: #000000;">,</span> <span style="color: #000000;">(</span><span style="color: #8B008B; font-weight:bold;">ref</span><span style="color: #000000;">(</span><span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> || <span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> <span style="color: #000000;">}</span>
+<a name="Humorist::new"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">Humorist::new</span>         <span style="color: #000000;">{</span> <span style="color: #8B008B; font-weight:bold;">bless</span> <span style="color: #000000;">{</span><span style="color: #000000;">}</span><span style="color: #000000;">,</span> <span style="color: #000000;">(</span><span style="color: #8B008B; font-weight:bold;">ref</span><span style="color: #000000;">(</span><span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> || <span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> <span style="color: #000000;">}</span>
+<a name="One::Sick::Puppy::new"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">One::Sick::Puppy::new</span> <span style="color: #000000;">{</span> <span style="color: #8B008B; font-weight:bold;">bless</span> <span style="color: #000000;">{</span><span style="color: #000000;">}</span><span style="color: #000000;">,</span> <span style="color: #000000;">(</span><span style="color: #8B008B; font-weight:bold;">ref</span><span style="color: #000000;">(</span><span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> || <span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> <span style="color: #000000;">}</span>
+<span style="color: #00688B;">@Punmeister::ISA</span> = <span style="color: #CD5555;">qw(Writer Humorist One::Sick::Puppy)</span><span style="color: #000000;">;</span>
+<a name="Language::Maestro::new"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">Language::Maestro::new</span> <span style="color: #000000;">{</span> <span style="color: #8B008B; font-weight:bold;">bless</span> <span style="color: #000000;">{</span><span style="color: #000000;">}</span><span style="color: #000000;">,</span> <span style="color: #000000;">(</span><span style="color: #8B008B; font-weight:bold;">ref</span><span style="color: #000000;">(</span><span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> || <span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> <span style="color: #000000;">}</span>
+<a name="Educator::new"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">Educator::new</span>          <span style="color: #000000;">{</span> <span style="color: #8B008B; font-weight:bold;">bless</span> <span style="color: #000000;">{</span><span style="color: #000000;">}</span><span style="color: #000000;">,</span> <span style="color: #000000;">(</span><span style="color: #8B008B; font-weight:bold;">ref</span><span style="color: #000000;">(</span><span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> || <span style="color: #00688B;">$_</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">)</span> <span style="color: #000000;">}</span>
+<span style="color: #00688B;">@Perl::Guru::ISA</span> = <span style="color: #CD5555;">qw(Perl::Hacker Language::Maestro Educator Punmeister)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$p</span> = <span style="color: #000000;">Perl::Guru</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$g</span> = <span style="color: #000000;">GraphViz::ISA</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #00688B;">$p</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">$g</span><span style="color: #00688B;">-&gt;as_png</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Graphik:
+</p>
+
+<form mt:asset-id="98" class="mt-enclosure mt-enclosure-image" style="display: inline;"><a href="{{ site.url }}/assets/images/graphviz-isa.png"><img alt="graphviz-isa-klein.png" src="{{ site.url }}/assets/images/graphviz-isa-klein.png" width="607" height="174" style="text-align: center; display: block; margin: 0 auto 20px;" /></a></form>
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li>CPAN: <a href="http://search.cpan.org/perldoc?GraphViz::ISA">GraphViz::ISA</a></li>
+<li>Github: <a href="https://github.com/hanekomu/GraphViz-ISA">https://github.com/hanekomu/GraphViz-ISA</a></li>
+<li><a href="http://hanekomu.at/blog/">&#36339;&#12397;&#36796;&#12416;&#12398;&#26085;&#35352; - hanekomu's Perl blog</a></li>
+<li>CPAN: <a href="http://search.cpan.org/perldoc?GraphViz">GraphViz</a></li>
+<li><a href="{{ site.url }}/2008/08/datenstrukturen-visualisieren.html">Datenstrukturen visualisieren mit GraphViz::Data::Grapher</a></li>
+<li><a href="{{ site.url }}/2010/09/develtraceuse-verwendete-module-ubersichtlich-auflisten.html">Devel::TraceUse - Verwendete Module übersichtlich auflisten</a></li>
+</ul>

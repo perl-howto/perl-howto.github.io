@@ -1,0 +1,91 @@
+---
+layout: post
+title: 'Try - Catch: Try::Tiny'
+date: '2009-09-05 15:40:00 +0000'
+mt_id: 163
+blog_id: 1
+post_id: 163
+permalink: /2009/09/try-catch-try-tiny.html
+categories:
+- '101'
+---
+<p>
+Das recht neue CPAN-Modul <a href="http://search.cpan.org/perldoc?Try::Tiny">Try::Tiny</a> von<a href="http://search.cpan.org/~nuffin/"> יובל קוג'מן (Yuval Kogman)</a> bietet einen einfachen <a href="http://de.wikipedia.org/wiki/Ausnahmebehandlung">Ausnahmebehandlungs</a>-Mechanismus.
+</p>
+<p>
+Wer nicht zwingend auf alle <a href="http://www.worldwidewords.org/qa/qa-bel1.htm">Bells und Whistles</a> von <a href="http://search.cpan.org/perldoc?TryCatch">TryCatch</a> angewiesen ist, sollte <a href="http://search.cpan.org/perldoc?Try::Tiny">Try::Tiny</a> mal ausprobieren.
+</p>
+<h2>Beispiel: Fehler beim Einbinden eines Modul zur Laufzeit abfangen</h2>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Try::Tiny</span><span style=" color: #000000;">;</span>
+ 
+<span style=" color: #00688B;">try</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">require</span> <span style=" color: #000000;">Foo</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span> <span style=" color: #00688B;">catch</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #228B22;"># $_ enthaelt Fehlermeldung</span>
+    	<span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span> <span style=" color: #CD5555;">/^Can&#39;t locate Foo\.pm in \@INC/</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+		<span style=" color: #228B22;"># ignore</span>
+		<span style=" color: #8B008B; font-weight:bold;">warn</span> <span style=" color: #CD5555;">&quot;Harmloser Fehler: Foo kann nicht geladen werden\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #000000;">}</span> 
+	<span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+		<span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #CD5555;">&quot;Fataler Fehler: $_&quot;</span><span style=" color: #000000;">;</span> <span style=" color: #228B22;"># Alle anderen Fehler sind fatal</span>
+	<span style=" color: #000000;">}</span> 
+<span style=" color: #000000;">}</span><span style=" color: #000000;">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Harmloser Fehler: Foo kann nicht geladen werden
+</pre>
+
+<h2>Beispiel: Eigener Signalhandler</h2>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Try::Tiny</span><span style=" color: #000000;">;</span>
+ 
+<span style=" color: #00688B;">try</span> <span style=" color: #000000;">{</span>
+	<span style=" color: #8B008B; font-weight:bold;">local</span> <span style=" color: #00688B;">$SIG</span>{<span style=" color: #000000;">ALRM</span>} = <span style=" color: #8B008B; font-weight:bold;">sub</span> <span style=" color: #000000;">{</span> <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #CD5555;">&quot;Zeitlimit &uuml;berschritten $!&quot;</span> <span style=" color: #000000;">}</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">alarm</span><span style=" color: #000000;">(</span><span style=" color: #B452CD;">2</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+	<span style=" color: #8B008B; font-weight:bold;">sleep</span><span style=" color: #000000;">(</span><span style=" color: #B452CD;">5</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>  <span style=" color: #228B22;"># Lang laufende Operation</span>
+	
+<span style=" color: #000000;">}</span> <span style=" color: #00688B;">catch</span> <span style=" color: #000000;">{</span>
+		<span style=" color: #228B22;"># $_ enthaelt Fehlermeldung </span>
+	<span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span> <span style=" color: #CD5555;">/Zeitlimit/i</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+		<span style=" color: #8B008B; font-weight:bold;">warn</span> <span style=" color: #CD5555;">&quot;Timed out\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #000000;">}</span>
+	<span style=" color: #8B008B; font-weight:bold;">else</span> <span style=" color: #000000;">{</span>
+		<span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #CD5555;">&quot;Anderer Fehler: $_\n&quot;</span><span style=" color: #000000;">;</span>
+	<span style=" color: #000000;">}</span>
+<span style=" color: #000000;">}</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">alarm</span><span style=" color: #000000;">(</span><span style=" color: #B452CD;">0</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Timed out
+</pre>
+
+
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Try::Tiny">Try::Tiny</a></li>
+<li><a href="http://search.cpan.org/perldoc?TryCatch">TryCatch</a></li>
+<li><a href="http://blog.woobling.org/2009/09/trytiny.html">nothingmuch's perl blog: Try::Tiny</a></li>
+<li><a href="http://www.perl.com/pub/a/2002/11/14/exception.html">Object Oriented Exception Handling in Perl</a></li>
+<li><a href="http://perldesignpatterns.com/?TryCatch">Try Catch at Perl Design Patterns Wiki</a></li>
+<li><a href="http://perldoc.perl.org/functions/eval.html">eval()</a></li>
+<li><a href="http://perldoc.perl.org/functions/alarm.html">alarm()</a></li>
+<li><a href="{{ site.url }}/2008/06/die-ausfuhrungsdauer-eines-pro.html">Die Ausführungsdauer eines Programms oder einer Routine mit alarm() begrenzen</a></li>
+</ul>

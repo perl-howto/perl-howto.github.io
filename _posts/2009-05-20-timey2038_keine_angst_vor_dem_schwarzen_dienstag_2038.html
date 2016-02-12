@@ -1,0 +1,156 @@
+---
+layout: post
+title: Time::y2038 - Keine Angst vor dem Schwarzen Dienstag 2038
+date: '2009-05-20 10:15:00 +0000'
+mt_id: 143
+blog_id: 1
+post_id: 143
+permalink: /2009/05/timey2038_keine_angst_vor_dem_schwarzen_dienstag_2038.html
+categories:
+- '101'
+---
+<p>
+Das <a href="http://de.wikipedia.org/wiki/Jahr-2038-Problem">Jahr-2038-Problem</a> kann möglicherweise zu Softwareausfällen im Februar 2038 auf 32-Bit-Systemen führen. 
+</p>
+<p>
+<a href="http://schwern.org/">Michael Schwern's</a> <a href="http://search.cpan.org/perldoc?Time::y2038">Time::y2038</a> schafft auf besonders einfache Art und Weise Abhilfe für <a href="http://en.wikipedia.org/wiki/Legacy_code">Legacy Cody</a>.
+</p>
+<p>
+Für <a href="http://de.wikipedia.org/wiki/Microsoft_Windows">Windows</a> steht <a href="http://search.cpan.org/perldoc?Time::y2038">Time::y2038</a> leider noch nicht zur Verfügung.
+</p>
+
+<h2>Beispiel mit 2038-Bug:</h2>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #228B22;">#</span>
+<span style=" color: #228B22;"># Based on http://maul.deepsky.com/~merovech/2038.perl.txt</span>
+<span style=" color: #228B22;">#</span>
+
+<span style=" color: #228B22;"># Zeitzone auf GMT aka UTC setzen</span>
+<span style=" color: #00688B;">$ENV</span>{<span style=" color: #CD5555;">&#39;TZ&#39;</span>} = <span style=" color: #CD5555;">&quot;GMT&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Epochsekunden kurz vor bzw. nach dem kritischen Event</span>
+<span style=" color: #228B22;"># in einer Schleife durchlaufen und pruefen, ob Datum </span>
+<span style=" color: #228B22;"># und Uhrzeit korrekt ausgegeben werden.</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$clock</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">for</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$clock</span> = <span style=" color: #B452CD;">2147483641</span><span style=" color: #000000;">;</span> <span style=" color: #00688B;">$clock</span> &lt; <span style=" color: #B452CD;">2147483651</span><span style=" color: #000000;">;</span> <span style=" color: #00688B;">$clock</span>++<span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	 <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #8B008B; font-weight:bold;">scalar</span> <span style=" color: #8B008B; font-weight:bold;">localtime</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$clock</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+<p>
+Ausgabe auf einem 32-Bit Linux:
+</p>
+<pre>
+Tue Jan 19 03:14:01 2038
+Tue Jan 19 03:14:02 2038
+Tue Jan 19 03:14:03 2038
+Tue Jan 19 03:14:04 2038
+Tue Jan 19 03:14:05 2038
+Tue Jan 19 03:14:06 2038
+Tue Jan 19 03:14:07 2038
+Fri Dec 13 20:45:52 1901
+Fri Dec 13 20:45:53 1901
+Fri Dec 13 20:45:54 1901
+</pre>
+<p>
+Auf 32-Bit Unix/Linux-Systemen wird die Zeit auf den 13. Dezember 1901 gesetzt.
+</p>
+<p>
+Ausgabe auf einem 32-Bit <a href="http://de.wikipedia.org/wiki/Microsoft_Windows">Windows</a>:
+</p>
+<pre>
+Tue Jan 19 04:14:01 2038
+Tue Jan 19 04:14:02 2038
+Tue Jan 19 04:14:03 2038
+Tue Jan 19 04:14:04 2038
+Tue Jan 19 04:14:05 2038
+Tue Jan 19 04:14:06 2038
+Tue Jan 19 04:14:07 2038
+</pre>
+<p>
+Das Programm stoppt genau nach der kritischen Sekunde im Jahr 2038.
+</p>
+
+<h2>Beispiel mit Time::y2038</h2>
+<p>
+Dank <a href="http://search.cpan.org/perldoc?Time::y2038">Time::y2038</a> muss nur <strong>eine</strong> Zeile Code hinzugefügt werden und das Programm ist Jahr-2038-fest.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Time::y2038</span><span style=" color: #000000;">;</span>
+<span style=" color: #228B22;">#</span>
+<span style=" color: #228B22;"># Based on http://maul.deepsky.com/~merovech/2038.perl.txt</span>
+<span style=" color: #228B22;">#</span>
+
+<span style=" color: #228B22;"># Zeitzone auf GMT aka UTC setzen</span>
+<span style=" color: #00688B;">$ENV</span>{<span style=" color: #CD5555;">&#39;TZ&#39;</span>} = <span style=" color: #CD5555;">&quot;GMT&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Epochsekunden kurz vor bzw. nach dem kritischen Event</span>
+<span style=" color: #228B22;"># in einer Schleife durchlaufen und pruefen, ob Datum </span>
+<span style=" color: #228B22;"># und Uhrzeit korrekt ausgegeben werden.</span>
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$clock</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">for</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$clock</span> = <span style=" color: #B452CD;">2147483641</span><span style=" color: #000000;">;</span> <span style=" color: #00688B;">$clock</span> &lt; <span style=" color: #B452CD;">2147483651</span><span style=" color: #000000;">;</span> <span style=" color: #00688B;">$clock</span>++<span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+	 <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #8B008B; font-weight:bold;">scalar</span> <span style=" color: #8B008B; font-weight:bold;">localtime</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$clock</span><span style=" color: #000000;">)</span><span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+</pre>
+
+
+<p>
+Ausgabe des Programms (Linux)
+</p>
+<pre>
+Tue Jan 19 03:14:01 2038
+Tue Jan 19 03:14:02 2038
+Tue Jan 19 03:14:03 2038
+Tue Jan 19 03:14:04 2038
+Tue Jan 19 03:14:05 2038
+Tue Jan 19 03:14:06 2038
+Tue Jan 19 03:14:07 2038
+Tue Jan 19 03:14:08 2038
+Tue Jan 19 03:14:09 2038
+Tue Jan 19 03:14:10 2038
+</pre>
+
+<h2>Datumsberechnungen (nicht nur über das Jahr 2038 hinaus)</h2>
+<p>
+Wer Datumsberechnungen (nicht nur über das Jahr 2038 hinaus) sicher durchführen möchte, sollte sich ohnehin nicht auf <a href="http://perldoc.perl.org/functions/time.html">time()</a> und <a href="http://de.wikipedia.org/wiki/Unixzeit">Epochal-Sekunden</a> verlassen, sondern besser ein CPAN-Modul wie <a href="http://search.cpan.org/perldoc?Date::Calc">Date::Calc</a> oder <a href="http://search.cpan.org/perldoc?DateTime">DateTime</a> verwenden.
+</p>
+<h3>Beispiel:</h3>
+<pre>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">DateTime</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$dt</span> = <span style=" color: #000000;">DateTime</span><span style=" color: #000000;">-&gt;now</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>  
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$dt</span><span style=" color: #00688B;">-&gt;iso8601</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #00688B;">$dt</span><span style=" color: #00688B;">-&gt;add</span><span style=" color: #000000;">(</span><span style=" color: #000000;">years</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">200</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">$dt</span><span style=" color: #00688B;">-&gt;iso8601</span><span style=" color: #000000;">(</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+</pre>
+
+
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Time::y2038">Time::y2038</a></li>
+<li><a href="http://search.cpan.org/perldoc?Time::y2038::Everywhere">Time::y2038::Everywhere</a></li>
+<li><a href="http://use.perl.org/~schwern/journal/37702">Journal of schwern: use Time::y2038::Everywhere</a></li>
+<li><a href="http://news.perlfoundation.org/2008/05/2008q2_grant_proposal_make_loc.html">2008Q2 Grant Proposal - Make localtime() and gmtime() Work Past 2038</a></li>
+<li><a href="http://www.perlfoundation.org/make_localtime_and_gmtime_work_past_2038">Make localtime() and gmtime() Work Past 2038</a></li>
+<li><a href="http://www.slideshare.net/schwern/whos-afraid-of-2038-presentation">Who's Afraid Of 2038?</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Jahr-2038-Problem">Jahr-2038-Problem - Wikipedia</a></li>
+<li><a href="http://www.2038bug.com/">The year 2038 bug</a></li>
+<li><a href="http://www.deepsky.com/~merovech/2038.html">The Project 2038 Frequently Asked Questions (FAQ)</a></li>
+<li><a href="http://taint.org/2006/07/20/171844a.html">Year 2038 Bug Strikes Early / taint.org: Justin Mason's Weblog</a></li>
+<li><a href="http://www.fourmilab.ch/fourmilog/archives/2007-07/000873.html">Perl: 2038 "Black Tuesday" Bug in Perl 5.8 gmtime and localtime Functions</a></li>
+<li><a href="http://search.cpan.org/perldoc?DateTime">DateTime</a></li>
+<li><a href="http://datetime.perl.org/">DateTime.org</a></li>
+<li><a href="http://de.wikipedia.org/wiki/Apophis_(Asteroid)">Apophis</a></li>
+</ul>

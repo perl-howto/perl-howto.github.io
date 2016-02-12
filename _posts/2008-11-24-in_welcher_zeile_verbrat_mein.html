@@ -1,0 +1,242 @@
+---
+layout: post
+title: In welcher Zeile verbrät mein Programm die meiste Zeit? Devel::SmallProf und
+  Devel::FastProf geben Antworten
+date: '2008-11-24 22:05:00 +0000'
+mt_id: 103
+blog_id: 1
+post_id: 103
+permalink: /2008/11/in_welcher_zeile_verbrat_mein.html
+categories:
+- profiler
+---
+<p>
+<strong>Zeilenorientierte</strong> Profiler wie
+<a href="http://search.cpan.org/perldoc?Devel::SmallProf">Devel::SmallProf</a> bzw. 
+<a href="http://search.cpan.org/perldoc?Devel::FastProf">Devel::FastProf</a> von <a href="http://search.cpan.org/~salva/">Salvador Fandiño García</a> zeigen, welche <strong>Zeile</strong> eines Perl-Programms wie oft aufgerufen wurde und wieviel Zeit dafür benötigt wurde.
+Sie erlauben es dem Entwickler, solche Bereiche gezielt zu verbessern.
+</p>
+
+<h2>Beispielprogramm: Fakul&auml;t berechnen</h2>
+<p>
+Das Beispielprogramm berechnet die <a href="http://de.wikipedia.org/wiki/Fakult%C3%A4t_(Mathematik)">Fakul&auml;t</a> einer Ganzzahl auf drei unterschiedliche Arten: rekursiv und zweimal iterativ. Die Variationen habe ich dem <a href="http://use.perl.org/~ambs/journal/37511">Journal of ambs: How would you write factorial?</a> entnommen.
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Berechnung der Fakultaet n! </span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$n</span> = <span style=" color: #B452CD;">70</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">recursive</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$n</span><span style=" color: #000000;">)</span>  <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">iterativ</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$n</span><span style=" color: #000000;">)</span>   <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #00688B;">iterativ2</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$n</span><span style=" color: #000000;">)</span>  <span style=" color: #000000;">,</span> <span style=" color: #CD5555;">&quot;\n&quot;</span><span style=" color: #000000;">;</span>
+
+
+<a name="recursive"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">recursive</span> <span style=" color: #000000;">{</span>
+  <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$n</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span><span style=" color: #000000;">;</span>
+  <span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$n</span> == <span style=" color: #B452CD;">1</span> <span style=" color: #8B008B; font-weight:bold;">or</span> <span style=" color: #00688B;">$n</span> == <span style=" color: #B452CD;">0</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+     <span style=" color: #8B008B; font-weight:bold;">return</span> <span style=" color: #B452CD;">1</span><span style=" color: #000000;">;</span>
+  <span style=" color: #000000;">}</span>
+  <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$total</span> = <span style=" color: #00688B;">$n</span> * <span style=" color: #00688B;">recursive</span><span style=" color: #000000;">(</span><span style=" color: #00688B;">$n</span>-<span style=" color: #B452CD;">1</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+  <span style=" color: #8B008B; font-weight:bold;">return</span> <span style=" color: #00688B;">$total</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<a name="iterativ"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">iterativ</span> <span style=" color: #000000;">{</span>
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$v</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$res</span> = <span style=" color: #B452CD;">1</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">while</span> <span style=" color: #000000;">(</span><span style=" color: #00688B;">$v</span> &gt; <span style=" color: #B452CD;">1</span><span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+        <span style=" color: #00688B;">$res</span> *= <span style=" color: #00688B;">$v</span><span style=" color: #000000;">;</span>
+        <span style=" color: #00688B;">$v</span>--<span style=" color: #000000;">;</span>
+    <span style=" color: #000000;">}</span>
+    <span style=" color: #8B008B; font-weight:bold;">return</span> <span style=" color: #00688B;">$res</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<a name="iterativ2"></a><span style=" color: #8B008B; font-weight:bold;">sub </span><span style=" color: #FF0000; font-weight:bold;">iterativ2</span> <span style=" color: #000000;">{</span>
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$v</span> = <span style=" color: #8B008B; font-weight:bold;">shift</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$res</span> = <span style=" color: #B452CD;">1</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">grep</span> <span style=" color: #000000;">{</span><span style=" color: #00688B;">$res</span>*=<span style=" color: #00688B;">$_</span><span style=" color: #000000;">}</span> <span style=" color: #000000;">(</span><span style=" color: #B452CD;">1</span>..<span style=" color: #00688B;">$v</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+    <span style=" color: #8B008B; font-weight:bold;">return</span> <span style=" color: #00688B;">$res</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<span style=" color: #228B22;"># Quelle:</span>
+<span style=" color: #228B22;"># Journal of ambs: How would you write factorial?</span>
+<span style=" color: #228B22;"># http://use.perl.org/~ambs/journal/37511</span>
+</pre>
+<p>Das Programm erzeugt folgende Ausgabe:</p>
+<pre>
+$ perl factorial.pl
+1.19785716699699e+100
+1.19785716699699e+100
+1.19785716699699e+100
+</pre>
+
+<h2>Devel::SmallProf</h2>
+<p>
+Das Programm lässt sich mit <a href="http://search.cpan.org/perldoc?Devel::SmallProf">Devel::SmallProf</a> wie folgt untersuchen:
+</p>
+<pre>
+perl -d:SmallProf factorial.pl
+</pre>
+<p>
+<a href="http://search.cpan.org/perldoc?Devel::SmallProf">Devel::SmallProf</a> erzeugt im aktuellen Verzeichnis eine Datei <em>smallprof.out</em>, welche die Ergebnisse enthält.  In der ersten Spalte wird angezeigt, wie oft eine Zeile im Programm aufgerufen wurde, die zweite Spalte zeigt die tatsächlich verbrauchte Zeit, die dritte Spalte die benötigte CPU-Zeit an. Die letzte Spalte enthält den Inhalt der Zeile.
+</p>
+<pre>
+$ cat smallprof.out 
+           ================ SmallProf version 2.02 ================
+                            Profile of factorial.pl                    Page 1
+       =================================================================
+    count wall tm  cpu time line
+        0   0.00000   0.00000     1:#!/usr/bin/perl
+        0   0.00000   0.00000     2:use strict;
+        0   0.00000   0.00000     3:use warnings;
+        0   0.00000   0.00000     4:
+        0   0.00000   0.00000     5:# Berechnung der Fakultaet n!
+        0   0.00000   0.00000     6:
+        1   0.00000   0.00000     7:my $n = 70;
+        0   0.00000   0.00000     8:
+        1   0.00000   0.00000     9:print recursive($n)  , "\n";
+        1   0.00000   0.00000    10:print iterativ($n)   , "\n";
+        1   0.00000   0.00000    11:print iterativ2($n)  , "\n";
+        0   0.00000   0.00000    12:
+        0   0.00000   0.00000    13:
+        0   0.00000   0.00000    14:sub recursive {
+       70   0.00000   0.00000    15:  my $n = shift;
+       70   0.00000   0.00000    16:  if ($n == 1 or $n == 0) {
+        0   0.00000   0.00000    17:     return 1;
+        0   0.00000   0.00000    18:  }
+       69   0.00004   0.00000    19:  my $total = $n * recursive($n-1);
+       69   0.00014   0.00000    20:  return $total;
+        0   0.00000   0.00000    21:}
+        0   0.00000   0.00000    22:sub iterativ {
+        1   0.00000   0.00000    23:    my $v = shift;
+        1   0.00000   0.00000    24:    my $res = 1;
+        1   0.00000   0.00000    25:    while ($v > 1) {
+       69   0.00000   0.00000    26:        $res *= $v;
+       69   0.00001   0.01000    27:        $v--;
+        0   0.00000   0.00000    28:    }
+        1   0.00009   0.00000    29:    return $res;
+        0   0.00000   0.00000    30:}
+        0   0.00000   0.00000    31:sub iterativ2 {
+        1   0.00000   0.00000    32: my $v = shift;
+        1   0.00000   0.00000    33:    my $res = 1;
+        1   0.00006   0.00000    34:    grep {$res*=$_} (1..$v);
+        1   0.00010   0.00000    35:    return $res;
+        0   0.00000   0.00000    36:}
+        0   0.00000   0.00000    37:# Quelle:
+        0   0.00000   0.00000    38:# Journal of ambs: How would you write
+        0   0.00000   0.00000    39:# http://use.perl.org/~ambs/journal/37511
+</pre>
+
+<h3>Ausgabe nach der Anzahl der Aufrufe sortieren</h3>
+
+<p>
+Die Ausgabe lässt sich in einer Linux-Shell durch das Kommando
+</p>
+<pre>
+$    sort -k 1nr,1 smallprof.out |  head
+</pre>
+<p>
+einfach nach der ersten Spalte, der Anzahl der Aufrufe, numerisch sortieren. So stehen die am häufigsten aufgerufenen Zeilen gleich am Anfang der Ausgabe.
+</p>
+<pre>
+       70   0.00000   0.00000    15:  my $n = shift;
+       70   0.00000   0.00000    16:  if ($n == 1 or $n == 0) {
+       69   0.00000   0.00000    26:        $res *= $v;
+       69   0.00001   0.01000    27:        $v--;
+       69   0.00004   0.00000    19:  my $total = $n * recursive($n-1);
+       69   0.00014   0.00000    20:  return $total;
+        1   0.00000   0.00000    10:print iterativ($n)   , "\n";
+        1   0.00000   0.00000    11:print iterativ2($n)  , "\n";
+        1   0.00000   0.00000    23:    my $v = shift;
+        1   0.00000   0.00000    24:    my $res = 1;
+</pre>
+
+<h3>Ausgabe nach der tatsächlich benötigten Zeit sortieren</h3>
+
+<p>
+Die Ausgabe lässt sich in einer Linux-Shell durch das Kommando
+</p>
+<pre>
+$    sort -k 2nr,2 smallprof.out |  head
+</pre>
+<p>
+einfach nach dem zweiten Feld von links (der tatsächlich verbrauchten Zeit) numerisch sortieren. So stehen die Zeilen mit den größten Zeitfresser gleich am Anfang der Ausgabe.
+</p>
+<pre>
+       69   0.00014   0.00000    20:  return $total;
+        1   0.00010   0.00000    35:    return $res;
+        1   0.00009   0.00000    29:    return $res;
+        1   0.00006   0.00000    34:    grep {$res*=$_} (1..$v);
+       69   0.00004   0.00000    19:  my $total = $n * recursive($n-1);
+       69   0.00001   0.01000    27:        $v--;
+</pre>
+
+<h2>Devel::FastProf</h2>
+<p>
+<a href="http://search.cpan.org/perldoc?Devel::FastProf">Devel::FastProf</a> ist eine Art Nachfolger von <a href="http://search.cpan.org/perldoc?Devel::SmallProf">Devel::SmallProf</a>.
+</p>
+<p>
+Unter <a href="http://de.wikipedia.org/wiki/Windows">Windows</a> läuft <a href="http://search.cpan.org/perldoc?Devel::FastProf">Devel::FastProf</a> leider <strong>nicht</strong> 
+</p>
+<p>
+Das Beispielprogramm lässt sich mit <a href="http://search.cpan.org/perldoc?Devel::FastProf">Devel::FastProf</a> wie folgt untersuchen:
+</p>
+<pre>
+perl -d:FastProf factorial.pl 
+</pre>
+<p>
+<a href="http://search.cpan.org/perldoc?Devel::FastProf">Devel::FastProf</a> erzeugt im aktuellen Verzeichnis eine Datei <em>fastprof.out</em>, welche die Ergebnisse in einem Binärformat enthält.
+</p>
+<p>
+Zur Ausgabe der Ergebnisse wird das mitgelieferte Programm <a href="http://search.cpan.org/perldoc?fprofpp">fprofpp</a> benötigt.
+</p>
+<pre>
+f$ fprofpp fastprof.out 
+
+# fprofpp output format is:
+# filename:line time count: source
+factorial.pl:20 0.01348 69: return $total;
+factorial.pl:19 0.00030 69: my $total = $n * recursive($n-1);
+factorial.pl:29 0.00016 1: return $res;
+factorial.pl:15 0.00015 70: my $n = shift;
+factorial.pl:16 0.00015 70: if ($n == 1 or $n == 0) {
+factorial.pl:26 0.00015 69: $res *= $v;
+factorial.pl:27 0.00014 69: $v--;
+factorial.pl:35 0.00011 1: return $res;
+factorial.pl:34 0.00007 1: grep {$res*=$_} (1..$v);
+factorial.pl:10 0.00001 1: print iterativ($n)   , "\n";
+factorial.pl:23 0.00001 1: my $v = shift;
+factorial.pl:11 0.00001 1: print iterativ2($n)  , "\n";
+factorial.pl:25 0.00000 1: while ($v > 1) {
+factorial.pl:32 0.00000 1: my $v = shift;
+factorial.pl:9 0.00000 1: print recursive($n)  , "\n";
+factorial.pl:7 0.00000 1: my $n = 70;
+factorial.pl:24 0.00000 1: my $res = 1;
+factorial.pl:33 0.00000 1: my $res = 1;
+</pre>
+<p>
+<a href="http://search.cpan.org/perldoc?fprofpp">fprofpp</a> erzeugt eine übersichtliche Tabelle, in der die Zeilen, die am häufigsten aufgerufen werden und die verbrauchte Zeit angezeigt werden.
+</p>
+<h2>Zeilenorientierung vs. Unterprogrammorientierung</h2>
+<p>Neben den beschriebenen <strong>zeilenorientierte</strong> Profilern, gibt es noch <a href="http://search.cpan.org/search?m=all&q=Devel">weitere Profiler</a>, die auf der Basis von <a href="http://perldoc.perl.org/functions/sub.html">Unterprogrammen</a> arbeiten, z.B. <a href="http://search.cpan.org/perldoc?Devel::DProf">Devel::DProf</a>, auf den ich in dem Beitrag <a href="{{ site.url }}/2008/11/in-welchem-unterprogramm-verbr.html">In welchem Unterprogramm verbrät mein Programm die meiste Zeit? Devel::DProf liefert Hinweise</a> eingehe.
+</p>
+<p>
+<strong>Zeilenorientierte</strong> Profiler haben gegenüber unterprogrammorientierten Profilern den Vorteil, daß sie auch Zeitdiebe innerhalb von Subroutinen finden, z.B. langsame Regexe innerhalb eines langen Unterprogramms.
+</p>
+
+<h2>Vorsicht AUTOLOAD</h2>
+<p>
+Wegen der <strong>Zeilenorientierung</strong> liefern beide Profiler falsche Ergebnisse, sobald<a href="http://perldoc.perl.org/AutoLoader.html"> AUTOLOAD</a> verwendet wird.
+</p>
+
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="http://search.cpan.org/perldoc?Devel::SmallProf">Devel::SmallProf</a></li>
+<li><a href="http://search.cpan.org/perldoc?Devel::FastProf">Devel::FastProf</a></li>
+<li><a href="http://perladvent.pm.org/2006/1/">Perl Advent Calendar 2006-12-01: Good things come in small packages</a></li>
+<li><a href="http://www.linux-magazin.de/heft_abo/ausgaben/2008/12/laufzeit_tacho">Michael Schilli: Laufzeit-Tacho - Profiler identifizieren Flaschenhälse in Perl-Programmen</a></li>
+<li><a href="http://www252.pair.com/comdog/mastering_perl/Chapters/profiling.html">Mastering Perl: Profiling Perl</a></li>
+<li><a href="{{ site.url }}/2008/11/develnytprof-der-beste-profi.html">Devel::NYTProf - Der beste Profiler für Perl</a>
+</li>
+<li><a href="{{ site.url }}/2008/11/in-welchem-unterprogramm-verbr.html">In welchem Unterprogramm verbrät mein Programm die meiste Zeit? Devel::DProf liefert Hinweise</a></li>
+</ul>

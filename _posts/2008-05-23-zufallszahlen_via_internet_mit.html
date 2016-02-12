@@ -1,0 +1,59 @@
+---
+layout: post
+title: Zufallszahlen via Internet mit Net::Random
+date: '2008-05-23 18:57:01 +0000'
+mt_id: 64
+blog_id: 1
+post_id: 64
+permalink: /2008/05/zufallszahlen_via_internet_mit.html
+categories:
+- kryptographie
+---
+<p>
+<a href="http://search.cpan.org/perldoc?Net::Random">Net::Random</a> von <a href="http://www.cantrell.org.uk/david">David Cantrell</a> ermöglicht es, Zufallszahlen via Internet zu beziehen. Es ist eigentlich als Notfalllösung gedacht, falls keine oder keine geeigneten Zufallszahlen zur Verfügung stehen.
+</p>
+<p>
+<a href="http://search.cpan.org/perldoc?Net::Random">Net::Random</a> nutzt dazu <a href="http://random.org/cgi-bin/randbyte?nbytes=1024&format=hex">random.org</a> bzw. <a href="http://www.fourmilab.ch/cgi-bin/uncgi/Hotbits?nbytes=1024&fmt=hex">www.fourmilab.ch</a> als Quelle für Zufallszahlen. Beide Quellen geben an, das ihre Zufallszahlen "truly random" sind. Das sind immerhin bessere Zufallszahlen, als  <a href="http://www.heise.de/newsticker/meldung/99441">einige Betriebssysteme liefern</a>.
+</p>
+<p>
+Für kryptographische Zwecke würde ich jedoch keine Zufallszahlen via Internet beziehen.
+</p>
+<p>
+<h2>Beispiel:</h2>
+<pre>
+#!/usr/bin/perl
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">strict</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">warnings</span><span style=" color: #000000;">;</span>
+<span style=" color: #8B008B; font-weight:bold;">use</span> <span style=" color: #000000;">Net::Random</span><span style=" color: #000000;">;</span>    
+
+<span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$rand</span> = <span style=" color: #000000;">Net::Random</span><span style=" color: #000000;">-&gt;new</span><span style=" color: #000000;">(</span>     
+  <span style=" color: #228B22;"># use random.org randomness source,           </span>
+        <span style=" color: #000000;">src</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #CD5555;">&#39;random.org&#39;</span><span style=" color: #000000;">,</span>
+         <span style=" color: #228B22;"># src =&gt; &#39;fourmilab.ch&#39;,</span>
+         <span style=" color: #228B22;"># and return results from 1 to 2000</span>
+        <span style=" color: #000000;">min</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">1</span><span style=" color: #000000;">,</span>
+        <span style=" color: #000000;">max</span> <span style=" color: #000000;">=&gt;</span> <span style=" color: #B452CD;">2000</span>
+    <span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #8B008B; font-weight:bold;">my</span>  <span style=" color: #00688B;">@numbers</span> = <span style=" color: #000000;">(</span><span style=" color: #000000;">)</span><span style=" color: #000000;">;</span>  
+
+<span style=" color: #228B22;"># Fehler werden &uuml;ber warnings gemeldet</span>
+<span style=" color: #8B008B; font-weight:bold;">eval</span> <span style=" color: #000000;">{</span>
+ <span style=" color: #8B008B; font-weight:bold;">local</span> <span style=" color: #00688B;">$SIG</span>{<span style=" color: #000000;">__WARN__</span>} = <span style=" color: #8B008B; font-weight:bold;">sub</span> <span style=" color: #000000;">{</span><span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #CD5555;">&#39;WARN: &#39;</span>.<span style=" color: #8B008B; font-weight:bold;">shift</span><span style=" color: #000000;">}</span><span style=" color: #000000;">;</span>
+        <span style=" color: #228B22;"># get 5 numbers</span>
+  <span style=" color: #00688B;">@numbers</span> = <span style=" color: #00688B;">$rand</span><span style=" color: #00688B;">-&gt;get</span><span style=" color: #000000;">(</span><span style=" color: #B452CD;">5</span><span style=" color: #000000;">)</span> 
+<span style=" color: #000000;">}</span><span style=" color: #000000;">;</span>
+
+<span style=" color: #228B22;"># Fehlerbehandlung</span>
+<span style=" color: #8B008B; font-weight:bold;">if</span> <span style=" color: #000000;">(</span> <span style=" color: #00688B;">$@</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+ <span style=" color: #8B008B; font-weight:bold;">warn</span> <span style=" color: #CD5555;">&quot;Fehler: $@&quot;</span><span style=" color: #000000;">;</span>
+ <span style=" color: #8B008B; font-weight:bold;">die</span> <span style=" color: #00688B;">$@</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+ 
+
+
+<span style=" color: #8B008B; font-weight:bold;">foreach</span> <span style=" color: #8B008B; font-weight:bold;">my</span> <span style=" color: #00688B;">$number</span>  <span style=" color: #000000;">(</span> <span style=" color: #8B008B; font-weight:bold;">sort</span> <span style=" color: #000000;">{</span> <span style=" color: #00688B;">$a</span> &lt;=&gt; <span style=" color: #00688B;">$b</span> <span style=" color: #000000;">}</span>  <span style=" color: #00688B;">@numbers</span> <span style=" color: #000000;">)</span> <span style=" color: #000000;">{</span>
+     <span style=" color: #8B008B; font-weight:bold;">print</span> <span style=" color: #CD5555;">&quot;$number\n&quot;</span><span style=" color: #000000;">;</span>
+<span style=" color: #000000;">}</span>
+<a name="__END__-"></a><span style=" color: #8B008B; font-weight:bold;">__END__</span>
+<a name="EOF-"></a></pre>
