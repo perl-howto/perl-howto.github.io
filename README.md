@@ -1,2 +1,4 @@
 # perl-howto.github.io
-Website Perl-Howto.de - GitHub Pages
+
+Github pages website [http://perl-howto.github.io](http://perl-howto.github.io)
+
