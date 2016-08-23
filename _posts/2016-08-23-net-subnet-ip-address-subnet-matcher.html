@@ -1,0 +1,184 @@
+
+---
+layout: post
+title: Net::Subnet - ein schneller IP-Adress Subnet Matcher
+date: '2016-08-23 16:15:00 +0000'
+permalink: /2016/08/net-subnet-ip-address-subnet-matcher.html
+author_full_name: "Thomas Fahle"
+author_url: "http://thomas-fahle.de"
+excerpt: "Net::Subnet - ein schneller IP-Adress Subnet Matcher"
+---
+
+<h2>Net::Subnet - ein schneller IP-Adress Subnet Matcher</h2>
+
+<p>
+<a href="https://metacpan.org/pod/Net::Subnet">Net::Subnet - Fast IP-in-subnet matcher for IPv4 and IPv6, CIDR or mask</a> von <a href="https://metacpan.org/author/JUERD">Juerd Waalboer</a> ist ein einfaches und schnelles Werkzeug, um fest zu stellen, ob sich eine bestimmte IP-Adresse in einem Subnetz befindet.
+</p>
+
+<p>
+Die nachfolgend angef&uuml;hrten Beispiele beziehen sich auf <a href="https://de.wikipedia.org/wiki/IPv4">IPv4</a>, Net::Subnet beherrscht auch <a href="https://de.wikipedia.org/wiki/IPv6">IPv6</a>.
+</p>
+
+<p>
+Net::Subnet <a href="https://metacpan.org/pod/Net::Subnet#CAVEATS">validiert &uuml;brigens keine Daten</a> - das muss man ggf. selbst machen.
+</p>
+
+<p>
+Alle Funktionen werden automatisch exportiert.
+</p>
+
+<p>&nbsp;</p>
+<h2>Ist eine IP in einem meiner Subnetze - subnet_matcher()</h2>
+<p>
+<strong>subnet_matcher()</strong> liefert eine <a href="http://perldoc.perl.org/perlref.html">Referenz auf eine Funktion</a> zur&uuml;ck, die wahr zur&uuml;ckliefert, wenn eine bestimmte IP-Adresse in einer Liste von Subnetzen (also in irgendeinem dieser Netze) enthalten ist. 
+</p>
+<h3>Beispiel</h3>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Net::Subnet</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$is_rfc1918</span> = <span style="color: #000000;">subnet_matcher</span> <span style="color: #CD5555;">qw&#39; 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 &#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@ips</span> = <span style="color: #CD5555;">qw/ 192.168.1.1 172.16.32.1 192.168.178.2 8.8.8.8 /</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ip</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@ips</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$is_rfc1918</span>-&gt;<span style="color: #000000;">(</span><span style="color: #00688B;">$ip</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;$ip ist eine private IP-Adresse\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span> <span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;$ip ist keine private IP-Adresse\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+192.168.1.1 ist eine private IP-Adresse
+172.16.32.1 ist eine private IP-Adresse
+192.168.178.2 ist eine private IP-Adresse
+8.8.8.8 ist keine private IP-Adresse
+</pre>
+<p>
+Wer nur wissen m&ouml;chte, ob eine bestimmte IP-Adresse in <em>einem</em> bestimmtem Subnetz enthalten ist, k&uuml;rzt die Liste der Subnetze, die an <em>subnet_matcher()</em> &uuml;bergeben wird, entsprechend. 
+</p>
+<h3>Beispiel</h3>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Net::Subnet</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$is_in_my_network</span> = <span style="color: #000000;">subnet_matcher</span> <span style="color: #CD5555;">qw&#39; 192.168.178.0/24 &#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@ips</span> = <span style="color: #CD5555;">qw&#39; 192.168.1.1 172.16.32.1 192.168.178.2 8.8.8.8 &#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ip</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@ips</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$is_in_my_network</span>-&gt;<span style="color: #000000;">(</span><span style="color: #00688B;">$ip</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;$ip ist in meinem Subnet\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span> <span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;$ip ist nicht in meinem Subnet\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+192.168.1.1 ist nicht in meinem Subnet
+172.16.32.1 ist nicht in meinem Subnet
+192.168.178.2 ist in meinem Subnet
+8.8.8.8 ist nicht in meinem Subnet
+</pre>
+
+<p>&nbsp;</p>
+<h2>In welchem meiner Subnetze ist eine IP - subnet_classifier()</h2>
+<p>
+<strong>subnet_classifier()</strong> liefert eine <a href="http://perldoc.perl.org/perlref.html">Referenz auf eine Funktion</a> zur&uuml;ck, die pr&uuml;ft, ob eine IP-Adresse zu einem Netz einer Subnetzliste geh&ouml;rt. Im Erfolgsfall wird das Subnetz zur&uuml;ckgegeben.
+</p>
+<h3>Beispiel</h3>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Net::Subnet</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$rfc1918_classifier</span> = <span style="color: #000000;">subnet_classifier</span> <span style="color: #CD5555;">qw&#39; 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 &#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@ips</span> = <span style="color: #CD5555;">qw/ 192.168.1.1 172.16.32.1 192.168.178.2 8.8.8.8 /</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ip</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@ips</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$subnet</span> =  <span style="color: #00688B;">$rfc1918_classifier</span>-&gt;<span style="color: #000000;">(</span><span style="color: #00688B;">$ip</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$subnet</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;$ip befindet sich im Subnetz &#39;$subnet&#39;\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span> <span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;$ip befindet sich in keinem Subnetz der Liste\n&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+192.168.1.1 befindet sich im Subnetz '192.168.0.0/16'
+172.16.32.1 befindet sich im Subnetz '172.16.0.0/12'
+192.168.178.2 befindet sich im Subnetz '192.168.0.0/16'
+8.8.8.8 befindet sich in keinem Subnetz der Liste
+</pre>
+
+<p>&nbsp;</p>
+<h2>Subnets nach Gr&ouml;&szlig;e sortieren - sort_subnets()</h2>
+<p>
+<strong>sort_subnets()</strong> sortiert eine Liste von Subnetzen der Gr&ouml;&szlig;e nach. Kleinere, mehr spezifische, Netze werden weiter vorne einsortiert. 
+</p>
+<p>
+Falls sich Subnetze &uuml;berlappen, muss die Liste der Subnetze sortiert werden, bevor diese an <em>subnet_matcher()</em> oder <em>subnet_classifier()</em> weitergereicht wird.
+</p>
+<h3>Beispiel</h3>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Net::Subnet</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@subnets</span> = <span style="color: #CD5555;">qw~ 172.16.0.0/12  172.16.0.0/16 172.16.0.0/22</span>
+  <span style="color: #CD5555;">172.16.31.0/24 172.16.31.0/22 ~</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Smaller networks will show up first</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@sorted_subnets</span> = <span style="color: #00688B;">sort_subnets</span><span style="color: #000000;">(</span><span style="color: #00688B;">@subnets</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$subnet</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@sorted_subnets</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">$subnet</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+172.16.31.0/24
+172.16.31.0/22
+172.16.0.0/22
+172.16.0.0/16
+172.16.0.0/12
+</pre>
+
+
+<p>&nbsp;</p>
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li><a href="https://metacpan.org/pod/Net::Subnet">Net::Subnet</a></li>
+<li><a href="http://perlmaven.com/is-this-ip-in-the-given-subnet">Is this IP in the given subnet?</a></li>
+<li><a href="https://metacpan.org/pod/distribution/Net-Netmask/lib/Net/Netmask.pod">Net::Netmask</a></li>
+<li><a href="https://metacpan.org/pod/NetAddr::IP">NetAddr::IP</a></li>
+<li><a href="http://stackoverflow.com/questions/962347/how-can-i-check-if-ip-numbers-are-in-the-same-subnet-with-perl">How can I check if IP numbers are in the same subnet with Perl?</a></li>
+<li><a href="https://metacpan.org/pod/Net::CIDR">Net::CIDR</a></li>
+<li><a href="https://de.wikipedia.org/wiki/Private_IP-Adresse">Private IP-Adresse</a></li>
+<li><a href="https://de.wikipedia.org/wiki/Subnetz">Subnetz</a></li>
+</ul>
+
