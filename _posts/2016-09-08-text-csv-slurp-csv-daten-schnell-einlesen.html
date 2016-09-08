@@ -1,0 +1,153 @@
+---
+layout: post
+title: Text::CSV::Slurp - CSV Daten aus Dateien so schnell wie m&ouml;glich einlesen
+date: '2016-09-08 18:15:00 +0200'
+permalink: /2016/09/text-csv-slurp-csv-daten-schnell-einlesen.html
+author_full_name: "Thomas Fahle"
+author_url: "http://thomas-fahle.de"
+excerpt: "Text::CSV::Slurp - CSV Daten aus Dateien so schnell wie m&ouml;glich einlesen"
+---
+<p>
+<a href="https://metacpan.org/pod/Text::CSV::Slurp">Text::CSV::Slurp -  convert CSV into an array of hashes, or an array of hashes into CSV</a> von <a href="https://metacpan.org/author/BABF">Robbie Bow</a> liest CSV Daten aus Dateien bzw. Dateihandles oder Strings so schnell wie m&ouml;glich in einen Perl Array of Hashes ein.
+</p>
+<p>
+Au&szlig;erdem kann Text::CSV::Slurp auch CSV Dateien erzeugen.
+</p>
+<p>
+Unter der Haube werkelt <a href="https://metacpan.org/pod/Text::CSV">Text::CSV</a>, d.h. die zahlreichen Optionen dieses Moduls k&ouml;nnen ebenfalls verwendet werden.
+</p>
+
+<p>&nbsp;</p>
+<h2>CSV Daten aus einer Datei lesen</h2>
+<p>
+Die Methode <em>load</em> liest CSV-Daten ein. Ohne Angabe von CSV-Optionen werden die Vorgaben von Text::CSV verwendet.
+</p>
+<p>
+In nachfolgendem Beispiel wird das Semikolon (;) statt des Kommas (,) als Spaltentrenner verwendet.
+</p>
+<p>
+Die erste Zeile der CSV Daten, oft als Headline bezeichnet, enth&auml;lt die Spalten&uuml;berschriften (column descriptions). Die Spalten&uuml;berschriften werden als keys der Hashes verwendet.
+</p>
+<p>
+Beispieldaten:
+</p>
+<pre>
+surname;givenname;phone
+Meier;Hans;+49 800 ...
+Schmidt;Susanne;+49 700 ...
+</pre>
+<p>
+In diesem Beispiel werden also <em>surname</em>, <em>givenname</em> und <em>phone</em> als keys genutzt.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Text::CSV::Slurp</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$slurp</span> = <span style="color: #000000;">Text::CSV::Slurp</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$filename</span> = <span style="color: #CD5555;">&#39;./1.csv&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># CSV Options - see Text::CSV</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">%csv_options</span> = <span style="color: #000000;">(</span>
+    <span style="color: #000000;">sep_char</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;;&#39;</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">binary</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;1&#39;</span><span style="color: #000000;">,</span>
+<span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Reference to an array of hashes</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$data</span> = <span style="color: #00688B;">$slurp</span><span style="color: #00688B;">-&gt;load</span><span style="color: #000000;">(</span> <span style="color: #000000;">file</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$filename</span><span style="color: #000000;">,</span> <span style="color: #00688B;">%csv_options</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$row</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@$data</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #228B22;"># $row holds a reference to a hash</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;$row-&gt;{givenname} $row-&gt;{surname} $row-&gt;{phone}\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Datei:
+</p>
+<pre>
+Hans Meier +49 800 ...
+Susanne Schmidt +49 700 ...
+</pre>
+
+<p>&nbsp;</p>
+<h2>CSV Daten in eine Datei schreiben</h2>
+<p>
+Die Methode <em>create</em> erzeugt CSV-Daten. Hierbei wird einfach der umgegekehrte Weg wie bei <em>load</em> gegangen.
+</p>
+<p>
+Also erst die passenden Datenstruktur (Array of Hashes) erzeugen und diese an <em>create</em> weiterreichen.
+</p>
+<p>
+Die Reihenfolge der Ausgabespalten kann mittels <em>field_order</em> festgelegt werden.
+</p>
+<p>
+CSV Optionen werden, wie gewohnt, an Text::CSV weitergereicht.
+</p>
+
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Text::CSV::Slurp</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$slurp</span> = <span style="color: #000000;">Text::CSV::Slurp</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+
+<span style="color: #228B22;"># CSV Options - see Text::CSV</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">%csv_options</span> = <span style="color: #000000;">(</span>
+    <span style="color: #000000;">sep_char</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;;&#39;</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">binary</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #B452CD;">1</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">quote_char</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;&quot;&#39;</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">always_quote</span> <span style="color: #000000;">=&gt;</span> <span style="color: #B452CD;">1</span><span style="color: #000000;">,</span>
+<span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+
+<span style="color: #228B22;"># Reference to an array of hashes</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$input</span> = <span style="color: #000000;">[</span>
+   <span style="color: #000000;">{</span>
+	<span style="color: #CD5555;">&#39;first&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;Otto&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;last&#39;</span>  <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;Maier&#39;</span><span style="color: #000000;">,</span>
+   <span style="color: #000000;">}</span><span style="color: #000000;">,</span>
+   <span style="color: #000000;">{</span>
+	<span style="color: #CD5555;">&#39;first&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;Hans&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;last&#39;</span>  <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;Huber&#39;</span><span style="color: #000000;">,</span>
+   <span style="color: #000000;">}</span><span style="color: #000000;">,</span>
+<span style="color: #000000;">]</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@field_order</span> = <span style="color: #CD5555;">qw/ last first /</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$csv</span> = <span style="color: #00688B;">$slurp</span><span style="color: #00688B;">-&gt;create</span><span style="color: #000000;">(</span> <span style="color: #000000;">input</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$input</span><span style="color: #000000;">,</span><span style="color: #000000;">field_order</span> <span style="color: #000000;">=&gt;</span> \<span style="color: #00688B;">@field_order</span><span style="color: #000000;">,</span> <span style="color: #00688B;">%csv_options</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$outfile</span> = <span style="color: #CD5555;">&#39;./test.csv&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$csv_encoding</span> = <span style="color: #CD5555;">&#39;utf-8&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">open</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$fh</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;&gt;:encoding($csv_encoding)&quot;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;$outfile&quot;</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;$!&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">$fh</span> <span style="color: #00688B;">$csv</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">close</span><span style="color: #000000;">(</span><span style="color: #00688B;">$fh</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+</pre>
+
+
+<p>
+Das Programm erzeugt folgende Datei:
+</p>
+<pre>
+"last";"first"
+"Maier";"Otto"
+"Huber";"Hans"</pre>
+
+
+<p>&nbsp;</p>
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li>
+<a href="https://metacpan.org/pod/Text::CSV::Slurp">Text::CSV::Slurp</a></li>
+<li><a href="https://metacpan.org/pod/Text::CSV">Text::CSV</a></li>
+<li><a href="https://de.wikipedia.org/wiki/CSV_(Dateiformat)">CSV (Dateiformat)</a></li>
+<li><a href="https://tools.ietf.org/html/rfc4180">RFC 4180: Common Format and MIME Type for Comma-Separated Values (CSV) Files</a></li>
+<li><a href="http://perldoc.perl.org/perldsc.html#ARRAYS-OF-HASHES">perldsc - Perl Data Structures Cookbook - ARRAYS OF HASHES</a></li>
+</ul>
