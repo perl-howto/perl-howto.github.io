@@ -10,7 +10,7 @@ title: "Perl HowTo - Tipps, Tricks und Anleitungen"
 email: perlhowto.github.io@gmail.com
 description: "Perl HowTo - Tipps, Tricks und Anleitungen - Getting things done with Perl 5"
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://perl-howto.github.io" # the base hostname & protocol for your site
+url: "https://perl-howto.github.io" # the base hostname & protocol for your site
 twitter_username: PerlHowto
 github_repo_url: https://github.com/perl-howto/perl-howto.github.io
 
