@@ -1,0 +1,116 @@
+---
+layout: post
+title: Statistics::LineFit - Lineare Regression ganz einfach
+date: '2016-11-22 17:15:00 +0100'
+permalink: /2016/11/statistics-linefit-lineare-regression.html
+author_full_name: "Thomas Fahle"
+author_url: "http://thomas-fahle.de"
+excerpt: "Statistics::LineFit - Lineare Regression mit Perl ganz einfach"
+---
+<p>
+<img alt="Gewicht eines Babys in Abh&auml;ngigkeit vom Lebenstag" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/GewichtLebenstag.svg/600px-GewichtLebenstag.svg.png" class="float-center"/>
+</p>
+
+<p>
+<a href="https://metacpan.org/pod/Statistics::LineFit">Statistics::LineFit</a> von <a href="https://metacpan.org/author/RANDERSON">Richard Anderson</a> ist eine einfach zu bedienende Bibliothek zur Berechnung einfacher <a href="https://de.wikipedia.org/wiki/Lineare_Regression">linearer Regressionen</a>.
+</p>
+
+<h2>Beispiel</h2>
+<p>
+F&uuml;r das nachfolgende Beispiel habe ich das <a href="https://www.r-project.org/">R</a> Beispiel aus <a href="https://de.wikibooks.org/wiki/GNU_R:_Regression">GNU R: Regression</a> als Vorlage genutzt.
+</p>
+<p>
+Zu erst werden die Koeffizienten der Regressionsgraden ermittelt und ausgegeben. 
+</p>
+<p>
+Im n&auml;chsten Schritt werden die gemessenen und berechneten Werte und deren Abweichung (Residuen) ausgegeben. 
+</p>
+<p>&nbsp;</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Statistics::LineFit</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Datensatz Lebensalter und Gewicht siehe</span>
+<span style="color: #228B22;"># https://de.wikibooks.org/wiki/GNU_R:_Anwendungsbeispiele#Beispiel_5</span>
+
+<span style="color: #228B22;"># Lebensalter in Tagen - X-Achse</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@xValues</span> = <span style="color: #000000;">(</span> <span style="color: #B452CD;">1</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">3</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">6</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">11</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">12</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">15</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">19</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">23</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">28</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">33</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">35</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">39</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">47</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">60</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">66</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">73</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Gewicht in Gramm - Y-Achse</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@yValues</span> = <span style="color: #000000;">(</span>
+    <span style="color: #B452CD;">3180</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">2960</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">3220</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">3270</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">3350</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">3410</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">3700</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">3830</span><span style="color: #000000;">,</span>
+    <span style="color: #B452CD;">4090</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">4310</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">4360</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">4520</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">4650</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">5310</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">5490</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">5540</span>
+<span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$lineFit</span> = <span style="color: #000000;">Statistics::LineFit</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">$lineFit</span><span style="color: #00688B;">-&gt;setData</span><span style="color: #000000;">(</span> \<span style="color: #00688B;">@xValues</span><span style="color: #000000;">,</span> \<span style="color: #00688B;">@yValues</span> <span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;Invalid data&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #00688B;">$lineFit</span><span style="color: #00688B;">-&gt;regress</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;Regression failed&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$intercept</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$slope</span> <span style="color: #000000;">)</span> = <span style="color: #00688B;">$lineFit</span><span style="color: #00688B;">-&gt;coefficients</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;f(x) = $slope * x + $intercept\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@predictedYs</span> = <span style="color: #00688B;">$lineFit</span><span style="color: #00688B;">-&gt;predictedYs</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@residuals</span>   = <span style="color: #00688B;">$lineFit</span><span style="color: #00688B;">-&gt;residuals</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$i</span> = <span style="color: #B452CD;">0</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span> &lt;= <span style="color: #00688B;">$#xValues</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span>++ <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">printf</span> <span style="color: #CD5555;">&quot;X: %2s Y: %4s Y pred: %-16s Residual: %s\n&quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$xValues</span>[<span style="color: #00688B;">$i</span>]<span style="color: #000000;">,</span>
+      <span style="color: #00688B;">$yValues</span>[<span style="color: #00688B;">$i</span>]<span style="color: #000000;">,</span>
+      <span style="color: #00688B;">$predictedYs</span>[<span style="color: #00688B;">$i</span>]<span style="color: #000000;">,</span> <span style="color: #00688B;">$residuals</span>[<span style="color: #00688B;">$i</span>]<span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+f(x) = 37.4774195124732 * x + 2971.13346310157
+
+X:  1 Y: 3180 Y pred: 3008.61088261404 Residual: 171.389117385957
+X:  3 Y: 2960 Y pred: 3083.56572163899 Residual: -123.565721638989
+X:  6 Y: 3220 Y pred: 3195.99798017641 Residual: 24.0020198235916
+X: 11 Y: 3270 Y pred: 3383.38507773877 Residual: -113.385077738775
+X: 12 Y: 3350 Y pred: 3420.86249725125 Residual: -70.862497251248
+X: 15 Y: 3410 Y pred: 3533.29475578867 Residual: -123.294755788668
+X: 19 Y: 3700 Y pred: 3683.20443383856 Residual: 16.7955661614396
+X: 23 Y: 3830 Y pred: 3833.11411188845 Residual: -3.11411188845341
+X: 28 Y: 4090 Y pred: 4020.50120945082 Residual: 69.4987905491803
+X: 33 Y: 4310 Y pred: 4207.88830701319 Residual: 102.111692986814
+X: 35 Y: 4360 Y pred: 4282.84314603813 Residual: 77.1568539618675
+X: 39 Y: 4520 Y pred: 4432.75282408803 Residual: 87.2471759119744
+X: 47 Y: 4650 Y pred: 4732.57218018781 Residual: -82.5721801878108
+X: 60 Y: 5310 Y pred: 5219.77863384996 Residual: 90.2213661500373
+X: 66 Y: 5490 Y pred: 5444.6431509248  Residual: 45.3568490751977
+X: 73 Y: 5540 Y pred: 5706.98508751211 Residual: -166.985087512115
+</pre>
+<p>
+</p>
+
+<p>&nbsp;</p>
+<h2>Siehe auch:</h2>
+<ul class="no-bullet">
+<li><a href="https://metacpan.org/pod/Statistics::LineFit">Statistics::LineFit</a></li>
+<li><a href="https://de.wikipedia.org/wiki/Lineare_Regression">Lineare Regression</a></li>
+<li><a href="https://de.wikibooks.org/wiki/GNU_R:_Regression">GNU R: Regression</a></li>
+<li><a href="https://metacpan.org/pod/Statistics::GaussHelmert">Statistics::GaussHelmert</a></li>
+<li><a href="https://metacpan.org/pod/Statistics::Regression">Statistics::Regression</a></li>
+<li><a href="https://metacpan.org/pod/Statistics::OLS">Statistics::OLS</a></li>
+<li><a href="https://metacpan.org/pod/Math::GSL::Fit">Math::GSL::Fit</a></li>
+<li><a href="http://pdl-stats.sourceforge.net/GLM.htm">PDL::Stats::GLM</a></li>
+<li><a href="https://metacpan.org/pod/distribution/Statistics-Basic/lib/Statistics/Basic/LeastSquareFit.pod">Statistics::Basic::LeastSquareFit</a></li>
+</ul>
+
+<p>&nbsp;</p>
+<h2>Bildnachweis</h2>
+<p>
+By Karsten Adam (Own work) [<a href="http://www.gnu.org/copyleft/fdl.html">GFDL</a> or <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a>], <a href="https://commons.wikimedia.org/wiki/File%3AGewichtLebenstag.svg">via Wikimedia Commons</a>
+</p>
+<p>&nbsp;</p>
+
