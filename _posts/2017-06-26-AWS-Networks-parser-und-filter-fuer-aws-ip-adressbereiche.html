@@ -1,0 +1,434 @@
+---
+layout: post
+title: AWS::Networks - Parser und Filter für AWS-IP-Adressbereiche
+date: '2017-06-26 17:15:00 +0100'
+permalink: /2017/06/aws-networks-parser-und-filter-fuer-aws-ip-adressbereiche.html
+author_full_name: "Thomas Fahle"
+author_url: "http://thomas-fahle.de"
+excerpt: "AWS::Networks - Parser und Filter für AWS-IP-Adressbereiche"
+---
+<p>
+<a href="https://aws.amazon.com/de/">Amazon Web Services (AWS)</a> ver&ouml;ffentlicht seine aktuellen <a href="http://docs.aws.amazon.com/general/latest/gr/aws-ip-ranges.html">IP-Adressbereiche</a> regelm&auml;&szlig;ig im <a href="http://www.json.org/">JSON</a>-Format.
+</p>
+<p>
+<a href="https://metacpan.org/pod/AWS::Networks">AWS::Networks</a> von <a href="https://metacpan.org/author/JLMARTIN">Jose Luis Martinez Torres</a> stellt einen Parser und verschiedene Filter f&uuml;r AWS Netzwerkbereiche bereit. 
+</p>
+<p>
+Diese so ermittelten Netzwerkbereiche k&ouml;nnen dann mit bereits existierenden CPAN Modulen f&uuml;r IP-Adressbereiche, wie <a href="https://metacpan.org/pod/Net::CIDR::Set">Net::CIDR::Set</a>, weiter verarbeitet werden.
+</p>
+<p>
+<a href="https://metacpan.org/pod/release/JLMARTIN/AWS-Networks-0.01/lib/AWS/Networks.pm">AWS::Networks in Version 0.01</a>, das f&uuml;r diesen Beitrag verwendet wird, kann leider nur IPv4 Adressbereiche aus den von AWS bereitgestellten Daten parsen bzw. filtern.  
+</p>
+
+<p>&nbsp;</p>
+<h2>Basics</h2>
+<p>
+Das nachfolgende Beispiel l&auml;dt die <a href="https://ip-ranges.amazonaws.com/ip-ranges.json">ip-ranges.json</a> Datei von AWS herunter, zeigt den Zeitpunkt der Ver&ouml;ffentlichung an und listet alle AWS IP-Adressbereiche im <a href="https://de.wikipedia.org/wiki/Classless_Inter-Domain_Routing">CIDR</a>-Format auf.
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$nets</span> = <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">$nets</span><span style="color: #00688B;">-&gt;sync_token</span><span style="color: #00688B;">-&gt;iso8601</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cidr</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">@</span>{ <span style="color: #00688B;">$nets</span><span style="color: #00688B;">-&gt;cidrs</span> } <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;$cidr\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>Das Programm erzeugt folgende (gek&uuml;rzte) Ausgabe:</p>
+<pre>
+2017-06-22T22:12:11
+13.32.0.0/15
+13.52.0.0/15
+13.54.0.0/15
+13.56.0.0/16
+13.57.0.0/16
+13.58.0.0/15
+.....
+54.240.128.0/18
+204.246.164.0/22
+204.246.168.0/22
+204.246.174.0/23
+204.246.176.0/20
+205.251.192.0/19
+205.251.249.0/24
+205.251.250.0/23
+205.251.252.0/23
+205.251.254.0/24
+216.137.32.0/19
+</pre>
+<p>
+Wer bereits eine <a href="https://ip-ranges.amazonaws.com/ip-ranges.json">ip-ranges.json</a> Datei lokal vorliegen hat, kann diese wie folgt mit <a href="https://metacpan.org/pod/File::Slurp">File::Slurp</a> einlesen:
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">File::Slurp</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">JSON</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># https://ip-ranges.amazonaws.com/ip-ranges.json</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ip_ranges_json_file</span> = <span style="color: #CD5555;">&#39;ip-ranges.json&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$json</span> = <span style="color: #00688B;">read_file</span><span style="color: #000000;">(</span><span style="color: #00688B;">$ip_ranges_json_file</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$nets</span> = <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span> <span style="color: #000000;">netinfo</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">decode_json</span><span style="color: #000000;">(</span><span style="color: #00688B;">$json</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">$nets</span><span style="color: #00688B;">-&gt;sync_token</span><span style="color: #00688B;">-&gt;iso8601</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;\n&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cidr</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">@</span>{ <span style="color: #00688B;">$nets</span><span style="color: #00688B;">-&gt;cidrs</span> } <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #CD5555;">&quot;$cidr\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>Ausgabe des Programms wie oben.</p>
+
+<p>Hinweis: Das Modul <a href="https://metacpan.org/pod/AWS::IP">AWS::IP</a>, das eine &auml;hnliche Funktionalit&auml;t anbietet, verwendet einen <a href="https://metacpan.org/pod/Cache::File">Cache</a> f&uuml;r die <a href="https://ip-ranges.amazonaws.com/ip-ranges.json">ip-ranges.json</a> Datei.
+</p>
+
+
+<p>&nbsp;</p>
+<h2>Ist diese IP eine AWS IP Adresse?</h2>
+<p>
+Das nachfolgende Kommandozeilentool pr&uuml;ft, ob eine IPv4 Adresse in den AWS IP-Adressbereichen enthalten ist: 
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Net::CIDR::Set</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ip</span> = <span style="color: #00688B;">$ARGV</span>[<span style="color: #B452CD;">0</span>]<span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #000000;">(</span><span style="color: #00688B;">$ip</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;Usage: $0 IPv4-address\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$nets</span> = <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cidrs</span> = <span style="color: #00688B;">$nets</span><span style="color: #00688B;">-&gt;cidrs</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cidr_set</span> = <span style="color: #000000;">Net::CIDR::Set</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #00688B;">@$cidrs</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$cidr_set</span><span style="color: #00688B;">-&gt;contains</span><span style="color: #000000;">(</span><span style="color: #00688B;">$ip</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;Yes - $ip is a AWS IP.&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span> <span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;No - $ip is not a AWS IP.&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>Das Programm erzeugt folgende Ausgabe:</p>
+<pre>
+$ perl ip.pl 216.137.32.6
+Yes - 216.137.32.6 is a AWS IP.
+
+$ perl ip.pl 127.0.0.1
+No - 127.0.0.1 is not a AWS IP.
+</pre>
+
+<p>
+<a href="https://metacpan.org/author/JLMARTIN">Jose Luis Martinez Torres</a> liefert mit der Distribution auch das umfangreichere Tool <a href="https://metacpan.org/source/JLMARTIN/AWS-Networks-0.01/bin/aws_ip">aws_ip</a> aus.
+</p>
+
+
+<p>&nbsp;</p>
+<h2>Nach Services filtern</h2>
+<p>Die Methode <em>services()</em> liefert eine Liste aller verf&uuml;gbaren Services:</p>
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$nets</span> = <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$service</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">@</span>{ <span style="color: #00688B;">$nets</span><span style="color: #00688B;">-&gt;services</span> } <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;$service&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>Das Programm erzeugt folgende Ausgabe:</p>
+<pre>
+EC2
+CLOUDFRONT
+ROUTE53_HEALTHCHECKS
+ROUTE53
+S3
+AMAZON
+</pre>
+<p>Die Methode <em>by_service( )</em> liefert eine Liste aller Netzwerkbereiche f&uuml;r einen bestimmten Service</p>
+<p>Eine &Uuml;bersicht &uuml;ber alle Netzwerkbereiche f&uuml;r alle Services erh&auml;lt man wie folgt:</p>
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$nets</span> = <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$service</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">@</span>{ <span style="color: #00688B;">$nets</span><span style="color: #00688B;">-&gt;services</span> } <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;$service&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$aws_networks_object</span> = <span style="color: #00688B;">$nets</span><span style="color: #00688B;">-&gt;by_service</span><span style="color: #000000;">(</span><span style="color: #00688B;">$service</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cidr</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">@</span>{ <span style="color: #00688B;">$aws_networks_object</span><span style="color: #00688B;">-&gt;cidrs</span> } <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;\t$cidr&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>Das Programm erzeugt folgende (gek&uuml;rzte) Ausgabe:</p>
+<pre>
+ROUTE53
+        52.95.110.0/24
+        205.251.192.0/21
+ROUTE53_HEALTHCHECKS
+        54.183.255.128/26
+        54.228.16.0/26
+....
+AMAZON
+        13.32.0.0/15
+        13.52.0.0/15
+        13.54.0.0/15
+....
+CLOUDFRONT
+        13.32.0.0/15
+        13.54.63.128/26
+....
+S3
+        52.82.188.0/22
+        52.92.0.0/20
+....
+EC2
+        13.52.0.0/15
+        13.54.0.0/15
+        13.56.0.0/16
+....
+</pre>
+
+<p>&nbsp;</p>
+<h2>Nach Regionen filtern</h2>
+<p>
+Die Methode <em>regions()</em> liefert eine Liste aller verf&uuml;gbaren AWS Regionen und die Methode <em>by_region()</em>
+liefert eine Liste aller Netzwerkbereiche f&uuml;r eine bestimmte Region.
+</p>
+<p>
+Eine &Uuml;bersicht &uuml;ber alle Netzwerkbereiche f&uuml;r alle Regionen erh&auml;lt man wie folgt:
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$nets</span> = <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$region</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">@</span>{ <span style="color: #00688B;">$nets</span><span style="color: #00688B;">-&gt;regions</span> } <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;$region&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$aws_networks_object</span> = <span style="color: #00688B;">$nets</span><span style="color: #00688B;">-&gt;by_region</span><span style="color: #000000;">(</span><span style="color: #00688B;">$region</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cidr</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">@</span>{ <span style="color: #00688B;">$aws_networks_object</span><span style="color: #00688B;">-&gt;cidrs</span> } <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;\t$cidr&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>Das Programm erzeugt folgende (gek&uuml;rzte) Ausgabe:</p>
+<pre>
+cn-north-1
+        52.80.0.0/16
+        52.94.249.0/28
+        52.95.255.144/28
+        54.222.0.0/19
+....
+sa-east-1
+        18.231.0.0/16
+        52.67.0.0/16
+        52.92.39.0/24
+....
+eu-west-1
+	34.240.0.0/13
+	34.248.0.0/13
+	46.51.128.0/18
+....
+</pre>
+
+<p>&nbsp;</p>
+<h2>Nach Regionen und Services filtern</h2>
+<p>Manchmal m&ouml;chte man die IP-Adressbereiche f&uuml;r einen bestimmten Service in einer bestimmten Region ermitteln.</p>
+<p>Hierzu ermittelt man zun&auml;chst alle IP-Adressbereiche f&uuml;r den gew&uuml;nschten Service und alle IP-Adressbereiche f&uuml;r die gew&uuml;nschte Region.</p>
+<p>Diese beiden Sets (Mengen) werden mit <a href="https://metacpan.org/pod/Net::CIDR::Set#intersection">und</a> zu einer neuen Menge verkn&uuml;pft.
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Net::CIDR::Set</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$region_set</span>  = <span style="color: #00688B;">cidr_set_for_region</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;eu-west-1&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$service_set</span> = <span style="color: #00688B;">cidr_set_for_service</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;EC2&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$overlap</span> = <span style="color: #00688B;">$region_set</span><span style="color: #00688B;">-&gt;intersection</span><span style="color: #000000;">(</span><span style="color: #00688B;">$service_set</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$iter</span> = <span style="color: #00688B;">$overlap</span><span style="color: #00688B;">-&gt;iterate_cidr</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">while</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cidr</span> = <span style="color: #00688B;">$iter</span>-&gt;<span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #00688B;">$cidr</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+<span style="color: #8B008B; font-weight:bold;">exit</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Returns a Net::CIDR::Set object filled with AWS CIDRs for $service</span>
+<a name="cidr_set_for_service"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">cidr_set_for_service</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$service</span>  = <span style="color: #8B008B; font-weight:bold;">shift</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$nets</span>     = <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$s</span>        = <span style="color: #00688B;">$nets</span><span style="color: #00688B;">-&gt;by_service</span><span style="color: #000000;">(</span><span style="color: #00688B;">$service</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cidrs</span>    = <span style="color: #00688B;">$s</span><span style="color: #00688B;">-&gt;cidrs</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cidr_set</span> = <span style="color: #000000;">Net::CIDR::Set</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #00688B;">@$cidrs</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">return</span> <span style="color: #00688B;">$cidr_set</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+<span style="color: #228B22;"># Returns a Net::CIDR::Set object filled with AWS CIDRs for $region</span>
+<a name="cidr_set_for_region"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">cidr_set_for_region</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$region</span>   = <span style="color: #8B008B; font-weight:bold;">shift</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$nets</span>     = <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$r</span>        = <span style="color: #00688B;">$nets</span><span style="color: #00688B;">-&gt;by_region</span><span style="color: #000000;">(</span><span style="color: #00688B;">$region</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cidrs</span>    = <span style="color: #00688B;">$r</span><span style="color: #00688B;">-&gt;cidrs</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cidr_set</span> = <span style="color: #000000;">Net::CIDR::Set</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #00688B;">@$cidrs</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">return</span> <span style="color: #00688B;">$cidr_set</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>Das Programm erzeugt folgende Ausgabe:</p>
+<pre>
+34.240.0.0/12
+46.51.128.0/18
+46.51.192.0/20
+46.137.0.0/17
+46.137.128.0/18
+52.16.0.0/14
+52.30.0.0/15
+52.48.0.0/14
+52.95.244.0/24
+52.95.255.64/28
+52.208.0.0/13
+54.72.0.0/14
+54.76.0.0/15
+54.78.0.0/16
+54.154.0.0/15
+54.170.0.0/15
+54.194.0.0/15
+54.216.0.0/15
+54.220.0.0/16
+54.228.0.0/15
+54.246.0.0/15
+79.125.0.0/17
+176.34.64.0/18
+176.34.128.0/17
+185.48.120.0/22
+</pre>
+
+<p>&nbsp;</p>
+<h2>IP-Ranges zur Kontrolle ausgehenden Datenverkehrs (egress control)</h2>
+<p>
+In der offiziellen AWS Dokumentation wird folgendes Beispiel <a href="http://docs.aws.amazon.com/de_de/general/latest/gr/aws-ip-ranges.html#aws-ip-egress-control">Implementieren der Kontrolle ausgehenden Datenverkehrs</a> aufgef&uuml;hrt, das als Ausgangspunkt f&uuml;r das nachfolgende Programm dient.
+</p>
+<p>
+<blockquote>
+"Um einer Instance nur den Zugriff auf AWS-Services zu erlauben, erstellen Sie eine Sicherheitsgruppe mit Regeln, die ausgehenden Datenverkehr zu den CIDR-Bl&ouml;cken in der AMAZON-Liste zulassen, abz&uuml;glich der CIDR-Bl&ouml;cke, die auch in der EC2-Liste enthalten sind." 
+</blockquote>
+</p>
+<p>
+Hierzu ermittelt man zun&auml;chst alle IP-Adressbereiche f&uuml;r die gew&uuml;nschten Services (AMAZON und EC2).
+</p>
+<p>
+Anschlie&szlig;end wird die Menge der EC2-Bereiche von der Menge der AMAZON-Bereiche <a href="https://metacpan.org/pod/Net::CIDR::Set#diff">abgezogen</a>.
+</p>
+<pre>
+#!/usr/bin/perl 
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Net::CIDR::Set</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># http://docs.aws.amazon.com/general/latest/gr/aws-ip-ranges.html</span>
+
+<span style="color: #228B22;"># Implementing Egress Control</span>
+
+<span style="color: #228B22;"># To allow an instance to access only AWS services, create a security group</span>
+<span style="color: #228B22;"># with rules that allow outbound traffic to the CIDR blocks in the AMAZON list,</span>
+<span style="color: #228B22;"># minus the CIDR blocks that are also in the EC2 list.</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$amazon_set</span> = <span style="color: #00688B;">cidr_set_for_service</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;AMAZON&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$ec2_set</span>    = <span style="color: #00688B;">cidr_set_for_service</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;EC2&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$egress_set</span> = <span style="color: #00688B;">$amazon_set</span><span style="color: #00688B;">-&gt;diff</span><span style="color: #000000;">(</span><span style="color: #00688B;">$ec2_set</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$iter</span> = <span style="color: #00688B;">$egress_set</span><span style="color: #00688B;">-&gt;iterate_cidr</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">while</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cidr</span> = <span style="color: #00688B;">$iter</span>-&gt;<span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #00688B;">$cidr</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+<span style="color: #8B008B; font-weight:bold;">exit</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Returns a Net::CIDR::Set object filled with</span>
+<span style="color: #228B22;"># AWS CIDRs for $service</span>
+<a name="cidr_set_for_service"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">cidr_set_for_service</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$service</span>  = <span style="color: #8B008B; font-weight:bold;">shift</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$nets</span>     = <span style="color: #000000;">AWS::Networks</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$s</span>        = <span style="color: #00688B;">$nets</span><span style="color: #00688B;">-&gt;by_service</span><span style="color: #000000;">(</span><span style="color: #00688B;">$service</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cidrs</span>    = <span style="color: #00688B;">$s</span><span style="color: #00688B;">-&gt;cidrs</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cidr_set</span> = <span style="color: #000000;">Net::CIDR::Set</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #00688B;">@$cidrs</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">return</span> <span style="color: #00688B;">$cidr_set</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>Das Programm erzeugt folgende (gek&uuml;rzte) Ausgabe:</p>
+<pre>
+13.32.0.0/15
+27.0.0.0/22
+43.250.192.0/23
+52.46.0.0/18
+52.46.64.0/19
+52.82.187.0/24
+52.82.188.0/22
+52.82.196.0/22
+52.82.200.0/21
+52.82.208.0/20
+....
+204.246.174.0/23
+204.246.176.0/20
+205.251.192.0/19
+205.251.224.0/20
+205.251.240.0/22
+205.251.244.0/23
+205.251.247.0/24
+205.251.248.0/22
+205.251.252.0/23
+205.251.254.0/24
+207.171.160.0/19
+216.137.32.0/19
+</pre>
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+ <li><a href="http://docs.aws.amazon.com/general/latest/gr/aws-ip-ranges.html">AWS IP Address Ranges</a></li>
+ <li><a href="https://metacpan.org/pod/AWS::Networks">AWS::Networks -Parse and query official AWS network ranges</a></li>
+ <li><a href="https://metacpan.org/pod/Net::CIDR::Set">Net::CIDR::Set - Manipulate sets of IP addresses</a></li>
+ <li><a href="https://metacpan.org/pod/AWS::IP">AWS::IP - Get and search AWS IP ranges in a caching, auto-refreshing way</a></li>
+ <li><a href="https://metacpan.org/pod/Paws">Paws - A Perl SDK for AWS (Amazon Web Services) APIs</a></li>
+</ul>
+
+<p>&nbsp;</p>
+
