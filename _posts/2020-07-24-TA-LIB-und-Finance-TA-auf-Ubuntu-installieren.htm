@@ -1,0 +1,94 @@
+---
+layout: post
+title: TA-LIB und Finance::TA auf Ubuntu installieren
+date: '2020-07-24 18:00:00 +0200'
+permalink: /2020/07/TA-LIB-und-Finance-TA-auf-Ubuntu-installieren.html
+categories:
+- 'Finance'
+---
+<p>&nbsp;</p>
+<h2>TA-LIB</h2>
+<p>
+<a href="https://www.ta-lib.org/">TA-Lib : Technical Analysis Library</a> ist eine Open-Source Bibliothek, die mehr als 200 Indikatoren der <a href="https://de.wikipedia.org/wiki/Technische_Analyse">Technischen Analyse</a>, wie <a href="https://de.wikipedia.org/wiki/Average_Directional_Movement_Index">ADX</a>, <a href="https://www.investopedia.com/trading/introduction-to-parabolic-sar/">Parabolic SAR</a> bereitstellt.
+</p>
+<p>
+Das CPAN Modul <a href="https://metacpan.org/pod/distribution/Finance-TA/TA.pod">Finance::TA - Perl wrapper for Technical Analysis Library (http://ta-lib.org)</a> erm&ouml;glicht den einfachen Zugriff auf die Funktionen/Indikatoren der TA-LIB Bibliothek.
+</p>
+<p>
+Dieser Beitrag besch&auml;ftigt sich mit der Installation von TA-LIB und Finance::TA auf einem <a href="https://ubuntu.com/">Ubuntu</a> Linux System.
+</p>
+
+
+<p>&nbsp;</p>
+<h2>Schritt f&uuml;r Schritt</h2>
+<p>
+TA-LIB soll aus den <a href="https://sourceforge.net/projects/ta-lib/">Sourcen</a> nach /usr/local installiert werden. 
+</p>
+<pre>
+tar -xzvf ta-lib-0.4.0-src.tar.gz
+cd ta-lib/
+./configure --prefix=/usr/local/
+make 
+sudo make install
+</pre>
+<p>
+Die TA-LIB Binaries befinden sich nun in <em>/usr/local/bin/</em>, die dazugeh&ouml;rigen Header in <em>/usr/local/include/</em> und die Bibliotheken in <em>/usr/local/lib/</em>.
+</p>
+<p>
+Das Programm <em>ta-lib-config</em>, das zur Installation ben&ouml;tigt wird, gibt leider falsche Pfade f&uuml;r Header und Libraries zur&uuml;ck. 
+</p>
+<pre>
+/usr/local/bin/ta-lib-config --cflags
+-I/include/ta-lib -DHAVE_CONFIG_H
+</pre>
+<p>
+Die korrekten Pfade f&uuml;r der Header lassen sich aber f&uuml;r die Installation von Finance::TA &uuml;ber die Umgebungsvariable <em>TALIB_CFLAGS</em> in einer cpanm Shell setzen. (F&uuml;r Bibliotheken kann ggf. <em>TALIB_CFLAGS</em> genutzt werden.)
+</p>
+<pre>
+cpanm --look Finance::TA
+
+    --&gt; Working on Finance::TA
+    Fetching http://www.cpan.org/authors/id/K/KM/KMX/Finance-TA-v0.4.3.tar.gz ... OK
+    Entering /home/tf/.cpanm/work/1595601923.149311/Finance-TA-v0.4.3 with /bin/bash
+
+
+TALIB_CFLAGS='-I/usr/local/include/ta-lib -DHAVE_CONFIG_H' perl Makefile.PL
+
+    Alien::TALib not found, trying ta-lib-config
+    Gonna use
+     cflags: '-I/usr/local/include/ta-lib -DHAVE_CONFIG_H'
+     libs:   '-L/lib -lpthread -ldl -lta_lib'
+    Checking if your kit is complete...
+    Looks good
+    Generating a Unix-style Makefile
+    Writing Makefile for Finance::TA
+    Writing MYMETA.yml and MYMETA.json
+</pre>
+Jetz noch der ber&uuml;hmte Dreiklang
+<pre>
+make 
+
+make test
+
+make install 
+</pre>
+und die cpanm Shell wieder verlassen.
+<pre>
+exit
+</pre>
+<p>
+That's it.
+</p>
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+ <li><a href="https://www.ta-lib.org/">TA-Lib : Technical Analysis Library</a></li>
+ <li><a href="https://sourceforge.net/projects/ta-lib/">Download TA-Lib : Technical Analysis Library</a></li>
+ <li><a href="https://metacpan.org/pod/distribution/Finance-TA/TA.pod">Finance::TA - Perl wrapper for Technical Analysis Library (http://ta-lib.org)</a></li>
+ <li><a href="https://metacpan.org/pod/Alien::TALib">Alien::TALib - Perl extension to install TA-lib</a></li>
+ <li><a href="https://metacpan.org/pod/PDL::Finance::TA">PDL::Finance::TA - Technical Analysis Library (http://ta-lib.org) bindings for PDL</a></li>
+</ul>
+
+<p> &nbsp;</p>
