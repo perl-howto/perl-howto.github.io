@@ -35,7 +35,13 @@ $&gt; sudo make install
 Die TA-Lib Binaries befinden sich nun in <em>/usr/local/bin/</em>, die dazugeh&ouml;rigen Header in <em>/usr/local/include/</em> und die Bibliotheken in <em>/usr/local/lib/</em>.
 </p>
 <p>
-Das Programm <em>ta-lib-config</em>, das zur Installation ben&ouml;tigt wird, gibt leider falsche Pfade f&uuml;r Header und Libraries zur&uuml;ck.
+Jetzt noch den Cache der Shared Libraries aktualisieren:
+</p>
+<pre>
+$&gt; sudo ldconfig -v
+</pre>
+<p>
+Das Programm <em>ta-lib-config</em>, das zur Installation vom Finance::TA ben&ouml;tigt wird, gibt leider falsche Pfade f&uuml;r Header und Libraries zur&uuml;ck.
 </p>
 <pre>
 $&gt; /usr/local/bin/ta-lib-config --cflags
