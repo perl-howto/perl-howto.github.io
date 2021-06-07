@@ -1,0 +1,63 @@
+---
+layout: post
+title: Crypt::URandom - nahezu betriebssystemunabh&auml;ngige und nicht-blockierende Zuf&auml;lligkeit
+date: '2021-06-07 18:00:00 +0200'
+permalink: /2021/07/Crypt-URandom-betriebssytemunabhaengige-und-nicht-blockierende-zufaelligkeit.html
+categories:
+- 'kryptographie'
+---
+<p>&nbsp;</p>
+<h2>Crypt::URandom</h2>
+<p>
+<a href="https://metacpan.org/pod/Crypt::URandom">Crypt::URandom - Provide non blocking randomness</a> von <a href="https://metacpan.org/author/DDICK">David Dick</a> soll eine Schnittstelle zur st&auml;rksten verf&uuml;gbaren Quelle f&uuml;r nicht-blockierende Zuf&auml;lligkeit auf der aktuellen Plattform bieten.
+<p>
+Derzeit werden alle Plattformen unterst&uuml;tzt, die <a href="https://en.wikipedia.org/wiki//dev/random">/dev/urandom/</a> und Windows-Versionen gr&ouml;&szlig;er oder gleich Windows 2000 unterst&uuml;tzen.
+</p>
+<p>
+Die Erzeugung von <a href="https://perldoc.perl.org/functions/srand">Seeds</a> oder <a href="https://en.wikipedia.org/wiki/Salt_%28cryptography%29">Salts</a> wird mit <a href="https://metacpan.org/pod/Crypt::URandom">Crypt::URandom</a> wesentlich portabler als mit anderen, &auml;hnlichen CPAN-Modulen.
+</p>
+
+
+<p>&nbsp;</p>
+<h2>Beispiel</h2>
+<p>
+Das nachfolgende Beispiel erzeugt einen 16 Byte langen mit zuf&auml;lligen Daten gef&uuml;llten String zur&uuml;ck.
+</p>
+<pre>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Crypt::URandom</span> <span style="color: #CD5555;">qw( urandom )</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$salt</span> = <span style="color: #00688B;">urandom</span><span style="color: #000000;">(</span><span style="color: #B452CD;">16</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">srand</span><span style="color: #000000;">(</span><span style="color: #00688B;">$salt</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Dieser zuf&auml;llige String kann als Seed f&uuml;r <a href="https://perldoc.perl.org/functions/srand">srand()</a> oder auch f&uuml;r Salts verwendet werden.   
+</p>
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+ <li><a href="https://metacpan.org/pod/Crypt::URandom">Crypt::URandom</a></li>
+ <li><a href="https://github.polettix.it/ETOOBUSY/2021/06/04/crypt-urandom/">ETOOBUSY - Crypt::URandom</a></li>
+ <li><a href="https://github.polettix.it/ETOOBUSY/2021/05/31/random-bytes-and-co/">ETOOBUSY - Random bytes and co.</a></li>
+ <li><a href="https://perldoc.perl.org/perlfaq4#Why-aren%27t-my-random-numbers-random%3F">Perl FAQ Why aren't my random numbers random?</a></li>
+ <li><a href="https://perldoc.perl.org/functions/rand">Perldoc rand()</a></li>
+ <li><a href="https://perldoc.perl.org/functions/srand">Perldoc srand()</a></li>
+ <li><a href="https://en.wikipedia.org/wiki//dev/random">Wikipedia - /dev/random</a></li>
+ <li><a href=""></a></li>
+ <li><a href="/2008/05/zufallszahlen-via-internet-mit.html">Zufallszahlen via Internet mit Net::Random</a></li>
+ <li><a href="/2008/06/zufallszahlen-pseudo-random-nu.html">Zufallszahlen (Pseudo Random Numbers) mit Bordmitteln erzeugen</a></li>
+ <li><a href="/2013/07/sessiontoken---zufallige-passworter-token-session-ids-passwort-reset-tokens-und-noch-viel-mehr.html">Session::Token - Zuf&auml;llige Passw&ouml;rter, Token, Session IDs, Passwort Reset Tokens und noch viel mehr</a></li>
+ <li><a href="https://perlmaven.com/generate-random-numbers-in-perl-with-rand">Generate random numbers in Perl with the rand() function</a></li>
+ <li><a href="https://metacpan.org/pod/Data::Entropy">Data::Entropy</a></li>
+ <li><a href="https://metacpan.org/pod/Crypt::Random">Crypt::Random</a></li>
+ <li><a href="https://metacpan.org/pod/Math::Random::Secure">Math::Random::Secure</a></li>
+ <li><a href="https://metacpan.org/pod/Crypt::Random::Seed">Crypt::Random::Seed</a></li>
+ <li><a href="https://metacpan.org/pod/Bytes::Random::Secure::Tiny">Bytes::Random::Secure::Tiny</a></li>
+</ul>
+
+<p>&nbsp;</p>
