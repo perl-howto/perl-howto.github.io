@@ -9,12 +9,13 @@ categories:
 <p>&nbsp;</p>
 <h2>Crypt::URandom</h2>
 <p>
-<a href="https://metacpan.org/pod/Crypt::URandom">Crypt::URandom - Provide non blocking randomness</a> von <a href="https://metacpan.org/author/DDICK">David Dick</a> soll eine Schnittstelle zur st&auml;rksten verf&uuml;gbaren Quelle f&uuml;r nicht-blockierende Zuf&auml;lligkeit auf der aktuellen Plattform bieten.
-<p>
-Derzeit werden alle Plattformen unterst&uuml;tzt, die <a href="https://en.wikipedia.org/wiki//dev/random">/dev/urandom/</a> und Windows-Versionen gr&ouml;&szlig;er oder gleich Windows 2000 unterst&uuml;tzen.
+Die Erzeugung von starkem Zufall wird mit <a href="https://metacpan.org/pod/Crypt::URandom">Crypt::URandom</a> von <a href="https://metacpan.org/author/DDICK">David Dick</a> wesentlich portabler als mit vergleichbaren CPAN-Modulen.
 </p>
 <p>
-Die Erzeugung von <a href="https://en.wikipedia.org/wiki/Salt_%28cryptography%29">Salts</a> wird mit <a href="https://metacpan.org/pod/Crypt::URandom">Crypt::URandom</a> wesentlich portabler als mit anderen, &auml;hnlichen CPAN-Modulen.
+<a href="https://metacpan.org/pod/Crypt::URandom">Crypt::URandom</a> unterst&uuml;tzt alle Plattformen, die <a href="https://en.wikipedia.org/wiki//dev/random">/dev/urandom/</a> unterst&uuml;tzen.
+</p>
+<p>
+Weiterhin werden alle Windows-Versionen gr&ouml;&szlig;er oder gleich Windows 2000 unterst&uuml;tzt.
 </p>
 
 
@@ -29,7 +30,7 @@ Das nachfolgende Beispiel erzeugt einen 16 Byte langen mit zuf&auml;lligen Daten
 
 <span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Crypt::URandom</span> <span style="color: #CD5555;">qw( urandom )</span><span style="color: #000000;">;</span>
 
-<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$salt</span> = <span style="color: #00688B;">urandom</span><span style="color: #000000;">(</span><span style="color: #B452CD;">16</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$random_data_string_16_bytes_long</span>  = <span style="color: #00688B;">urandom</span><span style="color: #000000;">(</span><span style="color: #B452CD;">16</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
 </pre>
 
 <p>&nbsp;</p>
