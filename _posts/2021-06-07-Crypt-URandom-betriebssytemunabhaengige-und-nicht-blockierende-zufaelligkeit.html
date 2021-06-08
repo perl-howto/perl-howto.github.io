@@ -14,7 +14,7 @@ categories:
 Derzeit werden alle Plattformen unterst&uuml;tzt, die <a href="https://en.wikipedia.org/wiki//dev/random">/dev/urandom/</a> und Windows-Versionen gr&ouml;&szlig;er oder gleich Windows 2000 unterst&uuml;tzen.
 </p>
 <p>
-Die Erzeugung von <a href="https://perldoc.perl.org/functions/srand">Seeds</a> oder <a href="https://en.wikipedia.org/wiki/Salt_%28cryptography%29">Salts</a> wird mit <a href="https://metacpan.org/pod/Crypt::URandom">Crypt::URandom</a> wesentlich portabler als mit anderen, &auml;hnlichen CPAN-Modulen.
+Die Erzeugung von <a href="https://en.wikipedia.org/wiki/Salt_%28cryptography%29">Salts</a> wird mit <a href="https://metacpan.org/pod/Crypt::URandom">Crypt::URandom</a> wesentlich portabler als mit anderen, &auml;hnlichen CPAN-Modulen.
 </p>
 
 
@@ -30,12 +30,7 @@ Das nachfolgende Beispiel erzeugt einen 16 Byte langen mit zuf&auml;lligen Daten
 <span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Crypt::URandom</span> <span style="color: #CD5555;">qw( urandom )</span><span style="color: #000000;">;</span>
 
 <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$salt</span> = <span style="color: #00688B;">urandom</span><span style="color: #000000;">(</span><span style="color: #B452CD;">16</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
-
-<span style="color: #8B008B; font-weight:bold;">srand</span><span style="color: #000000;">(</span><span style="color: #00688B;">$salt</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
 </pre>
-<p>
-Dieser zuf&auml;llige String kann als Seed f&uuml;r <a href="https://perldoc.perl.org/functions/srand">srand()</a> oder auch f&uuml;r Salts verwendet werden.   
-</p>
 
 <p>&nbsp;</p>
 <h2>Siehe auch</h2>
