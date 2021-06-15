@@ -1,0 +1,276 @@
+---
+layout: post
+title: Crypt::Eksblowfish::Bcrypt - Blowfish-based Unix crypt() password hash
+date: '2021-06-15 17:00:00 +0200'
+permalink: /2021/06/crypt-eksblowfish-bcrypt.html
+categories:
+- 'kryptographie'
+---
+<p>&nbsp;</p>
+<h2>Crypt::Eksblowfish::Bcrypt</h2>
+<p>
+Das CPAN-Modul <a href="https://metacpan.org/pod/Crypt::Eksblowfish::Bcrypt">Crypt::Eksblowfish::Bcrypt - Blowfish-based Unix crypt() password hash</a> von <a href="https://metacpan.org/author/ZEFRAM">Andrew Main (Zefram)</a> implementiert den <a href="https://de.wikipedia.org/wiki/Blowfish">Blowfish</a>-basierten Unix <a href="https://manpages.debian.org/unstable/libcrypt-dev/crypt.5.en.html">crypt()-Passwort-Hash-Algorithmus</a>, bekannt als <em>bcrypt</em>.
+</p>
+<p>
+Dieser Hash verwendet eine Variante von Blowfish, bekannt als <em>Eksblowfish</em>, die so modifiziert wurde, dass sie eine besonders teure Schl&uuml;sselplanung hat. Eksblowfish und bcrypt wurden von Niels Provos und David Mazieres f&uuml;r <a href="https://www.openbsd.org/">OpenBSD</a> entwickelt. Das Design ist in <a href="https://www.usenix.org/legacy/events/usenix99/provos.html">USENIX 99 - A Future-Adaptable Password Scheme</a> beschrieben.
+</p>
+<p>
+Hauptanwendungsgebiet ist das sichere, verschl&uuml;sselte Speichern von Passw&ouml;rtern - also so, dass das Original-Passwort nicht wiederhergestellt werden kann. 
+</p>
+
+
+<p>&nbsp;</p>
+<h2>Funktionen</h2>
+<p>
+Crypt::Eksblowfish::Bcrypt stellt vier Funktionen zur Verf&uuml;gung:
+</p>
+<ul class="no-bullet">
+ <li><em>bcrypt_hash()</em>, die eigentliche Hash-Funktion</li>
+ <li><em>bcrypt()</em>, eine convenience-Funktion zur Erzeugung von <em>crypt()</em> kompatiblen Strings aus bcrypt-Hashes</li>
+ <li><em>en_base64()</em>, <a href="https://de.wikipedia.org/wiki/Base64">Base64-Kodierung</a> der Octets/Bytes</li>
+ <li><em>de_base64()</em>, welche die Base64-Kodierung umkehrt</li>
+</ul>
+
+
+<p>&nbsp;</p>
+<h2>Beispiel Hash berechnen mit bcrypt_hash()</h2>
+<p>
+Das folgende Beispiel verwendet die Funktion <em>bcrypt_hash()</em> um den Bcrypt-Hash eines Passwortes aus einem <a href="/2021/06/Crypt-URandom-betriebssytemunabhaengige-und-nicht-blockierende-zufaelligkeit.html">zuf&auml;lligem Salt</a> (exakt 16 Byte) zu erzeugen. &Uuml;ber den Parameter <em>cost</em> wird die Anzahl der Rechenrunden beeinflu&szlig;t. <em>key_nul</em> dient der R&uuml;ckw&auml;rtskompatibilit&auml;t und sollte f&uuml;r aktuelle Implementierungen stets auf <em>1</em> gesetzt werden. 
+</p>
+
+<pre>
+#!/usr/bin/perl
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Crypt::URandom</span> <span style="color: #CD5555;">qw( urandom )</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Crypt::Eksblowfish::Bcrypt</span> <span style="color: #CD5555;">qw(bcrypt_hash en_base64)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$password</span> = <span style="color: #CD5555;">&#39;supercalifragilisticexpialidocious&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Non-negative integer controlling the cost of the hash function.</span>
+<span style="color: #228B22;"># The number of operations is proportional to 2^cost.</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cost</span> = <span style="color: #B452CD;">5</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Exactly sixteen octets of salt from a strong non-blocking random source</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$salt</span> = <span style="color: #00688B;">urandom</span><span style="color: #000000;">(</span><span style="color: #B452CD;">16</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$hash</span> = <span style="color: #00688B;">bcrypt_hash</span><span style="color: #000000;">(</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #000000;">key_nul</span> <span style="color: #000000;">=&gt;</span> <span style="color: #B452CD;">1</span><span style="color: #000000;">,</span>
+        <span style="color: #000000;">cost</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$cost</span><span style="color: #000000;">,</span>
+        <span style="color: #000000;">salt</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$salt</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">}</span><span style="color: #000000;">,</span>
+    <span style="color: #00688B;">$password</span>
+<span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Encodes the octet string textually using the form of base 64</span>
+<span style="color: #228B22;"># that is conventionally used with bcrypt.</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$encoded</span> = <span style="color: #00688B;">en_base64</span><span style="color: #000000;">(</span><span style="color: #00688B;">$hash</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #00688B;">$encoded</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Encodes the octet string as a hex string (high nybble first).</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$hex</span> = <span style="color: #8B008B; font-weight:bold;">unpack</span><span style="color: #000000;">(</span> <span style="color: #CD5555;">&#39;H*&#39;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$hash</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #00688B;">$hex</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm liefert z.B. folgende Ausgabe:
+</p>
+<pre>
+.EgtpXKVjY3XPuD0NulV5GK5vA2kDYe
+0068afad931795ae594701763f09d7ec833bc42e2615a8
+</pre>
+
+<p>&nbsp;</p>
+<h2>Bcrypt Hashes als Strings speichern</h2>
+<p>
+Die so errechneten Hashes werden als Strings im Password Storage, z.B. <em>/etc/shadow</em>, zusammen mit dem <em>Cost Factor</em> und dem <em>Salt</em> gespeichert. Diese <a href="https://en.wikipedia.org/wiki/Bcrypt">Zeichenkette hat die allgemeine Form</a>:
+</p>
+<pre>
+$2[a|b|y]$[cost]$[22 character salt][31 character hash]
+</pre>
+<p>
+Beispiel:
+</p>
+<pre>
+$2y$10$GI7ziJuT2wADu1BQMhnDKOJL5dYnpJj2zoGWwS2MrKgdgmGYHHzrq
+\__/\/ \____________________/\_____________________________/
+ Alg Cost      Salt                        Hash
+</pre>
+<p>
+Hier bedeutet
+</p>
+<ul class="no-bullet">
+	<li><em>$2a$ oder $2b$ oder $2y$</em>: The hash algorithm identifier (bcrypt)</li>
+	<li><em>10</em>: Cost factor (2&Hat;10 ==&gt; 1,024 rounds)</li>
+	<li><em>GI7ziJuT2wADu1BQMhnDKO</em>: 16-byte (128-bit) salt, base64-encoded to 22 characters</li>
+	<li><em>JL5dYnpJj2zoGWwS2MrKgdgmGYHHzrq</em>: 24-byte (192-bit) hash, base64-encoded to 31 characters</li>
+</ul>
+
+
+<p>&nbsp;</p>
+<h2>Beispiel <em>bcrypt()</em> - Bcrypt Hashes als Strings</h2>
+<p>
+Das folgende Beispiel nutzt die Funktion <em>bcrypt(PASSWORD, SETTINGS)</em> zur Erzeugung eines crypt()-kompatiblen Strings.  
+</p>
+<p>
+Die Funktion erwartet das Passwort und einen speziell konstruierten String von Settings, der u.a. <em>cost</em> und <em>salt</em> enth&auml;lt.
+</p>
+<p>
+Leider unterst&uuml;tzt <em>bcrypt()</em> nur den Identifier <strong>a</strong> als Hash Algorithmus Identifier. Die ebenfalls g&uuml;ltigen Identifier <strong>b</strong> und <strong>y</strong> erzeugen eine Fehlermeldung. (Einen m&ouml;glichen Workaround/Patch findet man in <a href="https://www.perlmonks.org/?node_id=1110400">Crypt::Eksblowfish::Bcrypt doesnt support 2y</a>.)
+</p>
+
+<pre>
+#!/usr/bin/perl
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Crypt::URandom</span> <span style="color: #CD5555;">qw( urandom )</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Crypt::Eksblowfish::Bcrypt</span> <span style="color: #CD5555;">qw(bcrypt en_base64)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$password</span> = <span style="color: #CD5555;">&#39;supercalifragilisticexpialidocious&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Non-negative integer controlling the cost of the hash function.</span>
+<span style="color: #228B22;"># The number of operations is proportional to 2^cost.</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$cost</span> = <span style="color: #B452CD;">5</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Exactly sixteen octets of salt from a strong non-blocking random source</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$salt</span>         = <span style="color: #00688B;">urandom</span><span style="color: #000000;">(</span><span style="color: #B452CD;">16</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$salt_encoded</span> = <span style="color: #00688B;">en_base64</span><span style="color: #000000;">(</span><span style="color: #00688B;">$salt</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Assemble settings string</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$settings</span><span style="color: #000000;">;</span>
+<span style="color: #228B22;"># &quot;$2&quot;, optional &quot;a&quot;, $</span>
+<span style="color: #228B22;"># only a is supported - b or y will yield an error</span>
+<span style="color: #00688B;">$settings</span> .= <span style="color: #CD5555;">&#39;$2a$&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #228B22;"># cost as two digits (leading zero)</span>
+<span style="color: #00688B;">$cost</span> = <span style="color: #8B008B; font-weight:bold;">sprintf</span><span style="color: #000000;">(</span> <span style="color: #CD5555;">&quot;%02d&quot;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$cost</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$settings</span> .= <span style="color: #00688B;">$cost</span><span style="color: #000000;">;</span>
+<span style="color: #228B22;"># $</span>
+<span style="color: #00688B;">$settings</span> .= <span style="color: #CD5555;">&#39;$&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #228B22;"># 22 base 64 digits (salt)</span>
+<span style="color: #00688B;">$settings</span> .= <span style="color: #00688B;">$salt_encoded</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$bycrypt_storage_string</span> = <span style="color: #00688B;">bcrypt</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$password</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$settings</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Debug</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;Settings:      $settings&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;Bcrypt string: $bycrypt_storage_string&quot;</span><span style="color: #000000;">;</span>
+</pre>
+
+
+<p>
+Das Programm liefert z.B. folgende Ausgabe:
+</p>
+<pre>
+Settings:      $2a$05$aI5KrNhn5/CHtUHT/ZaHou
+Bcrypt string: $2a$05$aI5KrNhn5/CHtUHT/ZaHouLpAGo8PA3Yclpv1Y4mNehB1fandFE6O
+</pre>
+
+<p>&nbsp;</p>
+<h2>Passwort Check</h2>
+<p>
+Um das vom User eingebene Passwort zu pr&uuml;fen, wird aus diesem Passwort erneut ein Hash mit <strong> exakt denselben</strong> Parametern (<em>cost</em>,<em>salt</em>) berechnet und  Base64-kodiert. Anschlie&szlig;end werden die beiden Hashes verglichen. Stimmen sie &uuml;berein, gilt das eingegeben Passwort als korrekt.
+</p>
+<p>
+Die Parameter <em>cost</em> und <em>salt</em> werden aus der im Password Storage hinterlegten Zeichenkette (s.o.) ermittelt.
+</p>
+<p>
+Das nachfolgende Bespiel verdeutlicht die Vorgehensweise.
+</p>
+
+<pre>
+#!/usr/bin/perl
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&quot;say&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Crypt::Eksblowfish::Bcrypt</span> <span style="color: #CD5555;">&quot;en_base64&quot;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;de_base64&quot;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;bcrypt_hash&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Cleartext password from user input</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$pass_input</span> = <span style="color: #CD5555;">&quot;12345678&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># bcrypt hash string from password storage or other application</span>
+<span style="color: #228B22;"># e.g.  my $bcrypt_hash_string = qx{php -r &#39;echo password_hash($pass_input, PASSWORD_BCRYPT);&#39;};</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$bcrypt_hash_string</span> = <span style="color: #CD5555;">&#39;$2y$10$GI7ziJuT2wADu1BQMhnDKOJL5dYnpJj2zoGWwS2MrKgdgmGYHHzrq&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$unused</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$algorithm</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$cost</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$salt_and_pass</span> <span style="color: #000000;">)</span> = <span style="color: #8B008B; font-weight:bold;">split</span> <span style="color: #CD5555;">/\$/</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$bcrypt_hash_string</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># 22 character salt (base64 encoded)</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$salt</span> = <span style="color: #8B008B; font-weight:bold;">substr</span> <span style="color: #00688B;">$salt_and_pass</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">0</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">22</span><span style="color: #000000;">;</span>
+<span style="color: #228B22;"># 31 character bcrypt hash (base64 encoded)</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$encoded_pass_hash</span> = <span style="color: #8B008B; font-weight:bold;">substr</span> <span style="color: #00688B;">$salt_and_pass</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">22</span><span style="color: #000000;">,</span> <span style="color: #B452CD;">31</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Debug</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;$algorithm, $cost, $salt_and_pass, $salt, $encoded_pass_hash&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Comput bcrypt hash using identified cost and salt</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$perl_bcrypt_hash</span> = <span style="color: #00688B;">en_base64</span><span style="color: #000000;">(</span>
+    <span style="color: #00688B;">bcrypt_hash</span><span style="color: #000000;">(</span>
+        <span style="color: #000000;">{</span>
+            <span style="color: #000000;">cost</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$cost</span><span style="color: #000000;">,</span>
+            <span style="color: #000000;">key_nul</span> <span style="color: #000000;">=&gt;</span> <span style="color: #B452CD;">1</span><span style="color: #000000;">,</span>
+            <span style="color: #000000;">salt</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">de_base64</span><span style="color: #000000;">(</span><span style="color: #00688B;">$salt</span><span style="color: #000000;">)</span>
+        <span style="color: #000000;">}</span><span style="color: #000000;">,</span>
+        <span style="color: #00688B;">$pass_input</span>
+    <span style="color: #000000;">)</span>
+<span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Method 1</span>
+<span style="color: #228B22;"># compare supplied bcrypt hash string from password storage</span>
+<span style="color: #228B22;"># with computed (Perl) bcrypt hash string</span>
+<span style="color: #228B22;"># Assemble (Perl) bcrypt hash string</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$perl_bcrypt_hash_string</span> = <span style="color: #8B008B; font-weight:bold;">sprintf</span> <span style="color: #CD5555;">&#39;$%s$%d$%s%s&#39;</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$algorithm</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$cost</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$salt</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$perl_bcrypt_hash</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Debug</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;Other $bcrypt_hash_string&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;Perl  $perl_bcrypt_hash_string&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$bcrypt_hash_string</span> <span style="color: #8B008B; font-weight:bold;">eq</span> <span style="color: #00688B;">$perl_bcrypt_hash_string</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;Okay. Password hash strings match.&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span> <span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;Sorry. Password hash strings do not match&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+
+<span style="color: #228B22;"># Method 2</span>
+<span style="color: #228B22;"># or compare encoded hashes</span>
+<span style="color: #228B22;"># Debug</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;Other $encoded_pass_hash&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;Perl  $perl_bcrypt_hash&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$encoded_pass_hash</span> <span style="color: #8B008B; font-weight:bold;">eq</span> <span style="color: #00688B;">$perl_bcrypt_hash</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;Okay. Password hashes match.&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span> <span style="color: #8B008B; font-weight:bold;">else</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;Sorry. Password hashes do not match&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+ <li><a href="https://metacpan.org/pod/Crypt::Eksblowfish::Bcrypt">Crypt::Eksblowfish::Bcrypt</a></li>
+ <li><a href="https://metacpan.org/pod/Digest::Bcrypt">Digest::Bcrypt</a></li>
+ <li><a href="https://metacpan.org/pod/Crypt::URandom">Crypt::URandom</a></li>
+ <li><a href="/2021/06/Crypt-URandom-betriebssytemunabhaengige-und-nicht-blockierende-zufaelligkeit.html">Crypt::URandom - nahezu betriebssystemunabh&auml;ngige und nicht-blockierende Zuf&auml;lligkeit</a></li>
+ <li><a href="https://www.perlmonks.org/?node_id=11104453">Perlmonks: use Crypt::Eksblowfish::Bcrypt to create a password the same as password_hash in PHP</a></li>
+ <li><a href="https://manpages.debian.org/unstable/libcrypt-dev/crypt.5.en.html">man 5 crypt</a></li>
+ <li><a href="https://www.usenix.org/legacy/events/usenix99/provos.html">USENIX 99 - A Future-Adaptable Password Scheme</a></li>
+ <li><a href="https://www.openwall.com/crypt/">bcrypt password hashing for your software and your servers</a></li>
+ <li><a href="https://en.wikipedia.org/wiki/Bcrypt">Wikipedia bcrypt</a></li>
+ <li><a href="https://auth0.com/blog/hashing-in-action-understanding-bcrypt/">Hashing in Action: Understanding bcrypt</a></li>
+ <li><a href="https://bcrypt.online/">bcrypt.online - Bcrypt Hash Generator & Verifier</a></li>
+ <li><a href="https://bcrypt-generator.com/">Bcrypt-Generator.com - Online Bcrypt Hash Generator & Checker</a></li>
+</ul>
+
+<p>&nbsp;</p>
