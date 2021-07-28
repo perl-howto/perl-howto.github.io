@@ -41,6 +41,20 @@ Jetzt noch den Cache der Shared Libraries aktualisieren:
 $&gt; sudo ldconfig -v
 </pre>
 <p>
+Falls sich der Cache z.B. mangels Rechten nicht aktualisieren lässt oder <em>/usr/local/lib</em> nicht in <em>/etc/ld.so.conf</em> konfiguriert ist, kann auch die Umgebungsvariable <em>LD_LIBRARY_PATH</em> gesetzt werden:
+</p>
+<p>
+Entweder in Perl im <a href="https://perldoc.perl.org/variables/%25ENV">%ENV</a>
+<pre>
+$ENV{LD_LIBRARY_PATH} = '/usr/local/lib';
+</pre>
+<p>
+oder in der Bash-Shell
+</p>
+<pre>
+export LD_LIBRARY_PATH='/usr/local/lib'
+</pre>
+<p>
 Das Programm <em>ta-lib-config</em>, das zur Installation vom Finance::TA ben&ouml;tigt wird, gibt leider falsche Pfade f&uuml;r Header und Libraries zur&uuml;ck.
 </p>
 <pre>
