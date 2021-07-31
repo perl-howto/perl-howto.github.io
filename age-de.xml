@@ -1,26 +1,22 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml	version="1.0"	encoding="UTF-8"	standalone="yes"?>
 <age-declaration>
 	<ageblock-basic>
-		<age-issuer>www.jugendschutzprogramm.de</age-issuer>
-		<last-change>2016-02-22</last-change>
+		<age-issuer>perl-howto.github.io</age-issuer>
+		<last-change>2021-07-31</last-change>
 		<country>de</country>
 		<label-version>1.0</label-version>
 		<revisit-after>1days</revisit-after>
 	</ageblock-basic>
 	<ageblock-labeltype>
-		<xmlfile>true</xmlfile>
 		<httpheader>false</httpheader>
 		<htmlmeta>false</htmlmeta>
 		<label-z>false</label-z>
+		<xmlfile>true</xmlfile>
 		<default-age>0</default-age>
 	</ageblock-labeltype>
 	<ageblock-labeltype-definition>
 		<labeltype-xmlfile>
-			<label class="default">
-				<min-age>0</min-age>
-				<default-age>0</default-age>
-			</label>
-			<label class="github">
+			<label	class="website">
 				<age>0</age>
 				<min-age>0</min-age>
 				<default-age>0</default-age>
