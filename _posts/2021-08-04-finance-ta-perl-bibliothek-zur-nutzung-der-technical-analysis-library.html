@@ -1,0 +1,614 @@
+---
+layout: post
+title: Finance::TA - Perl Bibliothek zur Nutzung der Technical Analysis Library (http://ta-lib.org)
+date: '2021-08-04 10:00:00 +0200'
+permalink: /2021/08/finance-ta-perl-bibliothek-zur-nutzung-der-technical-analysis-library.html
+categories:
+- 'finance'
+---
+<p>&nbsp;</p>
+<h2>TA-Lib</h2>
+<p>
+<a href="https://www.ta-lib.org/">TA-Lib : Technical Analysis Library</a> ist eine Open-Source Bibliothek, die mehr als <a href="https://ta-lib.org/function.html">200 Indikatoren</a> der <a href="https://de.wikipedia.org/wiki/Technische_Analyse">Technischen Analyse</a>, wie z.B. <a href="https://de.wikipedia.org/wiki/Average_Directional_Movement_Index">ADX</a>, <a href="https://www.investopedia.com/trading/introduction-to-parabolic-sar/">Parabolic SAR</a> bereitstellt. Dar&uuml;ber hinaus k&ouml;nnen auch <a href="https://en.wikipedia.org/wiki/Candlestick_pattern">Candlestick-Muster</a> erkannt werden.
+</p>
+<p>
+Das CPAN Modul <a href="https://metacpan.org/pod/distribution/Finance-TA/TA.pod">Finance::TA - Perl wrapper for Technical Analysis Library (http://ta-lib.org)</a> von <a href="https://metacpan.org/author/KMX">KMX</a> erm&ouml;glicht den einfachen Zugriff auf die Funktionen/Indikatoren der TA-Lib Bibliothek.
+</p>
+<p>
+Dieser Beitrag besch&auml;ftigt sich zun&auml;chst an Hand sehr einfacher Beispiele mit den grundlegenden Datenstrukturen und Funktionen der Bibliothek. 
+</p>
+<p>
+In einem abschlie&szlig;endem Beispiel werden Kursdaten aus einer CSV-Datei gelesen, daraus mehrere Indikatoren berechnet und das Ganze als neue CSV-Datei zur Weiterverarbeitung durch andere Programme gespeichert. 
+</p>
+
+
+<p>&nbsp;</p>
+<h2>Basics</h2>
+<p>
+Finance::TA folgt den Konventionen der <a href="https://ta-lib.org/d_api/d_api.html">TA-Lib C/C++ API</a>. Praktisch alle Funktionen von Finance::TA erwarten folgende Eingabeparameter:
+</p>
+<ul>
+	<li><a href="https://perldoc.perl.org/perlref">Referenzen</a> auf Arrays mit Input-Daten.</li>
+	<li>den Startindex (<em>$startIdx</em>), ab dem Daten ber&uuml;cksichtig werden sollen. &Uuml;blicherweise <em>0</em>, das erste Element der Input-Daten.</li>
+	<li>den Endindex (<em>$endIdx</em>), bis zu dem Daten ber&uuml;cksichtigt werden. &Uuml;blicherweise das letzte Element der Input-Daten.</li>
+	<li>eine Zeitspanne/Zeitfenster (<em>$optInTimePeriod</em>) f&uuml;r die Berechnungen.</li>
+</ul>
+<p>
+Und liefern folgende Werte zur&uuml;ck:
+</p>
+<ul>
+	<li>Referenzen auf Arrays mit berechneten Output-Daten.</li>
+	<li>einen Index (<em>$begIdx</em>), welcher auf den Anfang der Ausgabedaten im Array der Inputdaten verweist.</li>
+	<li>einen Return-Code <em>$retCode</em>, der den Erfolg oder Misserfolg des Funktionsaufrufs anzeigt.</li>
+</ul>
+<p>
+Dazu ein einfaches Beispiel - dann sollte es klarer werden.
+</p>
+
+<p>&nbsp;</p>
+<h3>Beispiel: Ein gleitender Durchschnitt</h3>
+<p>
+Das nachfolgende simple Beispiel berechnet mittels der Funktion <a href="https://metacpan.org/dist/Finance-TA/view/TA.pod#TA_SMA-(Simple-Moving-Average)">TA_SMA()</a> einen <a href="https://de.wikipedia.org/wiki/Gleitender_Mittelwert">einfachen gleitenden Durchschnitt</a> &uuml;ber drei Messwerte und erzeugt einen <a href="https://perldoc.perl.org/Data::Dumper">Dump</a> der Ein- und Ausgabedaten und deren Struktur.
+</p>
+
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Finance::TA</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Data::Dumper</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Style 2 (the default) outputs a very readable form which lines up the hash keys.</span>
+<span style="color: #228B22;"># Style 3 is like style 2, but also annotates the elements of arrays with their index</span>
+<span style="color: #228B22;"># (but the comment is on its own line, so array output consumes twice the number of lines)</span>
+<span style="color: #00688B;">$Data::Dumper::Indent</span> = <span style="color: #B452CD;">3</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Data straight from https://metacpan.org/dist/Finance-TA/view/TA.pod</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@series</span> = <span style="color: #000000;">(</span>
+    <span style="color: #CD5555;">&#39;91.500000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;94.815000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;94.375000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;95.095000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;93.780000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;94.625000&#39;</span><span style="color: #000000;">,</span>
+    <span style="color: #CD5555;">&#39;92.530000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;92.750000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;90.315000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;92.470000&#39;</span>
+<span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># https://metacpan.org/dist/Finance-TA/view/TA.pod#TA_SMA-(Simple-Moving-Average)</span>
+<span style="color: #228B22;"># TA_SMA (Simple Moving Average)</span>
+<span style="color: #228B22;"># ($retCode, $begIdx, $outReal) = TA_SMA($startIdx, $endIdx, \@inReal, $optInTimePeriod);</span>
+<span style="color: #228B22;">#</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$startIdx</span>        = <span style="color: #B452CD;">0</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$endIdx</span>          = <span style="color: #00688B;">$#series</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$optInTimePeriod</span> = <span style="color: #B452CD;">3</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$retCode</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$begIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$result</span> <span style="color: #000000;">)</span> = <span style="color: #00688B;">TA_SMA</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$startIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$endIdx</span><span style="color: #000000;">,</span> \<span style="color: #00688B;">@series</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$optInTimePeriod</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Die on TA errors</span>
+<span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;Error TA_SMA $retCode&quot;</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$retCode</span> == <span style="color: #00688B;">$TA_SUCCESS</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Debug</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&#39;Length @series:  &#39;</span><span style="color: #000000;">,</span> <span style="color: #8B008B; font-weight:bold;">scalar</span> <span style="color: #00688B;">@series</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&#39;Length @$result: &#39;</span><span style="color: #000000;">,</span> <span style="color: #8B008B; font-weight:bold;">scalar</span> <span style="color: #00688B;">@$result</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;begIdx: $begIdx&quot;</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Dump both arrays</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&#39;--- series ---&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #00688B;">Dumper</span><span style="color: #000000;">(</span> \<span style="color: #00688B;">@series</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&#39;--- result ---&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #00688B;">Dumper</span><span style="color: #000000;">(</span><span style="color: #00688B;">$result</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+<pre>
+Length @series:  10
+Length @$result: 8
+begIdx: 2
+--- series ---
+$VAR1 = [
+          #0
+          '91.500000',
+          #1
+          '94.815000',
+          #2
+          '94.375000',
+          #3
+          '95.095000',
+          #4
+          '93.780000',
+          #5
+          '94.625000',
+          #6
+          '92.530000',
+          #7
+          '92.750000',
+          #8
+          '90.315000',
+          #9
+          '92.470000'
+        ];
+
+--- result ---
+$VAR1 = [
+          #0
+          '93.5633333333333',
+          #1
+          '94.7616666666667',
+          #2
+          '94.4166666666667',
+          #3
+          '94.5',
+          #4
+          '93.645',
+          #5
+          '93.3016666666667',
+          #6
+          '91.865',
+          #7
+          '91.845'
+        ];
+</pre>
+<p>
+Da mindestens drei Messwerte f&uuml;r die Berechnung des gleitenden Durchschnitts ben&ouml;tigt werden, stehen f&uuml;r die ersten beiden Messwerte keine Ergebnisse zur Verf&uuml;gung.
+</p>
+<p>
+Die beiden Arrays mit den Eingabe- und Ausgabedaten sind zwar parallel aber unterschiedlich lang und starten mit dem Index <em>0</em>. Die Variable <em>$begIdx</em> verweist auf den Index im Array der Messwerte ab dem Ergebnisse zur Verf&uuml;gung stehen. Siehe Skizze.
+</p>
+<pre>
++++++++++++++++++++++++++++++++++++++++
+|   | series    |   | results         | 
++++++++++++++++++++++++++++++++++++++++
+| 0 | 91.500000 |   | N/A             |
+| 1 | 94.815000 |   | N/A             |
+| <strong>2</strong> | 94.375000 | 0 | 93.5633333333333|
+| 3 | 95.095000 | 1 | 94.7616666666667|
+| 4 | 93.780000 | 2 | 94.4166666666667|
+| 5 | 94.625000 | 3 | 94.5            |
+| 6 | 92.530000 | 4 | 93.645          |
+| 7 | 92.750000 | 5 | 93.3016666666667|
+| 8 | 90.315000 | 6 | 91.865          |
+| 9 | 92.470000 | 7 | 91.845          |
++++++++++++++++++++++++++++++++++++++++
+</pre>
+<p>
+Beim Loop &uuml;ber Mess- und berechnete Werte muss man sorgf&auml;ltig aufpassen, welcher Index zu welchem Array geh&ouml;rt.
+</p>
+
+<pre>
+<span style="color: #228B22;"># Loop over @series and @$results</span>
+<span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$i</span> = <span style="color: #B452CD;">0</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span> &lt; <span style="color: #00688B;">$begIdx</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span>++ <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;$i: $series[$i] --&gt; N/A&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+
+<span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$i</span> = <span style="color: #00688B;">$begIdx</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span> &lt;= <span style="color: #00688B;">$#series</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span>++ <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;$i: $series[$i] --&gt; $result-&gt;[ $i - $begIdx ] &quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+
+<pre>
+0: 91.500000 --&gt; N/A
+1: 94.815000 --&gt; N/A
+2: 94.375000 --&gt; 93.5633333333333
+3: 95.095000 --&gt; 94.7616666666667
+4: 93.780000 --&gt; 94.4166666666667
+5: 94.625000 --&gt; 94.5
+6: 92.530000 --&gt; 93.645
+7: 92.750000 --&gt; 93.3016666666667
+8: 90.315000 --&gt; 91.865
+9: 92.470000 --&gt; 91.845
+</pre>
+
+<p>
+Bei nur einem Ergebnis/Berechnung ist das noch gut nachvollziehbar. Bei mehreren Indikatoren und somit mehreren parallelen Arrays unterschiedlicher L&auml;nge kann das Ganze recht un&uuml;bersichtlich werden, wie das folgende Beispiel andeutet. 
+</p>
+
+<p>&nbsp;</p>
+<h3>Beispiel: Zwei gleitende Durchschnitte</h3>
+<p>
+Das nachfolgende einfache Beispiel berechnet zwei einfache gleitende Durchschnitte</a> &uuml;ber drei bzw. vier Messwerte und l&auml;uft in einer <a href="https://perldoc.perl.org/functions/for">for-Schleife</a> &uuml;ber die Eingangs- und Ausgangsdaten.
+</p>
+
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Finance::TA</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Data straight from https://metacpan.org/dist/Finance-TA/view/TA.pod</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@series</span> = <span style="color: #000000;">(</span>
+    <span style="color: #CD5555;">&#39;91.500000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;94.815000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;94.375000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;95.095000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;93.780000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;94.625000&#39;</span><span style="color: #000000;">,</span>
+    <span style="color: #CD5555;">&#39;92.530000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;92.750000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;90.315000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;92.470000&#39;</span>
+<span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># https://metacpan.org/dist/Finance-TA/view/TA.pod#TA_SMA-(Simple-Moving-Average)</span>
+<span style="color: #228B22;"># TA_SMA (Simple Moving Average)</span>
+<span style="color: #228B22;"># ($retCode, $begIdx, $outReal) = TA_SMA($startIdx, $endIdx, \@inReal, $optInTimePeriod);</span>
+<span style="color: #228B22;">#</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$startIdx</span> = <span style="color: #B452CD;">0</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$endIdx</span>   = <span style="color: #00688B;">$#series</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Fast SMA</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$optInTimePeriod_fast_sma</span> = <span style="color: #B452CD;">3</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$retCode_fast_sma</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$begIdx_fast_sma</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$result_fast_sma</span> <span style="color: #000000;">)</span> =
+  <span style="color: #00688B;">TA_SMA</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$startIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$endIdx</span><span style="color: #000000;">,</span> \<span style="color: #00688B;">@series</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$optInTimePeriod_fast_sma</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #228B22;"># Die on TA errors</span>
+<span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;Error fast TA_SMA $retCode_fast_sma&quot;</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$retCode_fast_sma</span> == <span style="color: #00688B;">$TA_SUCCESS</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Slow SMA</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$optInTimePeriod_slow_sma</span> = <span style="color: #B452CD;">4</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$retCode_slow_sma</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$begIdx_slow_sma</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$result_slow_sma</span> <span style="color: #000000;">)</span> =
+  <span style="color: #00688B;">TA_SMA</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$startIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$endIdx</span><span style="color: #000000;">,</span> \<span style="color: #00688B;">@series</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$optInTimePeriod_slow_sma</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #228B22;"># Die on TA errors</span>
+<span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;Error slow TA_SMA $retCode_slow_sma&quot;</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$retCode_slow_sma</span> == <span style="color: #00688B;">$TA_SUCCESS</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$format</span> = <span style="color: #CD5555;">&quot;%s | %10s | %10s | %20s |\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">printf</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$format</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;i&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;value&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;slow_sma&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;fast_sma&#39;</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$i</span> = <span style="color: #B452CD;">0</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span> &lt;= <span style="color: #00688B;">$#series</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span>++ <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$value</span>    = <span style="color: #00688B;">$series</span>[<span style="color: #00688B;">$i</span>]<span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$fast_sma</span> = <span style="color: #CD5555;">&#39;N/A&#39;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$slow_sma</span> = <span style="color: #CD5555;">&#39;N/A&#39;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$i</span> &gt;= <span style="color: #00688B;">$begIdx_fast_sma</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #00688B;">$fast_sma</span> = <span style="color: #00688B;">$result_fast_sma</span>-&gt;[ <span style="color: #00688B;">$i</span> - <span style="color: #00688B;">$begIdx_fast_sma</span> ]<span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$i</span> &gt;= <span style="color: #00688B;">$begIdx_slow_sma</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #00688B;">$slow_sma</span> = <span style="color: #00688B;">$result_slow_sma</span>-&gt;[ <span style="color: #00688B;">$i</span> - <span style="color: #00688B;">$begIdx_slow_sma</span> ]<span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #8B008B; font-weight:bold;">printf</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$format</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$i</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$value</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$slow_sma</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$fast_sma</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm erzeugt folgende Ausgabe:
+</p>
+
+<pre>
+i |      value |   slow_sma |             fast_sma |
+0 |  91.500000 |        N/A |                  N/A |
+1 |  94.815000 |        N/A |                  N/A |
+2 |  94.375000 |        N/A |     93.5633333333333 |
+3 |  95.095000 |   93.94625 |     94.7616666666667 |
+4 |  93.780000 |   94.51625 |     94.4166666666667 |
+5 |  94.625000 |   94.46875 |                 94.5 |
+6 |  92.530000 |    94.0075 |               93.645 |
+7 |  92.750000 |   93.42125 |     93.3016666666667 |
+8 |  90.315000 |     92.555 |               91.865 |
+9 |  92.470000 |   92.01625 |               91.845 |
+</pre>
+<p>
+Die drei Arrays mit den Eingabe- und Ausgabedaten sind zwar parallel aber unterschiedlich lang. Die Variablen <em>$begIdx_slow_sma</em> bzw. <em>$begIdx_fast_sma</em> verweisen auf den Index im Array der Messwerte ab dem jeweils Ergebnisse zur Verf&uuml;gung stehen.
+</p>
+
+<p>&nbsp;</p>
+<h2> Beispiel: Kursdaten aus CSV-Datei lesen, mehrere Indikatoren berechnen und als CSV-Datei speichern</h2>
+
+<p>
+Parallele Arrays, dazu noch unterschiedlicher L&auml;nge, sind nicht wirklich mein Ding. Ich folge daher dem Ansatz von Tom Christiansen (<a href="https://www.perl.com/doc/FMTEYEWTK/style/slide20.html/">Perl Style: Use Hashes of Records, not Parallel Arrays</a>) in leicht abgewandelter Form und verwende lieber 
+<a href="https://perldoc.perl.org/perldsc#ARRAYS-OF-HASHES">Arrays von Hashes</a>, die manchmal auch als Arrays von Datens&auml;tzen (Records) bezeichnet werden.
+</p>
+<p>
+Das folgende Beispielprogramm verwendet <a href="https://metacpan.org/pod/Text::CSV::Slurp">Text::CSV::Slurp - convert CSV into an array of hashes, or an array of hashes into CSV</a>, <a href="/2016/09/text-csv-slurp-csv-daten-schnell-einlesen.html">das ich bereits hier vorgestellt habe</a>, um eine CSV-Datei mit historischen <a href="https://tradistats.com/ohlc-charts/">OHLC-Daten</a> des <a href="https://en.wikipedia.org/wiki/SPDR_S%26P_500_Trust_ETF">SPDR S&amp;P 500 ETF Trust</a> (<a href="https://stooq.com/q/d/?s=spy.us">Download</a>) als Referenz auf einen Array von Hashes einzulesen. 
+</p>
+<p>
+Aus diesen CSV-Daten
+</p>
+
+<pre>
+Date,Open,High,Low,Close,Volume
+2005-02-25,98.555,99.7,98.466,99.51,74654349
+2005-02-28,99.277,99.406,98.357,98.831,84725874
+...
+...
+...
+2021-08-02,440.34,440.93,437.21,437.59,58783297
+2021-08-03,438.44,441.28,436.1,441.15,58053896
+</pre>
+<p>
+wird folgende Datenstruktur erzeugt.
+</p>
+
+<pre>
+<span style="color: #00688B;">$VAR1</span> = \<span style="color: #000000;">[</span>
+    <span style="color: #228B22;">#0</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #CD5555;">&#39;High&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;99.7&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Volume&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;74654349&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Low&#39;</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;98.466&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Open&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;98.555&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Close&#39;</span>  <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;99.51&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Date&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;2005-02-25&#39;</span>
+    <span style="color: #000000;">}</span><span style="color: #000000;">,</span>
+    <span style="color: #228B22;">#1</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #CD5555;">&#39;Volume&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;84725874&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;High&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;99.406&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Open&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;99.277&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Low&#39;</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;98.357&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Date&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;2005-02-28&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Close&#39;</span>  <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;98.831&#39;</span>
+    <span style="color: #000000;">}</span><span style="color: #000000;">,</span>
+    <span style="color: #228B22;">#2</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #CD5555;">&#39;Volume&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;58054340&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;High&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;99.59&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Open&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;98.97&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Low&#39;</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;98.97&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Close&#39;</span>  <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;99.347&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Date&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;2005-03-01&#39;</span>
+    <span style="color: #000000;">}</span><span style="color: #000000;">,</span>
+    <span style="color: #228B22;"># ...</span>
+    <span style="color: #228B22;"># ...</span>
+    <span style="color: #228B22;"># ...</span>
+    <span style="color: #228B22;">#4135</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #CD5555;">&#39;Date&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;2021-08-02&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Close&#39;</span>  <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;437.59&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Low&#39;</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;437.21&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Open&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;440.34&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;High&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;440.93&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Volume&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;58783297&#39;</span>
+    <span style="color: #000000;">}</span><span style="color: #000000;">,</span>
+    <span style="color: #228B22;">#4136</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #CD5555;">&#39;Close&#39;</span>  <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;441.15&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Date&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;2021-08-03&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Open&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;438.44&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Low&#39;</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;436.1&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Volume&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;58053896&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;High&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;441.28&#39;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">]</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Die Datenstruktur wird in weiteren Schritten um zwei gleitende Durchschnitte (<a href="https://metacpan.org/dist/Finance-TA/view/TA.pod#TA_SMA-(Simple-Moving-Average)">TA_SMA()</a>), <a href="https://de.wikipedia.org/wiki/Average_Directional_Movement_Index">Average Directional Movement Index ADX</a> (<a href="https://metacpan.org/dist/Finance-TA/view/TA.pod#TA_ADX-(Average-Directional-Movement-Index)">TA_ADX()</a>) und <a href=""https://www.investopedia.com/trading/introduction-to-parabolic-sar/>Parabolic SAR</a> (<a href="https://metacpan.org/dist/Finance-TA/view/TA.pod#TA_SAR-(Parabolic-SAR)">TA_SAR()</a>) erweitert - fehlende Werte werden als <a href="https://perldoc.perl.org/functions/undef">undef</a> deklariert - und sieht dann wie folgt aus.
+</p>
+<pre>
+<span style="color: #00688B;">$VAR1</span> = \<span style="color: #000000;">[</span>
+    <span style="color: #228B22;">#0</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #CD5555;">&#39;Slow SMA&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #8B008B; font-weight:bold;">undef</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Close&#39;</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;99.51&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Fast SMA&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #8B008B; font-weight:bold;">undef</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Volume&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;74654349&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;ADX&#39;</span>      <span style="color: #000000;">=&gt;</span> <span style="color: #8B008B; font-weight:bold;">undef</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Date&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;2005-02-25&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;PSAR&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #8B008B; font-weight:bold;">undef</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Low&#39;</span>      <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;98.466&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Open&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;98.555&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;High&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;99.7&#39;</span>
+    <span style="color: #000000;">}</span><span style="color: #000000;">,</span>
+    <span style="color: #228B22;">#1</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #CD5555;">&#39;High&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;99.406&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Open&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;99.277&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;PSAR&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;99.7&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Date&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;2005-02-28&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Low&#39;</span>      <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;98.357&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;ADX&#39;</span>      <span style="color: #000000;">=&gt;</span> <span style="color: #8B008B; font-weight:bold;">undef</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Fast SMA&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #8B008B; font-weight:bold;">undef</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Volume&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;84725874&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Slow SMA&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #8B008B; font-weight:bold;">undef</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Close&#39;</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;98.831&#39;</span>
+    <span style="color: #000000;">}</span><span style="color: #000000;">,</span>
+    <span style="color: #228B22;">#2</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #CD5555;">&#39;ADX&#39;</span>      <span style="color: #000000;">=&gt;</span> <span style="color: #8B008B; font-weight:bold;">undef</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Volume&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;58054340&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Fast SMA&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #8B008B; font-weight:bold;">undef</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Slow SMA&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #8B008B; font-weight:bold;">undef</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Close&#39;</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;99.347&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;High&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;99.59&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Open&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;98.97&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Date&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;2005-03-01&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;PSAR&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;99.67314&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Low&#39;</span>      <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;98.97&#39;</span>
+    <span style="color: #000000;">}</span><span style="color: #000000;">,</span>
+    <span style="color: #228B22;"># ...</span>
+    <span style="color: #228B22;"># ...</span>
+    <span style="color: #228B22;"># ...</span>
+    <span style="color: #228B22;">#4135</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #CD5555;">&#39;High&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;440.93&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Open&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;440.34&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Low&#39;</span>      <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;437.21&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Date&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;2021-08-02&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;PSAR&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;426.506011524495&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;ADX&#39;</span>      <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;14.3931816759973&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Volume&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;58783297&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Fast SMA&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;438.395555555556&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Slow SMA&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;435.723888888889&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Close&#39;</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;437.59&#39;</span>
+    <span style="color: #000000;">}</span><span style="color: #000000;">,</span>
+    <span style="color: #228B22;">#4136</span>
+    <span style="color: #000000;">{</span>
+        <span style="color: #CD5555;">&#39;ADX&#39;</span>      <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;13.4215432008823&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Slow SMA&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;436.292222222222&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Close&#39;</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;441.15&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Volume&#39;</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;58053896&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Fast SMA&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;439.12888888889&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Open&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;438.44&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;High&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;441.28&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Low&#39;</span>      <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;436.1&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;PSAR&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;427.423650833026&#39;</span><span style="color: #000000;">,</span>
+        <span style="color: #CD5555;">&#39;Date&#39;</span>     <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;2021-08-03&#39;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">]</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Im letzten Schritt werden die Kursdaten und die daraus berechneten Indikatoren (Datenstruktur) in einer weiteren CSV-Datei gespeichert. Das sieht dann in etwa so aus.
+</p>
+<pre>
+Date,Open,Low,High,Close,ADX,PSAR,"Fast SMA","Slow SMA"
+2005-02-25,98.555,98.466,99.7,99.51,,,,
+2005-02-28,99.277,98.357,99.406,98.831,,99.7,,
+...
+...
+...
+2021-08-02,440.34,437.21,440.93,437.59,14.3931816759973,426.506011524495,438.395555555556,435.723888888889
+2021-08-03,438.44,436.1,441.28,441.15,13.4215432008823,427.423650833026,439.12888888889,436.292222222222
+</pre>
+<p>
+Hier das Beispielprogramm:
+</p>
+
+<pre>
+#!/usr/bin/perl
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Text::CSV::Slurp</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Finance::TA</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Data::Dumper</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">$Data::Dumper::Indent</span> = <span style="color: #B452CD;">3</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># CSV Input</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$filename</span> = <span style="color: #CD5555;">&#39;./spy_d.csv&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #228B22;"># CSV Output</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$csv_encoding</span> = <span style="color: #CD5555;">&#39;utf-8&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$out_filename</span> = <span style="color: #CD5555;">&#39;./spy_d_indicators.csv&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># CSV Options - see Text::CSV</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">%csv_options</span> = <span style="color: #000000;">(</span>
+    <span style="color: #000000;">sep_char</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;,&#39;</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">binary</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;1&#39;</span><span style="color: #000000;">,</span>
+<span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$slurp</span> = <span style="color: #000000;">Text::CSV::Slurp</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Reference to an array of hashes</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$data</span> = <span style="color: #00688B;">$slurp</span><span style="color: #00688B;">-&gt;load</span><span style="color: #000000;">(</span> <span style="color: #000000;">file</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$filename</span><span style="color: #000000;">,</span> <span style="color: #00688B;">%csv_options</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #228B22;"># Reference to an array</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$highs</span> = <span style="color: #000000;">[</span> <span style="color: #8B008B; font-weight:bold;">map</span> <span style="color: #000000;">{</span> <span style="color: #00688B;">$_</span>-&gt;{<span style="color: #000000;">High</span>} <span style="color: #000000;">}</span> <span style="color: #00688B;">@$data</span> <span style="color: #000000;">]</span><span style="color: #000000;">;</span>
+<span style="color: #228B22;"># Reference to an array</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$lows</span> = <span style="color: #000000;">[</span> <span style="color: #8B008B; font-weight:bold;">map</span> <span style="color: #000000;">{</span> <span style="color: #00688B;">$_</span>-&gt;{<span style="color: #000000;">Low</span>} <span style="color: #000000;">}</span> <span style="color: #00688B;">@$data</span> <span style="color: #000000;">]</span><span style="color: #000000;">;</span>
+<span style="color: #228B22;"># Reference to an array</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$closes</span> = <span style="color: #000000;">[</span> <span style="color: #8B008B; font-weight:bold;">map</span> <span style="color: #000000;">{</span> <span style="color: #00688B;">$_</span>-&gt;{<span style="color: #000000;">Close</span>} <span style="color: #000000;">}</span> <span style="color: #00688B;">@$data</span> <span style="color: #000000;">]</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$startIdx</span> = <span style="color: #B452CD;">0</span><span style="color: #000000;">;</span>        <span style="color: #228B22;"># First element of @$data</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$endIdx</span>   = <span style="color: #00688B;">$#$data</span><span style="color: #000000;">;</span>  <span style="color: #228B22;"># Last element of @$data</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$retCode</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$begIdx</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># TA_ADX (Average Directional Movement Index)</span>
+<span style="color: #228B22;"># ($retCode, $begIdx, $outReal) = TA_ADX($startIdx, $endIdx, \@high, \@low, \@close, $optInTimePeriod);</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$optInTimePeriod_adx</span> = <span style="color: #B452CD;">9</span><span style="color: #000000;">;</span>    <span style="color: #228B22;"># Defaults to 14</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$adx</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">(</span> <span style="color: #00688B;">$retCode</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$begIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$adx</span> <span style="color: #000000;">)</span> = <span style="color: #00688B;">TA_ADX</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$startIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$endIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$highs</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$lows</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$closes</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$optInTimePeriod_adx</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;Error TA_ADX:  $retCode&quot;</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$retCode</span> == <span style="color: #00688B;">$TA_SUCCESS</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">fill_datastructure</span><span style="color: #000000;">(</span> <span style="color: #000000;">data</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$data</span><span style="color: #000000;">,</span> <span style="color: #000000;">results</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$adx</span><span style="color: #000000;">,</span> <span style="color: #000000;">begIdx</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$begIdx</span><span style="color: #000000;">,</span> <span style="color: #000000;">key</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;ADX&#39;</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># TA_SAR (Parabolic SAR)</span>
+<span style="color: #228B22;"># ($retCode, $begIdx, $outReal) = TA_SAR($startIdx, $endIdx, \@high, \@low, $optInAcceleration, $optInMaximum);</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$optInAcceleration</span> = <span style="color: #B452CD;">0.02</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$optInMaximum</span>      = <span style="color: #B452CD;">0.2</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$psar</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">(</span> <span style="color: #00688B;">$retCode</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$begIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$psar</span> <span style="color: #000000;">)</span> = <span style="color: #00688B;">TA_SAR</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$startIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$endIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$highs</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$lows</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$optInAcceleration</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$optInMaximum</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;Error TA_SAR:  $retCode&quot;</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$retCode</span> == <span style="color: #00688B;">$TA_SUCCESS</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">fill_datastructure</span><span style="color: #000000;">(</span> <span style="color: #000000;">data</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$data</span><span style="color: #000000;">,</span> <span style="color: #000000;">results</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$psar</span><span style="color: #000000;">,</span> <span style="color: #000000;">begIdx</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$begIdx</span><span style="color: #000000;">,</span> <span style="color: #000000;">key</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;PSAR&#39;</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># TA_SMA (Simple Moving Average)</span>
+<span style="color: #228B22;"># ($retCode, $begIdx, $outReal) = TA_SMA($startIdx, $endIdx, \@inReal, $optInTimePeriod);</span>
+<span style="color: #228B22;">## Fast SMA</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$optInTimePeriod_fast_sma</span> = <span style="color: #B452CD;">9</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$fast_sma</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">(</span> <span style="color: #00688B;">$retCode</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$begIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$fast_sma</span> <span style="color: #000000;">)</span> = <span style="color: #00688B;">TA_SMA</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$startIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$endIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$closes</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$optInTimePeriod_fast_sma</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;Error fast TA_SMA $retCode&quot;</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$retCode</span> == <span style="color: #00688B;">$TA_SUCCESS</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">fill_datastructure</span><span style="color: #000000;">(</span> <span style="color: #000000;">data</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$data</span><span style="color: #000000;">,</span> <span style="color: #000000;">results</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$fast_sma</span><span style="color: #000000;">,</span> <span style="color: #000000;">begIdx</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$begIdx</span><span style="color: #000000;">,</span> <span style="color: #000000;">key</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;Fast SMA&#39;</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #228B22;">## Slow SMA</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$optInTimePeriod_slow_sma</span> = <span style="color: #B452CD;">18</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$slow_sma</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">(</span> <span style="color: #00688B;">$retCode</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$begIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$slow_sma</span> <span style="color: #000000;">)</span> = <span style="color: #00688B;">TA_SMA</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$startIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$endIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$closes</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$optInTimePeriod_slow_sma</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;Error slow TA_SMA $retCode&quot;</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$retCode</span> == <span style="color: #00688B;">$TA_SUCCESS</span><span style="color: #000000;">;</span>
+<span style="color: #00688B;">fill_datastructure</span><span style="color: #000000;">(</span> <span style="color: #000000;">data</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$data</span><span style="color: #000000;">,</span> <span style="color: #000000;">results</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$slow_sma</span><span style="color: #000000;">,</span> <span style="color: #000000;">begIdx</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$begIdx</span><span style="color: #000000;">,</span> <span style="color: #000000;">key</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;Slow SMA&#39;</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Debug</span>
+<span style="color: #228B22;">#say Dumper( \$data );</span>
+
+<span style="color: #228B22;"># Create Output CSV</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$field_order</span> = <span style="color: #000000;">[</span> <span style="color: #CD5555;">&#39;Date&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;Open&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;Low&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;High&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;Close&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;ADX&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;PSAR&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;Fast SMA&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;Slow SMA&#39;</span> <span style="color: #000000;">]</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$csv</span> = <span style="color: #00688B;">$slurp</span><span style="color: #00688B;">-&gt;create</span><span style="color: #000000;">(</span> <span style="color: #000000;">input</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$data</span><span style="color: #000000;">,</span> <span style="color: #000000;">field_order</span> <span style="color: #000000;">=&gt;</span> <span style="color: #00688B;">$field_order</span><span style="color: #000000;">,</span> <span style="color: #00688B;">%csv_options</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">open</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$fh</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;&gt;:encoding($csv_encoding)&quot;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&quot;$out_filename&quot;</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;$!&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">print</span> <span style="color: #00688B;">$fh</span> <span style="color: #00688B;">$csv</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">close</span><span style="color: #000000;">(</span><span style="color: #00688B;">$fh</span><span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">or</span> <span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #00688B;">$!</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">exit</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22; font-style:italic;">=head1 SUBROUTINES/METHODS</span>
+
+<span style="color: #228B22; font-style:italic;">=cut</span>
+
+<span style="color: #228B22; font-style:italic;">=head2 fill_datastructure</span>
+
+<span style="color: #228B22; font-style:italic;"> fill_datastructure(data =&gt; $data, results =&gt; $results, begIdx =&gt; $begIdx, key =&gt; &#39;string&#39;);</span>
+
+<span style="color: #228B22; font-style:italic;">Fills datastructure C&lt;@$data&gt; with values from Finance:TA C&lt;$results&gt; using C&lt;key&gt; as hash key.</span>
+
+<span style="color: #228B22; font-style:italic;">Slots below C&lt;$begIdx&gt; will be filled with C&lt;undef&gt; values.</span>
+
+<span style="color: #228B22; font-style:italic;">Will warn on overwriting existing hash keys.</span>
+
+<span style="color: #228B22; font-style:italic;">=cut</span>
+
+<a name="fill_datastructure"></a><span style="color: #8B008B; font-weight:bold;">sub </span><span style="color: #FF0000; font-weight:bold;">fill_datastructure</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">%args</span>     = <span style="color: #00688B;">@_</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$data_ref</span> = <span style="color: #00688B;">$args</span>{<span style="color: #000000;">data</span>}<span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$results</span>  = <span style="color: #00688B;">$args</span>{<span style="color: #000000;">results</span>}<span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$begIdx</span>   = <span style="color: #00688B;">$args</span>{<span style="color: #000000;">begIdx</span>}<span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$key</span>      = <span style="color: #00688B;">$args</span>{<span style="color: #000000;">key</span>}<span style="color: #000000;">;</span>
+
+    <span style="color: #228B22;"># Check params</span>
+    <span style="color: #8B008B; font-weight:bold;">die</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;Missing arg &#39;data&#39;.&quot;</span><span style="color: #000000;">)</span>    <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$data_ref</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">die</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;Missing arg &#39;results&#39;.&quot;</span><span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$results</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">die</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;Missing arg &#39;begIdx&#39;.&quot;</span><span style="color: #000000;">)</span>  <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #8B008B; font-weight:bold;">defined</span> <span style="color: #00688B;">$begIdx</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">die</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;Missing arg &#39;key&#39;.&quot;</span><span style="color: #000000;">)</span>     <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$key</span><span style="color: #000000;">;</span>
+    <span style="color: #228B22;"># Minimal params validation</span>
+    <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">ref</span><span style="color: #000000;">(</span><span style="color: #00688B;">$data_ref</span><span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">eq</span> <span style="color: #CD5555;">&#39;ARRAY&#39;</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span> <span style="color: #8B008B; font-weight:bold;">die</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;No ARRAY reference found for $data.&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span> <span style="color: #000000;">}</span>
+    <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">ref</span><span style="color: #000000;">(</span><span style="color: #00688B;">$results</span><span style="color: #000000;">)</span> <span style="color: #8B008B; font-weight:bold;">eq</span> <span style="color: #CD5555;">&#39;ARRAY&#39;</span> <span style="color: #000000;">)</span>  <span style="color: #000000;">{</span> <span style="color: #8B008B; font-weight:bold;">die</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;No ARRAY reference found for $results.&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span> <span style="color: #000000;">}</span>
+
+    <span style="color: #228B22;"># Fill datastructure</span>
+    <span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$i</span> = <span style="color: #B452CD;">0</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span> &lt;= <span style="color: #00688B;">$#$data_ref</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span>++ <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #228B22;"># Emitt warning on overwriting data</span>
+        <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">exists</span> <span style="color: #00688B;">$data_ref</span>-&gt;[<span style="color: #00688B;">$i</span>]-&gt;{<span style="color: #00688B;">$key</span>} <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+            <span style="color: #8B008B; font-weight:bold;">warn</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&quot;Overwriting data key &#39;$key&#39; at &#39;$i&#39;&quot;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+        <span style="color: #000000;">}</span>
+        <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$value</span> = <span style="color: #8B008B; font-weight:bold;">undef</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$i</span> &gt;= <span style="color: #00688B;">$begIdx</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+            <span style="color: #00688B;">$value</span> = <span style="color: #00688B;">$results</span>-&gt;[ <span style="color: #00688B;">$i</span> - <span style="color: #00688B;">$begIdx</span> ]<span style="color: #000000;">;</span>
+        <span style="color: #000000;">}</span>
+        <span style="color: #00688B;">$data_ref</span>-&gt;[<span style="color: #00688B;">$i</span>]-&gt;{<span style="color: #00688B;">$key</span>} = <span style="color: #00688B;">$value</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+<a name="__END__"></a><span style="color: #8B008B; font-weight:bold;">__END__</span>
+
+</pre>
+
+<p>&nbsp;</p>
+<p>
+That's it.
+</p>
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+ <li><a href="https://metacpan.org/pod/Finance::TA">Finance::TA - Perl wrapper for Technical Analysis Library (http://ta-lib.org)</a></li>
+ <li><a href="https://ta-lib.org/">TA-Lib: Technical Analysis Library</a></li>
+ <li><a href="https://ta-lib.org/d_api/d_api.html">TA-Lib: C/C++ API Documentation</a></li>
+ <li><a href="https://github.com/kmx/perl-finance-ta">Github: perl-finance-ta</a></li>
+ <li><a href="https://metacpan.org/pod/PDL::Finance::TA">PDL::Finance::TA - Technical Analysis Library (http://ta-lib.org) bindings for PDL</a></li>
+ <li><a href="https://metacpan.org/pod/Alien::TALib">Alien::TALib - Perl extension to install TA-lib</a></li>
+ <li><a href="/2020/07/TA-LIB-und-Finance-TA-auf-Ubuntu-installieren.html">TA-LIB und Finance::TA auf Ubuntu installieren</a></li>
+ <li><a href=""></a></li>
+</ul>
+
+<p>&nbsp;</p>
