@@ -1,0 +1,90 @@
+---
+layout: post
+title: Historische Volatilität von Wertpapieren mit Math::Business::BlackScholes berechnen
+date: '2021-08-06 10:00:00 +0200'
+permalink: /2021/08/historische-volatilitaet-von-wertpapieren-mit-math-business-blackscholes-berechnen.html
+categories:
+- 'finance'
+---
+<p>&nbsp;</p>
+<h2>Math::Business::BlackScholes</h2>
+<p>
+Das CPAN-Modul <a href="https://metacpan.org/pod/Math::Business::BlackScholes">Math::Business::BlackScholes -  Black-Scholes option price model functions</a> von <a href="https://metacpan.org/author/ANDERS">Anders Johnson</a> bietet neben Funktionen zur Berechnung der Preise von klassischen Put- bzw. Call-<a href="https://de.wikipedia.org/wiki/Option_%28Wirtschaft%29">Optionen</a> nach dem <a href="https://de.wikipedia.org/wiki/Black-Scholes-Modell">Black-Scholes-Modell</a> auch eine Funktion zur Berechnung der <a href="https://www.gabler-banklexikon.de/definition/historische-volatilitaet-58703">historischen Volatilität von Wertpapieren</a>. 
+</p>
+<p>
+In diesem Beitrag geht es ausschließlich um die historische Volatilität, alle anderen Funktionen des Moduls werden nicht besprochen.
+</p>
+<h3>Zentrierte historische Volatilität</h3>
+<p>
+<a href="https://metacpan.org/pod/Math::Business::BlackScholes">Math::Business::BlackScholes</a> berechnet die annualisierte historische Volatilität als Standardabweichung der logarithmischen Renditen (stetige Verzinsung), die auch als zentrierte historische Volatilität bezeichnet wird.
+</p>
+
+
+<p>&nbsp;</p>
+<h2>Beispiel: Historische Volatilität</h2>
+<p>
+Das folgende Beispiel ruft zunächst die historischen Börsenkurse der letzen 30 Tage mittels <a href="https://metacpan.org/pod/Finance::QuoteHist">Finance::QuoteHist</a>, das <a href="/2009/06/financequotehist-historische-borsenkursdaten-einfach-abrufen.html">bereits hier beschrieben</a> wurde, ab.
+</p>
+<p>
+Im nächsten Schritt wird mittels der Funktion <em>historical_volatility</em> die annualisierte historische Volatilität berechnet. Die Funktion <em>historical_volatility</em> erwartet zwei Parameter: eine Referenz auf eine Liste der Schlusskurse und optional die Anzahl der Tradingtage pro Jahr (default 250 Tage).
+</p>
+<p>
+Die Anzahl der Elemente in der Liste der Schlusskurse wird von <em>historical_volatility</em> als Anzahl der Tage gewertet, für welche die historische Volatilität berechnet werden soll. Wenn die Liste 30 Elemente enthält, wird die Vola über 30 Tradingtage berechnet - bei 50 Elementen über 50 Tradingtage. Wenn weniger als 10 Elemente angeliefert werden, bricht die Funktion ab.
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Finance::QuoteHist</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Math::Business::BlackScholes</span> <span style="color: #CD5555;">qw/historical_volatility/</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@symbols</span>       = <span style="color: #CD5555;">qw/^DJI ^GDAXI/</span><span style="color: #000000;">;</span> <span style="color: #228B22;"># Dow Jones and DAX indices</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$days_per_year</span> = <span style="color: #B452CD;">252</span><span style="color: #000000;">;</span> <span style="color: #228B22;"># Trading days per year</span>
+
+<span style="color: #228B22;"># Defaults to Finance::QuoteHist::Yahoo</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$q</span> = <span style="color: #000000;">Finance::QuoteHist</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span>
+    <span style="color: #000000;">symbols</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #000000;">[</span><span style="color: #00688B;">@symbols</span><span style="color: #000000;">]</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">start_date</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;30 business days ago&#39;</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">end_date</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;today&#39;</span><span style="color: #000000;">,</span>
+<span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$symbol</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@symbols</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@closing_prices</span><span style="color: #000000;">;</span>
+    <span style="color: #228B22;"># Iterate over quotes and collect closing prices</span>
+    <span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$quote</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$q</span><span style="color: #00688B;">-&gt;quotes</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$sym</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$date</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$open</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$high</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$low</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$close</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$volume</span> <span style="color: #000000;">)</span> = <span style="color: #00688B;">@$quote</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">next</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$sym</span> <span style="color: #8B008B; font-weight:bold;">eq</span> <span style="color: #00688B;">$symbol</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">push</span> <span style="color: #00688B;">@closing_prices</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$close</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$days_in_scope</span>         = <span style="color: #8B008B; font-weight:bold;">scalar</span> <span style="color: #00688B;">@closing_prices</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$historical_volatility</span> = <span style="color: #00688B;">historical_volatility</span><span style="color: #000000;">(</span> \<span style="color: #00688B;">@closing_prices</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$days_per_year</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;Centered historical volatility ($days_in_scope days) for $symbol: $historical_volatility&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+Das Programm erzeugt z.B. folgende Ausgabe:
+</p>
+<pre>
+Centered historical volatility (30 days) for ^DJI: 0.11825075886597
+Centered historical volatility (30 days) for ^GDAXI: 0.147215875305835
+</pre>
+
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+
+<ul class="no-bullet">
+ <li><a href="https://metacpan.org/pod/Math::Business::BlackScholes">Math::Business::BlackScholes -  Black-Scholes option price model functions</a></li>
+ <li><a href="https://www.gabler-banklexikon.de/definition/historische-volatilitaet-58703">Gabler Banklexikon: historische Volatilität</a></li>
+ <li><a href="https://www.ideas-magazin.de/2016/ausgabe-172/wissen/volatilitaet-definition-erklaerung">Ideas Magazin - Volatilität: Definition und Erklärung </a></li>
+ <li><a href="https://de.wikipedia.org/wiki/Volatilit%C3%A4t">Wikipedia - Volatilität</a></li>
+ <li><a href="https://en.wikipedia.org/wiki/Volatility_(finance)">Wikipedia (en) - Volatility (finance)</a></li>
+ <li><a href="https://goodcalculators.com/historical-volatility-calculator/">Historical Volatility Calculator</a></li>
+ <li><a href=""></a></li>
+</ul>
+
+<p>&nbsp;</p>
+
