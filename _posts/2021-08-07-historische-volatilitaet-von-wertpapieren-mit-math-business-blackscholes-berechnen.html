@@ -72,6 +72,163 @@ Centered historical volatility (30 days) for ^DJI: 0.11825075886597
 Centered historical volatility (30 days) for ^GDAXI: 0.147215875305835
 </pre>
 
+<p>&nbsp;</p>
+<h2>Beispiel: Rollende Historische Volatilität</h2>
+<p>
+In diesem Beispiel soll die historische Volatilität über die letzten 30 Tradingtage für historische Kursdaten berechnet werden.
+</p>
+<p>
+Da mindestens 30 Schlusskurse (Array Index 29) zur Berechnung der historischen Volatilität benötigt werden, kann an den ersten 29 Tagen (Array Index von 0 bis 28) keine Vola berechnet werden. 
+</p>
+<p>
+Wie oben bereits erwähnt erwartet <em>historical_volatility()</em> einen genau passenden Array als ersten Parameter. Daher wird die Liste der Schlusskurse, die an <em>historical_volatility()</em> übergeben wird, mittels <a href="https://www.geeksforgeeks.org/perl-array-slices/">Array Slices</a> während des Loops über alle Schlusskurse passend erzeugt. 
+</p>
+<pre>
+#!/usr/bin/perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Finance::QuoteHist</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Math::Business::BlackScholes</span> <span style="color: #CD5555;">qw/historical_volatility/</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@symbols</span>       = <span style="color: #CD5555;">qw/^DJI ^GDAXI/</span><span style="color: #000000;">;</span>    <span style="color: #228B22;"># Dow Jones and DAX indices</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$days_per_year</span> = <span style="color: #B452CD;">252</span><span style="color: #000000;">;</span>                <span style="color: #228B22;"># Trading days per year</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$days_in_scope</span> = <span style="color: #B452CD;">30</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Defaults to Finance::QuoteHist::Yahoo</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$q</span> = <span style="color: #000000;">Finance::QuoteHist</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span>
+    <span style="color: #000000;">symbols</span>    <span style="color: #000000;">=&gt;</span> <span style="color: #000000;">[</span><span style="color: #00688B;">@symbols</span><span style="color: #000000;">]</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">start_date</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;45 business days ago&#39;</span><span style="color: #000000;">,</span>
+    <span style="color: #000000;">end_date</span>   <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;today&#39;</span><span style="color: #000000;">,</span>
+<span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$symbol</span> <span style="color: #000000;">(</span><span style="color: #00688B;">@symbols</span><span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #228B22;"># 3 parallel arrays</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@closing_prices</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@dates</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@historical_vola</span><span style="color: #000000;">;</span>
+    <span style="color: #228B22;"># Iterate over quotes and collect closing prices and dates</span>
+    <span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$quote</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$q</span><span style="color: #00688B;">-&gt;quotes</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$sym</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$date</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$open</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$high</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$low</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$close</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$volume</span> <span style="color: #000000;">)</span> = <span style="color: #00688B;">@$quote</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">next</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$sym</span> <span style="color: #8B008B; font-weight:bold;">eq</span> <span style="color: #00688B;">$symbol</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">push</span> <span style="color: #00688B;">@closing_prices</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$close</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">push</span> <span style="color: #00688B;">@dates</span><span style="color: #000000;">,</span>          <span style="color: #00688B;">$date</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #228B22;"># Loop over closing_prices,</span>
+    <span style="color: #228B22;"># slice array @closing_prices to suit historical_volatility()</span>
+    <span style="color: #228B22;"># and collect dates and hist vola</span>
+    <span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$i</span> = <span style="color: #B452CD;">0</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span> &lt;= <span style="color: #00688B;">$#closing_prices</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span>++ <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #00688B;">$historical_vola</span>[<span style="color: #00688B;">$i</span>] = <span style="color: #CD5555;">&#39;N/A&#39;</span><span style="color: #000000;">;</span>
+        <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$i</span> &gt;= <span style="color: #00688B;">$days_in_scope</span> - <span style="color: #B452CD;">1</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+            <span style="color: #228B22;"># Array slice from current index (upper) back down to lookup period (days in scope) -1 (lower)</span>
+            <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$lower</span>                   = <span style="color: #00688B;">$i</span> - <span style="color: #000000;">(</span> <span style="color: #00688B;">$days_in_scope</span> - <span style="color: #B452CD;">1</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+            <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@closing_prices_in_scope</span> = <span style="color: #00688B;">@closing_prices</span>[ <span style="color: #00688B;">$lower</span> .. <span style="color: #00688B;">$i</span> ]<span style="color: #000000;">;</span>
+            <span style="color: #00688B;">$historical_vola</span>[<span style="color: #00688B;">$i</span>] = <span style="color: #00688B;">historical_volatility</span><span style="color: #000000;">(</span> \<span style="color: #00688B;">@closing_prices_in_scope</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$days_per_year</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+        <span style="color: #000000;">}</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #228B22;"># Loop over closing_prices and display index, current symbol, closing price and computed vola</span>
+    <span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$i</span> = <span style="color: #B452CD;">0</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span> &lt;= <span style="color: #00688B;">$#closing_prices</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span>++ <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;$i $symbol $dates[$i] $closing_prices[$i] $historical_vola[$i]&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+Das Programm erzeugt z.B. folgende Ausgabe:
+</p>
+<pre>
+0 ^DJI 2021/06/07 34630.2383 N/A
+1 ^DJI 2021/06/08 34599.8203 N/A
+2 ^DJI 2021/06/09 34447.1406 N/A
+3 ^DJI 2021/06/10 34466.2383 N/A
+4 ^DJI 2021/06/11 34479.6016 N/A
+5 ^DJI 2021/06/14 34393.7500 N/A
+6 ^DJI 2021/06/15 34299.3281 N/A
+7 ^DJI 2021/06/16 34033.6719 N/A
+8 ^DJI 2021/06/17 33823.4492 N/A
+9 ^DJI 2021/06/18 33290.0781 N/A
+10 ^DJI 2021/06/21 33876.9688 N/A
+11 ^DJI 2021/06/22 33945.5781 N/A
+12 ^DJI 2021/06/23 33874.2383 N/A
+13 ^DJI 2021/06/24 34196.8203 N/A
+14 ^DJI 2021/06/25 34433.8398 N/A
+15 ^DJI 2021/06/28 34283.2695 N/A
+16 ^DJI 2021/06/29 34292.2891 N/A
+17 ^DJI 2021/06/30 34502.5117 N/A
+18 ^DJI 2021/07/01 34633.5312 N/A
+19 ^DJI 2021/07/02 34786.3516 N/A
+20 ^DJI 2021/07/06 34577.3711 N/A
+21 ^DJI 2021/07/07 34681.7891 N/A
+22 ^DJI 2021/07/08 34421.9297 N/A
+23 ^DJI 2021/07/09 34870.1602 N/A
+24 ^DJI 2021/07/12 34996.1797 N/A
+25 ^DJI 2021/07/13 34888.7891 N/A
+26 ^DJI 2021/07/14 34933.2305 N/A
+27 ^DJI 2021/07/15 34987.0195 N/A
+28 ^DJI 2021/07/16 34687.8516 N/A
+29 ^DJI 2021/07/19 33962.0391 0.124834226102961
+30 ^DJI 2021/07/20 34511.9883 0.134218934103578
+31 ^DJI 2021/07/21 34798.0000 0.135727160336629
+32 ^DJI 2021/07/22 34823.3516 0.135730492963977
+33 ^DJI 2021/07/23 35061.5508 0.137060882957344
+34 ^DJI 2021/07/26 35144.3086 0.136828649663936
+35 ^DJI 2021/07/27 35058.5195 0.136761489180455
+36 ^DJI 2021/07/28 34930.9297 0.1349734387388
+37 ^DJI 2021/07/29 35084.5312 0.133565951288527
+38 ^DJI 2021/07/30 34935.4688 0.124188328961976
+39 ^DJI 2021/08/02 34838.1602 0.11499320795688
+40 ^DJI 2021/08/03 35116.3984 0.116799789157168
+41 ^DJI 2021/08/04 34792.6719 0.120453610376238
+42 ^DJI 2021/08/05 35064.2500 0.119465773449191
+43 ^DJI 2021/08/06 35211.3086 0.118492022837183
+0 ^GDAXI 2021/06/07 15677.1504 N/A
+1 ^GDAXI 2021/06/08 15640.5996 N/A
+2 ^GDAXI 2021/06/09 15581.1396 N/A
+3 ^GDAXI 2021/06/10 15571.2197 N/A
+4 ^GDAXI 2021/06/11 15693.2695 N/A
+5 ^GDAXI 2021/06/14 15673.6396 N/A
+6 ^GDAXI 2021/06/15 15729.5195 N/A
+7 ^GDAXI 2021/06/16 15710.5703 N/A
+8 ^GDAXI 2021/06/17 15727.6699 N/A
+9 ^GDAXI 2021/06/18 15448.0400 N/A
+10 ^GDAXI 2021/06/21 15603.2402 N/A
+11 ^GDAXI 2021/06/22 15636.3301 N/A
+12 ^GDAXI 2021/06/23 15456.3896 N/A
+13 ^GDAXI 2021/06/24 15589.2305 N/A
+14 ^GDAXI 2021/06/25 15607.9697 N/A
+15 ^GDAXI 2021/06/28 15554.1797 N/A
+16 ^GDAXI 2021/06/29 15690.5898 N/A
+17 ^GDAXI 2021/06/30 15531.0400 N/A
+18 ^GDAXI 2021/07/01 15603.8096 N/A
+19 ^GDAXI 2021/07/02 15650.0898 N/A
+20 ^GDAXI 2021/07/05 15661.9697 N/A
+21 ^GDAXI 2021/07/06 15511.3799 N/A
+22 ^GDAXI 2021/07/07 15692.7100 N/A
+23 ^GDAXI 2021/07/08 15420.6396 N/A
+24 ^GDAXI 2021/07/09 15687.9297 N/A
+25 ^GDAXI 2021/07/12 15790.5098 N/A
+26 ^GDAXI 2021/07/13 15789.6396 N/A
+27 ^GDAXI 2021/07/14 15788.9805 N/A
+28 ^GDAXI 2021/07/15 15629.6602 N/A
+29 ^GDAXI 2021/07/16 15540.3096 0.132886029847589
+30 ^GDAXI 2021/07/19 15133.2002 0.153747543860939
+31 ^GDAXI 2021/07/20 15216.2695 0.154727885312354
+32 ^GDAXI 2021/07/21 15422.5000 0.160355346073778
+33 ^GDAXI 2021/07/22 15514.5400 0.159598602711704
+34 ^GDAXI 2021/07/23 15669.2900 0.162434221185135
+35 ^GDAXI 2021/07/26 15618.9805 0.162322368614483
+36 ^GDAXI 2021/07/27 15519.1299 0.163323138451846
+37 ^GDAXI 2021/07/28 15570.3604 0.163636303169993
+38 ^GDAXI 2021/07/29 15640.4697 0.155067342214758
+39 ^GDAXI 2021/07/30 15544.3896 0.153399408966577
+40 ^GDAXI 2021/08/02 15568.7305 0.153335017048669
+41 ^GDAXI 2021/08/03 15555.0801 0.149352162877445
+42 ^GDAXI 2021/08/04 15692.1299 0.149461080971496
+43 ^GDAXI 2021/08/05 15744.6699 0.149719787680581
+44 ^GDAXI 2021/08/06 15778.0996 0.149363427544281
+</pre>
 
 <p>&nbsp;</p>
 <h2>Siehe auch</h2>
