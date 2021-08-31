@@ -1,0 +1,412 @@
+---
+layout: post
+title: Perl on Docker - Dancer2 Hello World Beispiel
+date: '2021-08-31 08:15:00 +0200'
+permalink: /2021/08/perl-on-docker-dancer2-hello-world-example.html
+excerpt: "Perl on Docker - Dancer2 Hello World Beispiel f&uuml;r Docker-Einsteiger"
+---
+<p>
+<img alt="Camel looking outside from hut" src="/assets/images/peter-fogden-37eRee0YrNk-unsplash.jpg" class="float-center"/>
+</p>
+
+<p>&nbsp;</p>
+<p>
+<a href="https://www.docker.com/">Docker</a> ist eine Freie Software zur Isolierung von Anwendungen mit Hilfe von <a href="https://de.wikipedia.org/wiki/Containervirtualisierung">Containervirtualisierung</a>. 
+</p>
+<p>
+Laut <a href="https://de.wikipedia.org/wiki/Docker_%28Software%29">Wikipedia</a> <em>vereinfacht [Docker] die Bereitstellung von Anwendungen, weil sich Container, die alle n&ouml;tigen Pakete enthalten, leicht als Dateien transportieren und installieren lassen. Container gew&auml;hrleisten die Trennung und Verwaltung der auf einem Rechner genutzten Ressourcen. Das beinhaltet laut Aussage der Entwickler: Code, Laufzeitmodul, Systemwerkzeuge, Systembibliotheken – alles was auf einem Rechner installiert werden kann.</em>.
+</p>
+<p>
+Dieser Beitrag besch&auml;fitigt sich mit der Containerisierung/Dockerisierung einer sehr einfachen <a href="https://metacpan.org/pod/Dancer2">Dancer2</a> Webapplikation und richtet sich an Dockereinsteiger mit minimalen Dockerkenntnissen.
+</p>
+
+<p>&nbsp;</p>
+<h2>Schritt f&uuml;r Schritt</h2>
+<p>
+In einem eigenen Verzeichnis werden die Datei der Webapplikation <em>hello-world.pl</em> und ein <a href="https://docs.docker.com/engine/reference/builder/">Dockerfile</a> erstellt.
+</p>
+<h3>Hello World App</h3>
+<pre>
+<span style="color: #228B22;"># Shamelessly stolen from https://metacpan.org/pod/Dancer2</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Dancer2</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">get</span> <span style="color: #CD5555;">&#39;/&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #8B008B; font-weight:bold;">sub</span> <span style="color: #000000;">{</span> <span style="color: #CD5555;">&quot;Hello World\n&quot;</span> <span style="color: #000000;">}</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">dance</span><span style="color: #000000;">;</span>
+</pre>
+
+<h3>Dockerfile</h3>
+<pre>
+FROM ubuntu:focal
+# https://hub.docker.com/_/ubuntu/
+# https://github.com/docker-library/official-images
+
+LABEL maintainer="Your Name &lt;YourMail@example.com&gt;"
+LABEL version="0.10"
+LABEL description="Just Another Docker Ubuntu Focal Image running Dancer2 hello-world using build-in server"
+
+
+# Upgrade already installed packages
+# Install Dancer2
+# Install File::Slurper
+# Install Template-Toolkit
+# Install SQLite3
+# Install vim
+# Autoremove unused packages
+# Clean local repos
+# Free disk space to decrease image size
+ARG DEBIAN_FRONTEND=noninteractive
+RUN set -ex; \
+       apt-get update &amp;&amp; \
+       apt-get dist-upgrade -y &amp;&amp; \
+       apt-get -qq -y --no-install-recommends install \
+       libdancer2-perl \
+       libfile-slurper-perl \
+       libtemplate-perl \
+       sqlite3 libdbd-sqlite3-perl \
+       vim \
+       &amp; apt-get -y autoremove &amp; apt-get clean \
+       ; \
+    rm -rf /var/lib/apt/lists/* ; \
+    rm -rf /tmp/*
+
+WORKDIR /app
+
+COPY ./hello-world.pl /app/
+
+EXPOSE 3000/tcp
+
+ENTRYPOINT ["perl", "/app/hello-world.pl"]
+</pre>
+<p>
+Das neue Container-Image basiert auf dem offiziellem <a href="https://hub.docker.com/_/ubuntu/">Ubuntu Focal</a> Docker Image (<a href="https://docs.docker.com/engine/reference/builder/#from">FROM</a> ubuntu:focal).
+</p>
+<p>
+Per <a href="https://docs.docker.com/config/labels-custom-metadata/">LABEL</a> werden diverse Metadaten gesetzt, welche die Verwaltung der Images erleichtern sollen.
+<p/>
+<p>
+Mittels <a href="https://wiki.ubuntuusers.de/apt/apt-get/">apt-get</a> werden zun&auml;chst alle installierten Pakete auf den neuesten Stand gebracht und <a href="https://metacpan.org/pod/Dancer2">Dancer2</a> installiert. Die Umgebungsvariable <em>DEBIAN_FRONTEND</em> wird per <a href="https://docs.docker.com/engine/reference/builder/#arg">ARG</a> tempor&auml;r &ndash; also nur w&auml;hrend des Builds &ndash; gesetzt. (Bei der Verwendung von <a href="https://docs.docker.com/engine/reference/builder/#env">ENV</a> werden Umgebungsvariablen dauerhaft (unver&auml;nderlich) im Image gesetzt.)  
+<p>
+</p>
+Der Vollst&auml;ndigkeit halber werden die &ndash; im <a href="https://metacpan.org/dist/Dancer2/view/lib/Dancer2/Tutorial.pod">Dancer2::Tutorial</a> erw&auml;hnten &ndash; Module <a href="https://metacpan.org/pod/Template">Template-Toolkit</a>, <a href="https://metacpan.org/pod/File::Slurper">File::Slurper</a>, <a href="https://metacpan.org/pod/DBD::SQLite">DBD::SQLite</a> und die Datenbank <a href="https://sqlite.org/index.html">SQLite</a> installiert, auch wenn sie f&uuml;r das Beispiel nicht ben&ouml;tigt werden.
+</p>
+<p>
+Danach werden noch alle tempor&auml;ren Dateien und apt-repos gel&ouml;scht, um das Image so klein wie m&ouml;glich zu halten.
+</p>
+<p>
+Die <a href="https://docs.docker.com/engine/reference/builder/#workdir">WORKDIR</a>-Anweisung erzeugt den Ordner <em>/app</em> im Containerimage und setzt diesen als Startpunkt für nachfolgende Befehle, z.B. COPY. 
+</p>
+<p>
+Anschlie&szlig;end wird die Datei <em>hello-world.pl</em> im aktuellen Verzeichis per <a href="https://docs.docker.com/engine/reference/builder/#copy">COPY</a> in das Image kopiert.
+</p>
+<p>
+Der in Dancer2 eingebaute Miniwebserver nutzt den TCP-Port 3000, der per <a href="https://docs.docker.com/engine/reference/builder/#expose">EXPOSE</a> von aussen zug&auml;nglich gemacht wird.
+</p>
+<p>
+Im letzten Schritt wird mittels <a href="https://docs.docker.com/engine/reference/builder/#entrypoint">ENTRYPOINT</a> die Anwendung gesetzt, die mit dem Start des Containers gestartet werden soll. (Hier k&ouml;nnte man auch <a href="https://docs.docker.com/engine/reference/builder/#cmd">CMD</a> verwenden.)
+</p>
+
+
+<p>&nbsp;</p>
+<h2>Docker in Aktion</h2>
+<p>
+Docker l&auml;uft unter Linux mit <em>root</em>-Rechten. Alle Kommandos m&uuml;ssen daher als <em>root</em>-User oder mit <em>sudo</em>-Rechten ausgef&uuml;hrt werden. Die oft in Blogs  empfohlene <a href="https://docs.docker.com/engine/install/linux-postinstall/">Verwendung der <em>docker</em>-Gruppe</a> &ouml;ffnet einen <a href="https://docs.docker.com/engine/security/#docker-daemon-attack-surface">Angriffsvektor</a>, den ich allenfalls in Entwicklungsumgebungen toleriere.
+
+</p>
+<p>
+In diesem Beitrag wird daher stets folgende Form verwendet:
+</p>
+<pre>
+sudo docker command
+</pre>
+<p>
+Wem das h&auml;ufige Eintippen des <em>sudo</em>-Befehls zu l&auml;stig ist, empfehle ich einen <a href"https://wiki.ubuntuusers.de/alias/">Shell-Alias</a> wie <em>alias docker="sudo docker"</em>.
+</p>
+<p>
+Die nachfolgend aufgef&uuml;hrten Kommandos werden in dem Ordner ausgef&uuml;hrt, in dem sich die beiden o.a. Dateien befinden.
+</p>
+
+<p>&nbsp;</p>
+<h3>Containerimage bauen</h3>
+<p>
+Das Kommando <a href="https://docs.docker.com/engine/reference/commandline/build/">docker build</a> erzeugt eine Containerimagedatei aus den Anweisungen im <em>Dockerfile</em>. Aktuelle Dockerversionen (18.09 oder h&ouml;her) k&ouml;nnen <a href="https://docs.docker.com/develop/develop-images/build_enhancements/">BuildKit</a> verwenden - die neue und optimierte build-Version.
+</p>
+<pre>
+sudo DOCKER_BUILDKIT=1 docker build -t dancer-hello-world .
+</pre>
+<p>
+oder ohne BuildKit
+</p>
+<pre>
+sudo docker build -t dancer-hello-world .
+</pre>
+</p>
+<p>
+Der Parameter <em>-t</em> tagged (benennt) das neu erstellte Image. So k&ouml;nnen Images in weiteren Kommandos auch &uuml;ber den Namen statt der ID angesprochen werden.
+</p>
+<p>
+Der Punkt (.) bezieht sich auf das <em>Dockerfile</em> im aktuellen Verzeichnis.
+</p>
+<p>&nbsp;</p>
+<h3>Images listen</h3>
+<p>
+Vorhandene Images lassen sich mit <a href="https://docs.docker.com/engine/reference/commandline/images/">docker images</a> anzeigen.
+</p>
+<pre>
+sudo docker images
+
+REPOSITORY           TAG       IMAGE ID       CREATED       SIZE
+dancer-hello-world   latest    72ba77dc6169   4 hours ago   194MB
+</pre>
+<p>
+Noch mehr Informationen &uuml;ber das Image liefert <a href="https://docs.docker.com/engine/reference/commandline/inspect/">docker inspect</a>.
+</p>
+<pre>
+sudo docker inspect dancer-hello-world
+
+[
+    {
+        "Id": "sha256:72ba77dc6169d6bc1d08ef56c24b7d5ca74fef84554a9a80ad364c0c3a7a53d1",
+        "RepoTags": [
+            "dancer-hello-world:latest"
+        ],
+...
+   }
+]
+</pre>
+
+
+<p>&nbsp;</p>
+<h3>Container mit App erzeugen und starten</h3>
+<p>
+<a href="https://docs.docker.com/engine/reference/commandline/run/">docker run</a> erzeugt aus einem Docker-Image einen Container und startet diesen auch sofort.
+</p>
+<pre>
+sudo docker run -p 3000:3000 -d --name dancer dancer-hello-world
+
+063f9bf4824971fd9fbccf372ea3737d7804d08e37dfcf9975c23b6ce48c7db
+</pre>
+<p>
+Der Parameter <em>-d</em> l&auml;sst den Container im Hintergrund (detached) laufen, <em>--name</em> vergibt einen Namen f&uuml;r den Container, <em>-p</em> erzeugt ein Portmapping vom Dockerhost zum Dockercontainer.
+</p>
+
+<p>&nbsp;</p>
+<h3>Container auflisten</h3>
+<p>
+Mit <a href="https://docs.docker.com/engine/reference/commandline/ps/">docker ps</a> k&ouml;nnen vorhandene Container angezeigt werden.
+</p>
+<pre>
+sudo docker ps -a
+
+CONTAINER ID   IMAGE                COMMAND                  CREATED         STATUS         PORTS                                       NAMES
+063f9bf48249   dancer-hello-world   "perl /app/hello-wor…"   8 minutes ago   Up 8 minutes   0.0.0.0:3000-&gt;3000/tcp, :::3000-&gt;3000/tcp   dancer
+</pre>
+<p>
+Der Parameter <em>-a</em> zeigt alle Container an, also auch solche, die bereits beendet sind.
+</p>
+
+<p>&nbsp;</p>
+<h3>Container Logs</h3>
+<p>
+Jetzt noch ein kurzer Blick in die Containerlogs mit <a href="https://docs.docker.com/engine/reference/commandline/logs/">docker logs</a>
+</p>
+<pre>
+sudo docker logs dancer
+
+ &gt;&gt; Dancer2 v0.300000 server 1 listening on http://0.0.0.0:3000
+</pre>
+<p>&nbsp;</p>
+<h3>Container Applikation verwenden</h3>
+<p>
+Nachdem ausf&uuml;hrlich gepr&uuml;ft wurde, ob alles l&auml;uft, kann die App ja auch mal verwendet werden:
+</p>
+<pre>
+curl 0.0.0.0:3000
+
+Hello World
+</pre>
+<p>
+Oder <a href="http://0.0.0.0:3000">http://0.0.0.0:3000</a> im Browser &ouml;ffnen.
+</p>
+
+<p>&nbsp;</p>
+<h3>Shellzugang zu einem laufendem Container</h3>
+<p>
+<a href="https://docs.docker.com/engine/reference/commandline/exec/">docker exec</a> erm&ouml;glicht die Ausf&uuml;hrung von Kommandos, z.B. <em>/bin/bash</em>, in einem bereits laufendem Container. 
+</p>
+<pre>
+sudo docker exec -it dancer /bin/bash
+
+root@063f9bf48249:/app#
+</pre>
+<p>
+Die Parameter <em>-i</em> und <em>-t</em> erzeugen einen interaktiven Zugang per Terminal. Sehr hilfreich zum Debuggen. Docker wechselt in das im <em>Dockerfile</em> angegebene <em>WORKDIR</em>.
+</p>
+
+<p>&nbsp;</p>
+<h3>Debuggingtipp</h3>
+<p>
+Falls die Applikation nicht starten will, kann man den <em>ENTRYPOINT</em> des <em>Dockerfile</em> auf der Kommandozeile &uuml;berschreiben und sich per Shell in einen neuen Container einloggen.
+</p>
+<pre>
+sudo docker run -p 3000:3000 --name dancer-x --entrypoint='' -it --rm dancer-hello-world /bin/bash
+
+root@a753025c55d4:/app# perl -c hello-world.pl
+hello-world.pl syntax OK
+
+root@a753025c55d4:/app# exit
+</pre>
+<p>
+Der Parameter <em>--rm</em> l&ouml;scht den Container automatisch nach der Verwendung.
+</p>
+
+
+<p>&nbsp;</p>
+<h3>Container stoppen</h3>
+<p>
+<a href="https://docs.docker.com/engine/reference/commandline/stop/">docker stop</a> stoppt (beendet) einen laufenden Container.
+</p>
+<pre>
+sudo docker stop dancer
+
+dancer
+
+sudo docker ps -a
+
+CONTAINER ID   IMAGE                COMMAND                  CREATED          STATUS                        PORTS     NAMES
+063f9bf48249   dancer-hello-world   "perl /app/hello-wor…"   26 minutes ago   Exited (137) 11 seconds ago             dancer
+
+</pre>
+<p>
+Gestoppte Container lassen sich mit <a href="https://docs.docker.com/engine/reference/commandline/start/">docker start</a> erneut starten.
+</p>
+
+
+<p>&nbsp;</p>
+<h3>Docker Images sichern und verteilen</h3>
+<p>
+Nun kann das Image mit <a href="https://docs.docker.com/engine/reference/commandline/save/">docker save</a> als <a href="https://wiki.ubuntuusers.de/tar/">tar-Archiv</a> gesichert und anschlie&szlig;end komprimiert zum Kunden versandt werden.
+</p>
+<pre>
+sudo docker save dancer-hello-world -o myimage.tar
+sudo gzip myimage.tar
+</pre>
+<p>
+Auf der Empf&auml;ngerseite wird das Image entkomprimiert und mit <a href="https://docs.docker.com/engine/reference/commandline/load/">docker load</a> geladen.
+</p>
+<pre>
+gunzip myimage.tar.gz
+sudo docker load -i myimage.tar
+ &gt;&gt;Loaded image: dancer-hello-world:latest
+</pre>
+
+<p>&nbsp;</p>
+<h3>Aufr&auml;umarbeiten</h3>
+<p>
+Wenn alles getan ist, kann der gestoppte Container per <a href="https://docs.docker.com/engine/reference/commandline/rm/">docker rm</a> gel&ouml;scht werden.
+</p>
+<pre>
+sudo docker ps -a
+CONTAINER ID   IMAGE                COMMAND                  CREATED             STATUS                           PORTS     NAMES
+063f9bf48249   dancer-hello-world   "perl /app/hello-wor…"   About an hour ago   Exited (137) About an hour ago             dancer
+
+sudo docker rm dancer
+dancer
+</pre>
+<p>
+Images k&ouml;nnen mittels <a href="https://docs.docker.com/engine/reference/commandline/rmi/">docker rmi</a> gel&ouml;scht werden, sobald kein Container mehr darauf zugreift.
+</p>
+<pre>
+sudo docker images
+REPOSITORY           TAG       IMAGE ID       CREATED       SIZE
+dancer-hello-world   latest    72ba77dc6169   6 hours ago   194MB
+
+sudo docker rmi dancer-hello-world
+Untagged: dancer-hello-world:latest
+Deleted: sha256:72ba77dc6169d6bc1d08ef56c24b7d5ca74fef84554a9a80ad364c0c3a7a53d1
+</pre>
+
+
+<p>&nbsp;</p>
+<h2>Bonus - PSGI</h2>
+<p>
+Wer statt des eingebauten Miniwebservers lieber <a href="https://metacpan.org/pod/PSGI">PSGI</a> und <a href="https://metacpan.org/dist/Plack/view/script/plackup">plackup</a> verwendet, kann sich folgendes <em>Dockerfile</em> mal anschauen.
+</p>
+<pre>
+FROM ubuntu:focal
+# https://hub.docker.com/_/ubuntu/
+# https://github.com/docker-library/official-images
+
+LABEL maintainer="Your Name &lt;YourMail@example.com&gt;"
+LABEL version="0.10"
+LABEL description="Just Another Docker Ubuntu Focal Image running Dancer2 hello-world with plackup"
+
+
+# Upgrade already installed packages
+# Install Dancer2
+# Insatll Plackup
+# Install File::Slurper
+# Install Template-Toolkit
+# Install SQLite3
+# Install vim
+# Autoremove unused packages
+# Clean local repos
+# Free disk space to decrease image size
+ARG DEBIAN_FRONTEND=noninteractive
+RUN set -ex; \
+       apt-get update &amp;&amp; \
+       apt-get dist-upgrade -y &amp;&amp; \
+       apt-get -qq -y --no-install-recommends install \
+       libdancer2-perl \
+       libplack-perl \
+       libfile-slurper-perl \
+       libtemplate-perl \
+       sqlite3 libdbd-sqlite3-perl \
+       vim \
+       &amp;&amp; apt-get -y autoremove &amp;&amp; apt-get clean \
+       ; \
+    rm -rf /var/lib/apt/lists/* ; \
+    rm -rf /tmp/*
+
+WORKDIR /app
+
+COPY ./hello-world.pl /app/
+
+EXPOSE 5000/tcp
+
+ENTRYPOINT ["/usr/bin/plackup", "/app/hello-world.pl"]
+</pre>
+
+<p>&nbsp;</p>
+<p>
+That's it.
+</p>
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="https://www.docker.com/">Docker</a></li>
+<li><a href="https://docs.docker.com/">Docker Docs</a></li>
+<li><a href="https://docs.docker.com/develop/develop-images/build_enhancements/">Build images with BuildKit</a></li>
+<li><a href="https://docs.docker.com/develop/develop-images/dockerfile_best-practices/">Best practices for writing Dockerfiles</a></li>
+<li><a href="https://hub.docker.com/_/ubuntu/">Official Ubuntu Docker Image</a></li>
+<li><a href="https://metacpan.org/pod/Dancer2">Dancer2</a></li>
+<li><a href="https://perlmaven.com/getting-started-with-perl-on-docker">Getting started with Perl on Docker</a></li>
+<li><a href="https://perlmaven.com/distributing-perl-script-using-docker">Distributing a Perl script using Docker container</a></li>
+<li><a href="https://perlmaven.com/dancer-in-docker">Dancer in Docker</a></li>
+<li><a href="https://perlmaven.com/counter-dancer2-redis-docker">Counter using Dancer2 and Redis in a Docker container</a></li>
+<li><a href="https://perlmaven.com/hello-world-with-mojolicious-in-docker">Hello World with Mojolicious in Docker</a></li>
+<li><a href="https://patrick-picard.medium.com/musings-of-dockerizing-a-perl-application-b72ca2478e0f">Musings of dockerizing a Perl application</a></li>
+<li><a href="http://johnbokma.com/blog/2021/06/09/debugging-a-docker-container.html">Debugging a Perl Docker container</a></li>
+<li><a href="https://dev.to/zakame/a-few-tips-for-perl-on-docker-and-kubernetes-29bg">A few tips for Perl on Docker and Kubernetes </a></li>
+<li><a href="https://perlcon.eu/talk/27">Deploying Perl Apps using Docker, Gitlab & Kubernetes</a></li>
+<li><a href="https://archive.fosdem.org/2017/schedule/event/docker_for_perl/">Docker for Perl[56] People - A Ridiculously Short Introduction</a></li>
+<li><a href="https://blog.perl-academy.de/tag/Docker">Optimierung von Docker-Images</a></li>
+<li><a href="https://kofler.info/docker-container-automatisch-starten/">Docker-Container automatisch starten</a></li>
+</ul>
+
+<p>&nbsp;</p>
+<h2>Bildnachweis</h2>
+<p>
+<a href="https://unsplash.com/photos/37eRee0YrNk">Photo</a> by <a href="https://unsplash.com/@petefogden?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Peter Fogden</a> on <a href="https://unsplash.com/s/photos/container-camel?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+</p>
+<p>&nbsp;</p>
+
