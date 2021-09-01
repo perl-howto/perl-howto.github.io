@@ -1,3 +1,3 @@
-# robots.txt for http://perl-howto.github.io/
+# robots.txt for https://perl-howto.github.io/
 User-agent: *
-Sitemap: http://perl-howto.github.io/sitemap.xml
+Sitemap: https://perl-howto.github.io/sitemap.xml
