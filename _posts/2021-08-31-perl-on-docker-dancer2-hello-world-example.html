@@ -83,7 +83,7 @@ Das neue Container-Image basiert auf dem offiziellem <a href="https://hub.docker
 </p>
 <p>
 Per <a href="https://docs.docker.com/config/labels-custom-metadata/">LABEL</a> werden diverse Metadaten gesetzt, welche die Verwaltung der Images erleichtern sollen.
-<p/>
+</p>
 <p>
 Mittels <a href="https://wiki.ubuntuusers.de/apt/apt-get/">apt-get</a> werden zun&auml;chst alle installierten Pakete auf den neuesten Stand gebracht und <a href="https://metacpan.org/pod/Dancer2">Dancer2</a> installiert. Die Umgebungsvariable <em>DEBIAN_FRONTEND</em> wird per <a href="https://docs.docker.com/engine/reference/builder/#arg">ARG</a> tempor&auml;r &ndash; also nur w&auml;hrend des Builds &ndash; gesetzt. (Bei der Verwendung von <a href="https://docs.docker.com/engine/reference/builder/#env">ENV</a> werden Umgebungsvariablen dauerhaft (unver&auml;nderlich) im Image gesetzt.)
 </p>
