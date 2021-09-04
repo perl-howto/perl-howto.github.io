@@ -85,9 +85,9 @@ Das neue Container-Image basiert auf dem offiziellem <a href="https://hub.docker
 Per <a href="https://docs.docker.com/config/labels-custom-metadata/">LABEL</a> werden diverse Metadaten gesetzt, welche die Verwaltung der Images erleichtern sollen.
 <p/>
 <p>
-Mittels <a href="https://wiki.ubuntuusers.de/apt/apt-get/">apt-get</a> werden zun&auml;chst alle installierten Pakete auf den neuesten Stand gebracht und <a href="https://metacpan.org/pod/Dancer2">Dancer2</a> installiert. Die Umgebungsvariable <em>DEBIAN_FRONTEND</em> wird per <a href="https://docs.docker.com/engine/reference/builder/#arg">ARG</a> tempor&auml;r &ndash; also nur w&auml;hrend des Builds &ndash; gesetzt. (Bei der Verwendung von <a href="https://docs.docker.com/engine/reference/builder/#env">ENV</a> werden Umgebungsvariablen dauerhaft (unver&auml;nderlich) im Image gesetzt.)  
-<p>
+Mittels <a href="https://wiki.ubuntuusers.de/apt/apt-get/">apt-get</a> werden zun&auml;chst alle installierten Pakete auf den neuesten Stand gebracht und <a href="https://metacpan.org/pod/Dancer2">Dancer2</a> installiert. Die Umgebungsvariable <em>DEBIAN_FRONTEND</em> wird per <a href="https://docs.docker.com/engine/reference/builder/#arg">ARG</a> tempor&auml;r &ndash; also nur w&auml;hrend des Builds &ndash; gesetzt. (Bei der Verwendung von <a href="https://docs.docker.com/engine/reference/builder/#env">ENV</a> werden Umgebungsvariablen dauerhaft (unver&auml;nderlich) im Image gesetzt.)
 </p>
+<p>
 Der Vollst&auml;ndigkeit halber werden die &ndash; im <a href="https://metacpan.org/dist/Dancer2/view/lib/Dancer2/Tutorial.pod">Dancer2::Tutorial</a> erw&auml;hnten &ndash; Module <a href="https://metacpan.org/pod/Template">Template-Toolkit</a>, <a href="https://metacpan.org/pod/File::Slurper">File::Slurper</a>, <a href="https://metacpan.org/pod/DBD::SQLite">DBD::SQLite</a> und die Datenbank <a href="https://sqlite.org/index.html">SQLite</a> installiert, auch wenn sie f&uuml;r das Beispiel nicht ben&ouml;tigt werden.
 </p>
 <p>
@@ -111,7 +111,6 @@ Im letzten Schritt wird mittels <a href="https://docs.docker.com/engine/referenc
 <h2>Docker in Aktion</h2>
 <p>
 Docker l&auml;uft unter Linux mit <em>root</em>-Rechten. Alle Kommandos m&uuml;ssen daher als <em>root</em>-User oder mit <em>sudo</em>-Rechten ausgef&uuml;hrt werden. Die oft in Blogs  empfohlene <a href="https://docs.docker.com/engine/install/linux-postinstall/">Verwendung der <em>docker</em>-Gruppe</a> &ouml;ffnet einen <a href="https://docs.docker.com/engine/security/#docker-daemon-attack-surface">Angriffsvektor</a>, den ich allenfalls in Entwicklungsumgebungen toleriere.
-
 </p>
 <p>
 In diesem Beitrag wird daher stets folgende Form verwendet:
@@ -140,7 +139,6 @@ oder ohne BuildKit
 <pre>
 sudo docker build -t dancer-hello-world .
 </pre>
-</p>
 <p>
 Der Parameter <em>-t</em> tagged (benennt) das neu erstellte Image. So k&ouml;nnen Images in weiteren Kommandos auch &uuml;ber den Namen statt der ID angesprochen werden.
 </p>
