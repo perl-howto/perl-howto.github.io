@@ -1,0 +1,250 @@
+---
+layout: post
+title: Perl on Docker - Multi-stage Builds zur Verk&uuml;rzung von Build-Laufzeiten 
+date: '2021-09-14 08:15:00 +0200'
+permalink: /2021/09/perl-on-docker-multi-stage-builds-zur-verkuerzung-von-build-laufzeiten.html
+excerpt: "Perl on Docker - Multi-stage Builds zur Verk&uuml;rzung von Build-Laufzeiten"
+categories:
+- 'container'
+---
+<p>
+<img alt="Two, baby and adult, brown camels. Dasht-e Kavir also known as Kavir-e Namak and the Great Salt Desert, is a large desert lying in the middle of the Iranian plateau." src="/assets/images/mostafa-meraji-v6wFUMDiTgo-unsplash.jpg" class="float-center"/>
+</p>
+
+<p>&nbsp;</p>
+<h2>Einf&uuml;hrung</h2>
+<p>
+Beim Bau eines Docker-Images werden oft (mehrere) Artifakte erzeugt, deren Erstellung recht zeit- und ressourceaufwendig sein kann. Ein typisches Bespiel daf&uuml;r ist das Kompilieren von umfangreichen C-Programmen.
+</p>
+<p>
+Ohne <a href="https://docs.docker.com/develop/develop-images/multistage-build/">multi-stage builds</a> muss das Image auch bei noch so kleinen &Auml;nderungen am <a href="https://docs.docker.com/engine/reference/builder/">Dockerfile</a> komplett neu erstellt werden.
+</p>
+<p>
+Mit Docker Multi-Stage Builds kann man hingegen innerhalb eines Dockerfiles mehrere unabh&auml;ngige Zwischencontainer/Images erstellen, die jeweils ein Ergebnis (Artefakt)  produzieren. Dieses intermedi&auml;re Ergebnis wird von Docker zwischengespeichert (Cache) und kann von anderen Containern/Images gezogen werden. Es wird also nur der ge&auml;nderte Teil des Images neu erzeugt, alle anderen Teile werden wiederverwendet.
+</p>
+<p>
+In diesem Beitrag wird ein C-Programm (hier ta-lib) aus den Sourcen in ein intermedi&auml;res Image installiert. Dieses Artefakt wird in einem weiterem Build Stage zur Installation eines CPAN-Moduls (hier Finance::TA) wiederverwendet. Wiederholte Docker Builds laufen Dank dieser Vorgehensweise erheblich schneller. 
+</p>
+
+<p>&nbsp;</p>
+<h2>Beispiel: ta-lib in Zwischencontainer kompilieren (Stage 1) und Finance::TA installieren (Stage 2)</h2>
+<p>
+Das nachfolgende Beispiel nutzt <a href="https://hub.docker.com/_/perl">Official Docker Perl Images</a>, die bereits in <a href="/2021/09/perl-on-docker-offizielle-perl-docker-images.html">Perl on Docker - Offizielle Perl Docker Images als Grundlage eigener Images</a> beschrieben wurden, als Basis.
+</p>
+<p>
+Im ersten Schritt wird <a href="https://www.ta-lib.org/">ta-lib</a> wie breits in <a href="/2020/07/TA-LIB-und-Finance-TA-auf-Ubuntu-installieren.html">TA-LIB und Finance::TA auf Ubuntu installieren</a> beschrieben aus den C-Sourcen in einen Zwischencontainer installiert.
+</p>
+<p>
+<p>
+Im zweiten Schritt wird das CPAN Modul <a href="https://metacpan.org/pod/distribution/Finance-TA/TA.pod">Finance::TA</a> mittels <a href="https://metacpan.org/dist/App-cpanminus/view/lib/App/cpanminus/fatscript.pm">cpanm</a> installiert. Die fertigen Binaries, Bibliotheken und Header aus dem ersten Schritt/Zwischencontainer werden in den zweiten Container (Layer) kopiert.
+</p>
+<p>
+Zu Demonstrationszwecken werden noch einige weitere CPAN-Module und ein kleines Testprogramm (<em>finance-ta-sma.pl</em>) installiert. Das Programm wurde bereits in <a href="/2021/08/finance-ta-perl-bibliothek-zur-nutzung-der-technical-analysis-library.html">Finance::TA - Perl Bibliothek zur Nutzung der Technical Analysis Library (http://ta-lib.org)</a> beschrieben.
+</p>
+<p>
+Randnotiz: Hier wird alles &ndash; auch alte Beitr&auml;ge &ndash; wiederverwendet.
+</p>
+
+<p>&nbsp;</p>
+<h2>Dockerfile</h2>
+<p>
+Datei <em>Dockerfile</em>.
+</p>
+<pre>
+<strong># Stage 1: Build TA-LIB</strong>
+FROM perl:5.34.0 <strong>as ta-lib</strong>
+# https://github.com/perl/docker-perl/blob/311f05366d91427d289740dd15fb9401dc4347ef/5.034.000-main-buster/Dockerfile
+
+RUN set -ex; \
+       wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz &amp;&amp; \
+       tar -xvzf ta-lib-0.4.0-src.tar.gz &amp;&amp; \
+       cd ta-lib/ &amp;&amp; \
+       ./configure --prefix=/usr/local &amp;&amp; \
+       make &amp;&amp; \
+       make install; \
+       cd .. ; \
+       rm -rf ta-lib ta-lib-0.4.0-src.tar.gz ;
+
+<strong># Stage 2: Install Finance::TA</strong>
+FROM perl:5.34.0
+
+LABEL maintainer="Thomas Fahle &lt;perlhowto.github.io@gmail.com&gt;"
+LABEL version="0.10"
+LABEL description="Perl on Docker - Finance::TA/ta-lib Container - based on perl:5.34.0 buildpacks-deps"
+
+# Copy compiled (docker cached) ta-lib from stage 1 into stage 2
+<strong>COPY --from=ta-lib /usr/local/lib/libta_lib.* /usr/local/lib/</strong>
+<strong>COPY --from=ta-lib /usr/local/bin/ta-lib-config /usr/local/bin/ta-lib-config</strong>
+<strong>COPY --from=ta-lib /usr/local/include/ta-lib/ /usr/local/include/ta-lib/</strong>
+
+
+# Upgrade already installed packages in noninteractive mode
+# Install SQLite3
+# Install tree
+# Install vim
+# Autoremove unused packages
+# Clean local repos
+#
+# cpanm
+# Install DBD::SQLite
+# Install Finance::TA
+# Install Text::CSV Text::CSV_XS Text::CSV_PP Text::CSV::Slurp
+#
+# Free disk space to decrease image size
+
+ARG DEBIAN_FRONTEND=noninteractive
+# Set TALIB_CFLAGS because
+# ta-lib-config --cflags returns incorrect data
+ARG TALIB_CFLAGS='-I/usr/local/include/ta-lib -DHAVE_CONFIG_H'
+RUN set -ex; \
+    apt-get update &amp;&amp; \
+    apt-get dist-upgrade -y &amp;&amp; \
+    apt-get -y -qq --no-install-recommends install sqlite3 tree vim &amp;&amp; \
+    apt-get -y autoremove &amp;&amp; \
+    apt-get clean \
+    ; \
+    /usr/local/bin/cpanm \
+     DBD::SQLite \
+     Finance::TA \
+     Text::CSV Text::CSV_XS Text::CSV_PP Text::CSV::Slurp \
+    ; \
+    rm -rf /var/lib/apt/lists/* ; \
+    rm -rf /tmp/* ; \
+    rm -rf /root/.cpanm/
+
+WORKDIR /app
+
+# Copy simple demo program into container to check Finance::TA
+COPY ./finance-ta-sma.pl /app/finance-ta-sma.pl
+
+CMD ["/bin/bash"]
+</pre>
+<p>
+Das Image kann jetzt gebaut,
+</p>
+<pre>
+sudo DOCKER_BUILDKIT=1 docker build -t ta-lib-image .
+</pre>
+<p>
+gestartet
+</p>
+<pre>
+sudo docker run -it --rm --name ta-lib ta-lib-image
+</pre>
+<p>
+und getestet werden.
+</p>
+<pre>
+root@c97043f36ab8:/app# /app/finance-ta-sma.pl
+i |      value |   slow_sma |             fast_sma |
+0 |  91.500000 |        N/A |                  N/A |
+1 |  94.815000 |        N/A |                  N/A |
+2 |  94.375000 |        N/A |     93.5633333333333 |
+3 |  95.095000 |   93.94625 |     94.7616666666667 |
+4 |  93.780000 |   94.51625 |     94.4166666666667 |
+5 |  94.625000 |   94.46875 |                 94.5 |
+6 |  92.530000 |    94.0075 |               93.645 |
+7 |  92.750000 |   93.42125 |     93.3016666666667 |
+8 |  90.315000 |     92.555 |               91.865 |
+9 |  92.470000 |   92.01625 |               91.845 |
+</pre>
+
+
+<p>&nbsp;</p>
+<h3>Keine erneute Kompilation von ta-lib (Stage 1) bei &Auml;nderungen in Stage 2</h3>
+<p>
+Falls das Image nach einer Anpassung, z.B. Installation weiterer CPAN-Module, im Abschnitt 2 des <em>Dockerfile</em>s neu gebaut werden muss, so wird nur der zweite Zwischencontainer neu erstellt. Der Zwischencontainer aus Schritt 1 wird <strong>nicht</strong> neu erzeugt, sondern aus dem Docker-Image-Cache gezogen. Dies beschleunigt den erneuten Build-Vorgang erheblich.
+</p>
+<p>
+Bei &Auml;nderungen in Schritt 1 muss nat&uuml;rlich das Zwischenimage neu gebaut werden, da hilft leider nichts.
+</p>
+
+<p>&nbsp;</p>
+<h3>Beispielprogramm <em>finance-ta-sma.pl</em></h3>
+<p>
+Hier noch das Beispielprogramm <em>finance-ta-sma.pl</em> aus <a href="/2021/08/finance-ta-perl-bibliothek-zur-nutzung-der-technical-analysis-library.html">Finance::TA - Perl Bibliothek zur Nutzung der Technical Analysis Library (http://ta-lib.org)</a>:
+</p>
+<pre>
+#!/usr/bin/env perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Finance::TA</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Data straight from https://metacpan.org/dist/Finance-TA/view/TA.pod</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@series</span> = <span style="color: #000000;">(</span>
+    <span style="color: #CD5555;">&#39;91.500000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;94.815000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;94.375000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;95.095000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;93.780000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;94.625000&#39;</span><span style="color: #000000;">,</span>
+    <span style="color: #CD5555;">&#39;92.530000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;92.750000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;90.315000&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;92.470000&#39;</span>
+<span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># https://metacpan.org/dist/Finance-TA/view/TA.pod#TA_SMA-(Simple-Moving-Average)</span>
+<span style="color: #228B22;"># TA_SMA (Simple Moving Average)</span>
+<span style="color: #228B22;"># ($retCode, $begIdx, $outReal) = TA_SMA($startIdx, $endIdx, \@inReal, $optInTimePeriod);</span>
+<span style="color: #228B22;">#</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$startIdx</span> = <span style="color: #B452CD;">0</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$endIdx</span>   = <span style="color: #00688B;">$#series</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Fast SMA</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$optInTimePeriod_fast_sma</span> = <span style="color: #B452CD;">3</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$retCode_fast_sma</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$begIdx_fast_sma</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$result_fast_sma</span> <span style="color: #000000;">)</span> =
+  <span style="color: #00688B;">TA_SMA</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$startIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$endIdx</span><span style="color: #000000;">,</span> \<span style="color: #00688B;">@series</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$optInTimePeriod_fast_sma</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #228B22;"># Die on TA errors</span>
+<span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;Error fast TA_SMA $retCode_fast_sma&quot;</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$retCode_fast_sma</span> == <span style="color: #00688B;">$TA_SUCCESS</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># Slow SMA</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$optInTimePeriod_slow_sma</span> = <span style="color: #B452CD;">4</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$retCode_slow_sma</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$begIdx_slow_sma</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$result_slow_sma</span> <span style="color: #000000;">)</span> =
+  <span style="color: #00688B;">TA_SMA</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$startIdx</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$endIdx</span><span style="color: #000000;">,</span> \<span style="color: #00688B;">@series</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$optInTimePeriod_slow_sma</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #228B22;"># Die on TA errors</span>
+<span style="color: #8B008B; font-weight:bold;">die</span> <span style="color: #CD5555;">&quot;Error slow TA_SMA $retCode_slow_sma&quot;</span> <span style="color: #8B008B; font-weight:bold;">unless</span> <span style="color: #00688B;">$retCode_slow_sma</span> == <span style="color: #00688B;">$TA_SUCCESS</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$format</span> = <span style="color: #CD5555;">&quot;%s | %10s | %10s | %20s |\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">printf</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$format</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;i&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;value&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;slow_sma&#39;</span><span style="color: #000000;">,</span> <span style="color: #CD5555;">&#39;fast_sma&#39;</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">for</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$i</span> = <span style="color: #B452CD;">0</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span> &lt;= <span style="color: #00688B;">$#series</span> <span style="color: #000000;">;</span> <span style="color: #00688B;">$i</span>++ <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$value</span>    = <span style="color: #00688B;">$series</span>[<span style="color: #00688B;">$i</span>]<span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$fast_sma</span> = <span style="color: #CD5555;">&#39;N/A&#39;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$slow_sma</span> = <span style="color: #CD5555;">&#39;N/A&#39;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$i</span> &gt;= <span style="color: #00688B;">$begIdx_fast_sma</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #00688B;">$fast_sma</span> = <span style="color: #00688B;">$result_fast_sma</span>-&gt;[ <span style="color: #00688B;">$i</span> - <span style="color: #00688B;">$begIdx_fast_sma</span> ]<span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #8B008B; font-weight:bold;">if</span> <span style="color: #000000;">(</span> <span style="color: #00688B;">$i</span> &gt;= <span style="color: #00688B;">$begIdx_slow_sma</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+        <span style="color: #00688B;">$slow_sma</span> = <span style="color: #00688B;">$result_slow_sma</span>-&gt;[ <span style="color: #00688B;">$i</span> - <span style="color: #00688B;">$begIdx_slow_sma</span> ]<span style="color: #000000;">;</span>
+    <span style="color: #000000;">}</span>
+    <span style="color: #8B008B; font-weight:bold;">printf</span><span style="color: #000000;">(</span> <span style="color: #00688B;">$format</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$i</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$value</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$slow_sma</span><span style="color: #000000;">,</span> <span style="color: #00688B;">$fast_sma</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+
+<p>
+<p>&nbsp;</p>
+That's it.
+</p>
+
+
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="https://docs.docker.com/develop/develop-images/multistage-build/">Docker - Use multi-stage builds</a></li>
+<li><a href="https://www.docker.com/">Docker</a></li>
+<li><a href="https://docs.docker.com/">Docker Docs</a></li>
+<li><a href="https://hub.docker.com/_/perl">Official Docker Perl</a></li>
+<li><a href="https://github.com/Perl/docker-perl">Github docker-perl</a></li>
+<li><a href="http://johnbokma.com/blog/2021/06/09/debugging-a-docker-container.html">Debugging a Perl Docker container</a></li>
+<li><a href="/2021/08/perl-on-docker-dancer2-hello-world-example.html">Perl on Docker - Dancer2 Hello World Beispiel</a></li>
+<li><a href="/2021/09/perl-on-docker-offizielle-perl-docker-images.html">Perl on Docker - Offizielle Perl Docker Images als Grundlage eigener Images</a></li>
+<li><a href="https://www.ta-lib.org/">TA-Lib: Technical Analysis Library</a></li>
+<li><a href="/2020/07/TA-LIB-und-Finance-TA-auf-Ubuntu-installieren.html">TA-LIB und Finance::TA auf Ubuntu installieren</a></li>
+<li><a href="/2021/08/finance-ta-perl-bibliothek-zur-nutzung-der-technical-analysis-library.html">Finance::TA - Perl Bibliothek zur Nutzung der Technical Analysis Library (http://ta-lib.org)</a></li>
+</ul>
+
+<p>&nbsp;</p>
+<p>
+Source-Code der Beispiele im <a href="https://github.com/perl-howto/perl-howto-code">Github Repo perl-howto-code</a>.
+</p>
+
+<p>&nbsp;</p>
+<h2>Bildnachweis</h2>
+<p>
+<a href="https://unsplash.com/photos/v6wFUMDiTgo">Photo</a> by <a href="https://unsplash.com/@mostafa_meraji?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">mostafa meraji</a> on <a href="https://unsplash.com/s/photos/camel?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+</p>
+<p>&nbsp;</p>
