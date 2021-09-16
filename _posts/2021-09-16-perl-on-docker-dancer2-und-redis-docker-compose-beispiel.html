@@ -1,0 +1,324 @@
+---
+layout: post
+title: Perl on Docker - Dancer2 und Redis docker-compose Beispiel 
+date: '2021-09-16 10:15:00 +0200'
+permalink: /2021/09/perl-on-docker-dancer2-und-redis-docker-compose-beispiel.html
+excerpt: "Perl on Docker - Dancer2 und Redis docker-compose Beispiel"
+categories:
+- 'container'
+---
+<p>
+<img alt="Two kissing camels" src="/assets/images/lesly-juarez-viwGM7jCUFA-unsplash.jpg" class="float-center"/>
+</p>
+
+<p>&nbsp;</p>
+<h2>Einf&uuml;hrung</h2>
+<p>
+Das Einrichten von einzelnen <a href="https://www.docker.com/">Docker-Containern</a> mit <a href="https://docs.docker.com/engine/reference/builder/">Dockerfile</a>s ist eigentlich unkompliziert. Oft ben&ouml;tigt man aber Setups aus mehreren Containern, z.B. einen Front- und einen Backendserver in einem eigenem Netzwerk. 
+</p>
+<p>
+<a href="https://docs.docker.com/compose/">Docker Compose</a> erm&ouml;glicht das Bereitstellen einer Gruppe mit mehreren Containern aus einer Konfigurationsdatei (<em>docker-compose.yml</em> oder <em>docker-compose.yaml</em>) im <a href="https://de.wikipedia.org/wiki/YAML">YAML</a>-Format.
+</p>
+<p>
+In diesem Beitrag wird eine <a href="https://metacpan.org/pod/Dancer2">Dancer2</a>-Webapplikation (Frontend) in einem eigenen Container erstellt. Diese Webapp verwendet einen <a href="https://redis.io/">Redis</a>-Server in einem weiterem Container als Backend im selben Netzwerk. Beide Container werden per <a href="https://docs.docker.com/compose/">Docker Compose</a> gebaut, verbunden und gemeinsam gestartet.
+</p>
+
+<p>&nbsp;</p>
+<h2>Beispiel: Dancer2-Webapp mit Redis-Backend</h2>
+<p>
+Alle nachfolgend aufgef&uuml;hrten Dateien befinden sich in einem eigenen Verzeichnis. 
+</p>
+<p>
+Der Source-Code der Beispiele befindet sich auch <a href="https://github.com/perl-howto/perl-howto-code/Perl-On-Docker/Redis">Github Repo perl-howto-code</a>.
+</p>
+<h3>Dancer2-Webapp</h3>
+<p>
+Zun&auml;chst die Dancer2-Webapp &ndash; Datei <em>redis-counter.pl</em> &ndash; ein einfaches Counter-Programm, welches den Z&auml;hlerstand in einer Redis-Datenbank vorh&auml;lt. 
+</p>
+<pre>
+#!/usr/bin/env perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Dancer2</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Redis</span><span style="color: #000000;">;</span>
+
+<span style="color: #000000;">set</span> <span style="color: #CD5555;">&#39;logger&#39;</span>       <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;console&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">set</span> <span style="color: #CD5555;">&#39;log&#39;</span>          <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;debug&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">set</span> <span style="color: #CD5555;">&#39;show_errors&#39;</span>  <span style="color: #000000;">=&gt;</span> <span style="color: #B452CD;">1</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">set</span> <span style="color: #CD5555;">&#39;startup_info&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #B452CD;">1</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$redis_host</span> = <span style="color: #CD5555;">&#39;myredis&#39;</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$redis_port</span> =  <span style="color: #B452CD;">6379</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$redis</span> = <span style="color: #000000;">Redis</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span> <span style="color: #000000;">server</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&quot;$redis_host:$redis_port&quot;</span> <span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #000000;">get</span> <span style="color: #CD5555;">&#39;/&#39;</span> <span style="color: #000000;">=&gt;</span> <span style="color: #8B008B; font-weight:bold;">sub</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$counter</span> = <span style="color: #00688B;">$redis</span><span style="color: #00688B;">-&gt;incr</span><span style="color: #000000;">(</span><span style="color: #CD5555;">&#39;counter&#39;</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+    <span style="color: #000000;">debug</span> <span style="color: #CD5555;">&quot;Counter: $counter&quot;</span><span style="color: #000000;">;</span>
+    <span style="color: #8B008B; font-weight:bold;">return</span> <span style="color: #CD5555;">&quot;$counter\n&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span><span style="color: #000000;">;</span>
+
+<span style="color: #000000;">dance</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+Redishost und -port (myredis, 6379) m&uuml;ssen mit den Angaben in der Konfigurationsdatei <em>docker-compose.yaml</em> exakt &uuml;bereinstimmen. Dazu sp&auml;ter mehr.
+</p>
+<p>
+Die Ausgabe der eingestreuten <em>debug</em>-logging-Anweisungen l&auml;sst sich auch per <a href="https://docs.docker.com/engine/reference/commandline/logs/">docker logs</a> am laufenden Container einsehen.
+</p>
+
+
+<p>&nbsp;</p>
+<h3>Dockercontainer der Dancer2-Webapp</h3>
+<p>
+Das nachfolgende <em>Dockerfile</em> nutzt <a href="https://hub.docker.com/_/perl">Official Docker Perl Images</a>, die bereits in <a href="/2021/09/perl-on-docker-offizielle-perl-docker-images.html">Perl on Docker - Offizielle Perl Docker Images als Grundlage eigener Images</a> beschrieben wurden, als Basis (<a href="https://docs.docker.com/engine/reference/builder/#from">FROM</a> perl:latest).
+</p>
+<p>
+Zun&auml;chst werden alle installierten Pakete mit <a href="https://wiki.ubuntuusers.de/apt/apt-get/">apt-get</a> auf den neuesten Stand gebracht. Die Umgebungsvariable <em>DEBIAN_FRONTEND</em> wird per <a href="https://docs.docker.com/engine/reference/builder/#arg">ARG</a> tempor&auml;r &ndash; also nur w&auml;hrend des Builds &ndash; gesetzt.
+</p>
+<p>
+Im n&auml;chsten Schritt werden die <a href="https://metacpan.org/">CPAN</a>-Module <a href="https://metacpan.org/pod/Dancer2">Dancer2</a> und <a href="https://metacpan.org/pod/Redis">Redis</a> mit <a href="https://metacpan.org/dist/App-cpanminus/view/lib/App/cpanminus/fatscript.pm">cpanm</a> installiert.
+</p>
+<p>
+Um das Image so klein wie m&ouml;glich zu halten, werden nun noch alle tempor&auml;ren Dateien und apt-repos gel&ouml;scht.
+</p>
+<p>
+Die <a href="https://docs.docker.com/engine/reference/builder/#workdir">WORKDIR</a>-Anweisung erzeugt den Ordner <em>/app</em> im Containerimage und setzt diesen als Startpunkt f&uuml;r nachfolgende Befehle, z.B. COPY.
+</p>
+<p>
+Anschlie&szlig;end wird die Datei <em>redis-counter.pl</em> im aktuellen Verzeichis per <a href="https://docs.docker.com/engine/reference/builder/#copy">COPY</a> in das Image kopiert.
+</p>
+<p>
+Der in Dancer2 eingebaute Miniwebserver nutzt den TCP-Port 3000, der per <a href="https://docs.docker.com/engine/reference/builder/#expose">EXPOSE</a> von aussen zug&auml;nglich gemacht wird.
+</p>
+<p>
+Im letzten Schritt wird mittels <a href="https://docs.docker.com/engine/reference/builder/#entrypoint">ENTRYPOINT</a> die Anwendung gesetzt, die mit dem Start des Containers gestartet werden soll. (Hier k&ouml;nnte man auch <a href="https://docs.docker.com/engine/reference/builder/#cmd">CMD</a> verwenden.)
+</p>
+<p>&nbsp;</p>
+<h4>Dockerfile</h4>
+<p>
+Datei <em>Dockerfile</em>.
+</p>
+<pre>
+FROM perl:latest
+
+LABEL maintainer="Thomas Fahle &lt;perlhowto.github.io@gmail.com&gt;"
+LABEL version="0.10"
+LABEL description="Perl-on-Docker perl:latest buildpacks-deps Image running Dancer2 Redis Example"
+
+
+# apt-get
+# Upgrade already installed packages
+# Autoremove packages unused by other packages
+# Clean local repos
+#
+# cpanm
+# Install Dancer2
+# Install Redis
+#
+# Free disk space to decrease image size
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN set -ex; \
+    apt-get update &amp;&amp; \
+     apt-get dist-upgrade -y &amp;&amp; \
+     apt-get -y autoremove &amp;&amp; \
+     apt-get clean ; \
+    /usr/local/bin/cpanm \
+      Dancer2 \
+      Redis \
+      ; \
+    rm -rf /var/lib/apt/lists/* ; \
+    rm -rf /tmp/* ; \
+    rm -rf /root/.cpanm/
+
+WORKDIR /app
+
+COPY ./redis-counter.pl /app/
+
+EXPOSE 3000/tcp
+
+ENTRYPOINT ["/usr/local/bin/perl", "/app/redis-counter.pl"]
+</pre>
+<p>
+Das Image kann jetzt gebaut
+</p>
+<pre>
+sudo DOCKER_BUILDKIT=1 docker build -t perl-redis-client-image .
+</pre>
+<p>
+und zumindestens &ndash; der Redis-Container l&auml;uft ja noch nicht &ndash; inspiziert werden.
+</p>
+<pre>
+# Debug
+sudo docker run -it --rm --entrypoint='' --name perl-redis-client perl-redis-client-image /bin/bash
+</pre>
+<p>
+Es ist nicht zwingend erforderlich, das Image bereits jetzt zu bauen. Das kann docker-compose ebenfalls erledigen. Es vereinfacht aber das Debugging erheblich.
+</p>
+
+<p>&nbsp;</p>
+<h3>Dockercontainer des Redis-Servers</h2>
+<p>
+F&uuml;r den Redis-Container wird ein vorgefertigtes <a href="https://hub.docker.com/_/redis/">offizielles Redis Image vom Docker Hub</a> mit dem besonders schlanken <a href="https://www.alpinelinux.org/">Alpine Linux</a> verwendet.
+</p>
+<p>
+Redis-Daten werden im <a href="https://docs.docker.com/storage/volumes/">Docker VOLUME</a> <em>/data</em> persistent gespeichert, falls das Volume vorhanden ist.
+</p>
+
+<p>&nbsp;</p>
+<h3>Container mit docker-compose verbinden</h3>
+<p>
+Die nachfolgende Konfiguration erzeugt zwei Services bzw. Container, <em>dancer</em> und <em>myredis</em>, in einem eigenem Netzwerk.
+</p>
+<p>
+Die Servicekennzeichungen werden von <em>docker-compose</em> auch als Hostnamen f&uuml;r die Container verwendet. Der Hostname des Redis-Containers (<em>myredis</em>) wurde auch in der Datei <em>redis-counter.pl</em> hartkodiert.
+</p>
+<p>
+Da kein Netzwerk explizit konfiguriert wurde, legt <em>docker-compose</em> automatisch ein <a href="https://docs.docker.com/compose/networking/">Netzwerk</a> an. Der Name des Netzwerks wird in diesem Fall aus dem Namen des Ordners, hier <em>redis</em>, erzeugt.
+</p>
+<p>
+Der Webapp-Container <em>dancer</em> wird ggf. neu gebaut, &ouml;ffnet den Dancer2-Standard-Port 3000, mappt den Port 3000 des Dockerhosts auf den Port 3000 des Containers und startet mit dem im <em>Dockerfile</em> konfiguriertem Kommando.
+</p>
+<p>
+Da der Webapp-Container <em>dancer</em> ohne den zugeh&ouml;rigen Redis-Container <em>myredis</em> nicht lauff&auml;hig ist, wird <em>dancer</em> erst nach <em>myredis</em> <a href="https://docs.docker.com/compose/startup-order/">gestartet</a>
+</p>
+<p>
+Der Redis-Container <em>myredis</em> nutzt, wie bereits beschrieben, ein vorgefertigtes <a href="https://hub.docker.com/_/redis/">offizielles Redis Image vom Docker Hub</a>, &ouml;ffnet den Redis-Standard-Port 6379 im Netzwerk dieser Containergruppe, mountet das lokale Verzeichnis <em>./redis-data</em> als <a href="https://docs.docker.com/storage/volumes/#use-a-volume-with-docker-compose/">Volume</a> <em>/data</em> und startet den <em>redis-server</em>. 
+</p>
+<p>
+<h4>docker-compose.yml</h4>
+Datei <em>docker-compose.yml</em>
+</p>
+<pre>
+version: '3'
+services:
+  dancer:
+    build: .
+    expose:
+     - "3000"
+    ports:
+     - "3000:3000"
+    depends_on:
+     - "myredis"
+  myredis:
+    image: redis:alpine
+    expose:
+     - "6379"
+    command: redis-server
+    volumes:
+      - ./redis-data:/data
+</pre>
+<h4>Container starten, testen und stoppen</h4>
+<p>
+Containergruppe im Vordergrund starten
+</p>
+<pre>
+sudo docker-compose up
+</pre>
+<p>
+Das sieht dann ungef&auml;hr so aus:
+</p>
+<pre>
+Creating network "redis_default" with the default driver
+Starting redis_myredis_1 ... done
+Starting redis_dancer_1  ... done
+Attaching to redis_myredis_1, redis_dancer_1
+myredis_1  | 1:C 16 Sep 2021 10:39:03.467 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+myredis_1  | 1:C 16 Sep 2021 10:39:03.467 # Redis version=6.2.5, bits=64, commit=00000000, modified=0, pid=1, just started
+myredis_1  | 1:C 16 Sep 2021 10:39:03.467 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf
+myredis_1  | 1:M 16 Sep 2021 10:39:03.468 * monotonic clock: POSIX clock_gettime
+myredis_1  | 1:M 16 Sep 2021 10:39:03.469 * Running mode=standalone, port=6379.
+myredis_1  | 1:M 16 Sep 2021 10:39:03.469 # Server initialized
+myredis_1  | 1:M 16 Sep 2021 10:39:03.469 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add 'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 'sysctl vm.overcommit_memory=1' for this to take effect.
+myredis_1  | 1:M 16 Sep 2021 10:39:03.469 * Ready to accept connections
+dancer_1   | &gt;&gt; Dancer2 v0.301004 server 1 listening on http://0.0.0.0:3000
+</pre>
+<p>
+Testen im Browser <a href="http://127.0.0.1:3000/">http://127.0.0.1:3000/</a> bzw. <a href="http://0.0.0.0:3000/">http://0.0.0.0:3000/</a> oder in einer weiteren Shell.
+</p>
+<pre>
+curl 0.0.0.0:3000
+</pre>
+<p>
+Containergruppe im Vordergrund mit der Tastenkombination <em>Crtl-C</em> stoppen.
+</p>
+<p>
+Die Containergruppe kann nat&uuml;rlich auch im <em>detached</em>-Modus gestartet
+</p>
+<pre>
+sudo docker-compose -d up
+</pre>
+<p>
+und gestoppt werden.
+</p>
+<pre>
+sudo docker-compose down
+</pre>
+<h4>Persistenz der Redis-Daten</h4>
+<p>
+Beim erneuten Start der Containergruppe liest Redis die Datenbank aus dem <a href="https://docs.docker.com/storage/volumes/">VOLUME</a> <em>/data</em> ein: 
+</p>
+<pre>
+...
+myredis_1  | 1:M 16 Sep 2021 10:42:28.509 * Loading RDB produced by version 6.2.5
+myredis_1  | 1:M 16 Sep 2021 10:42:28.509 * RDB age 25 seconds
+myredis_1  | 1:M 16 Sep 2021 10:42:28.509 * RDB memory usage when created 0.77 Mb
+myredis_1  | 1:M 16 Sep 2021 10:42:28.509 * DB loaded from disk: 0.000 seconds
+</pre>
+<h4>Aufr&auml;umarbeiten</h4>
+<p>
+Sobald die Containergruppe nicht mehr ben&ouml;tigt wird, kann weitestgehend aufger&auml;umt werden.
+</p>
+<pre>
+sudo docker-compose down -v --rmi all --remove-orphans
+
+Removing redis_dancer_1  ... done
+Removing redis_myredis_1 ... done
+Removing network redis_default
+Removing image redis:alpine
+Removing image redis_dancer
+</pre>
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="https://docs.docker.com/compose/">Overview of Docker Compose</a></li>
+<li><a href="https://docs.docker.com/compose/samples-for-compose/">Sample apps with Compose</a></li>
+<li><a href="https://github.com/docker/awesome-compose">Awesome Compose Repo - A curated list of Docker Compose samples</a></li>
+<li><a href="https://docs.docker.com/compose/compose-file/compose-file-v3/">Compose file version 3 reference</a></li>
+<li><a href="https://docs.docker.com/storage/volumes/#use-a-volume-with-docker-compose/">Use a volume with docker-compose</a></li>
+<li><a href="https://docs.docker.com/compose/startup-order/">Control startup and shutdown order in Compose</a></li>
+<li><a href="https://docs.docker.com/compose/networking/">Networking in Compose</a></li>
+<li><a href="https://docs.docker.com/compose/environment-variables/">Environment variables in Compose</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/stack/">docker stack</a></li>
+<li><a href="https://www.docker.com/">Docker</a></li>
+<li><a href="https://docs.docker.com/">Docker Docs</a></li>
+
+<li><a href="https://redis.io/">Redis</a></li>
+<li><a href="https://hub.docker.com/_/redis/">Redis - Official Image | Docker Hub</a></li>
+<li><a href="https://edward-cernera.medium.com/intro-to-redis-with-docker-compose-8d53962336cb">Intro to Redis — with Docker Compose</a></li>
+<li><a href="https://metacpan.org/pod/Redis">Redis - Perl binding for Redis database</a></li>
+
+<li><a href="https://metacpan.org/pod/Dancer2">Dancer2</a></li>
+<li><a href="https://perlmaven.com/counter-dancer2-redis-docker">Counter using Dancer2 and Redis in a Docker container</a></li>
+
+<li><a href="https://hub.docker.com/_/perl">Official Docker Perl</a></li>
+<li><a href="https://github.com/Perl/docker-perl">Github docker-perl</a></li>
+<li><a href="/2021/08/perl-on-docker-dancer2-hello-world-example.html">Perl on Docker - Dancer2 Hello World Beispiel</a></li>
+<li><a href="/2021/09/perl-on-docker-offizielle-perl-docker-images.html">Perl on Docker - Offizielle Perl Docker Images als Grundlage eigener Images</a></li>
+<li><a href="/2021/09/perl-on-docker-multi-stage-builds-zur-verkuerzung-von-build-laufzeiten.html">Perl on Docker - Multi-stage Builds zur Verk&uuml;rzung von Build-Laufzeiten</a></li>
+</ul>
+
+<p>&nbsp;</p>
+<p>
+Source-Code der Beispiele im <a href="https://github.com/perl-howto/perl-howto-code">Github Repo perl-howto-code</a>.
+</p>
+
+<p>&nbsp;</p>
+<h2>Bildnachweis</h2>
+<p>
+<a href="https://unsplash.com/photos/viwGM7jCUFA">Photo</a> by <a href="https://unsplash.com/@jblesly?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Lesly Juarez</a> on <a href="https://unsplash.com/s/photos/camel?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+</p>
+<p>&nbsp;</p>
