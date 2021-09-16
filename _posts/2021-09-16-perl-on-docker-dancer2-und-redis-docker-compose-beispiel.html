@@ -159,7 +159,7 @@ Es ist nicht zwingend erforderlich, das Image bereits jetzt zu bauen. Das kann d
 </p>
 
 <p>&nbsp;</p>
-<h3>Dockercontainer des Redis-Servers</h2>
+<h3>Dockercontainer des Redis-Servers</h3>
 <p>
 F&uuml;r den Redis-Container wird ein vorgefertigtes <a href="https://hub.docker.com/_/redis/">offizielles Redis Image vom Docker Hub</a> mit dem besonders schlanken <a href="https://www.alpinelinux.org/">Alpine Linux</a> verwendet.
 </p>
@@ -187,8 +187,8 @@ Da der Webapp-Container <em>dancer</em> ohne den zugeh&ouml;rigen Redis-Containe
 <p>
 Der Redis-Container <em>myredis</em> nutzt, wie bereits beschrieben, ein vorgefertigtes <a href="https://hub.docker.com/_/redis/">offizielles Redis Image vom Docker Hub</a>, &ouml;ffnet den Redis-Standard-Port 6379 im Netzwerk dieser Containergruppe, mountet das lokale Verzeichnis <em>./redis-data</em> als <a href="https://docs.docker.com/storage/volumes/#use-a-volume-with-docker-compose/">Volume</a> <em>/data</em> und startet den <em>redis-server</em>. 
 </p>
-<p>
 <h4>docker-compose.yml</h4>
+<p>
 Datei <em>docker-compose.yml</em>
 </p>
 <pre>
