@@ -210,6 +210,13 @@ services:
     volumes:
       - ./redis-data:/data
 </pre>
+<h4>Container bauen</h4>
+<p>
+Container in einem eigenen Arbeitsschritt <a href="https://www.docker.com/blog/faster-builds-in-compose-thanks-to-buildkit-support/">bauen</a>.
+</p>
+<pre>
+sudo COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build
+</pre>
 <h4>Container starten, testen und stoppen</h4>
 <p>
 Containergruppe im Vordergrund starten
