@@ -12,24 +12,24 @@ categories:
 </p>
 
 <p>&nbsp;</p>
-<h2 id="intro">Einführung</h2>
+<h2 id="intro">Einf&uuml;hrung</h2>
 <p>
-<a href="https://hub.docker.com/_/perl">Official Docker Perl Images</a> sollen das Erstellen eigener Docker-Images für <a href="https://www.perl.org/">Perl</a>-Anwendungen erleichtern.
+<a href="https://hub.docker.com/_/perl">Official Docker Perl Images</a> sollen das Erstellen eigener Docker-Images f&uuml;r <a href="https://www.perl.org/">Perl</a>-Anwendungen erleichtern.
 </p>
 <p>
-Die zahlreichen Varianten beruhen aktuell (Anfang September 2021) auf den <a href="https://hub.docker.com/_/debian">Debian Docker Images</a> für <a href="https://wiki.debian.org/DebianStretch">Stretch (9)</a> bzw. <a href="https://wiki.debian.org/DebianBuster">Buster (10)</a> und bieten 
+Die zahlreichen Varianten beruhen aktuell (Anfang September 2021) auf den <a href="https://hub.docker.com/_/debian">Debian Docker Images</a> f&uuml;r <a href="https://wiki.debian.org/DebianStretch">Stretch (9)</a> bzw. <a href="https://wiki.debian.org/DebianBuster">Buster (10)</a> und bieten
 </p>
 <ul>
 <li>Perlversionen von 5.8 bis aktuell 5.34</li>
 <li>Threaded und non-threaded Perls in allen o.g. Perlversionen</li>
-<li>Unterstützung für <a href="https://github.com/docker-library/official-images#architectures-other-than-amd64">zahlreiche Architekturen</a></li>
+<li>Unterst&uuml;tzung f&uuml;r <a href="https://github.com/docker-library/official-images#architectures-other-than-amd64">zahlreiche Architekturen</a></li>
 <li>Leichtgewichtige <em>slim</em> Varianten, falls minimaler Speicherplatz oder passgenaue eigene Installation erforderlich</li>
 <li>Entwicklerfreundliche <a href="https://hub.docker.com/_/buildpack-deps/">buildpacks-deps</a> Varianten, bei denen zahlreiche Entwicklungsbibliotheken, Header, Compiler usw. bereits vorinstalliert sind</li>
 <li><a href="https://metacpan.org/dist/App-cpanminus/view/lib/App/cpanminus/fatscript.pm">cpanm</a> passend vorinstalliert</li>
 <li>Einsehbare, nachvollziehbare und wiederverwendbare Dockerfiles im offiziellen <a href="https://github.com/Perl/docker-perl">docker-perl</a> Git-Repo.</li>
 </ul>
 <p>
-Dieser Beitrag beschäfigt sich mit <a href="https://hub.docker.com/_/perl">Official Docker Perl Images</a> als Basis für eigene Perl-<a href="https://www.docker.com/">Docker</a>-Images und setzt grundlegende Dockerkenntnisse voraus.
+Dieser Beitrag besch&auml;figt sich mit <a href="https://hub.docker.com/_/perl">Official Docker Perl Images</a> als Basis f&uuml;r eigene Perl-<a href="https://www.docker.com/">Docker</a>-Images und setzt grundlegende Dockerkenntnisse voraus.
 </p>
 
 
@@ -55,7 +55,7 @@ Die Tags finden sich auf der <a href="https://hub.docker.com/_/perl?tab=tags&pag
 curl -s https://registry.hub.docker.com/v1/repositories/perl/tags | jq '.[].name'
 </pre>
 <p>
-Das liefert folgende, hier deutlich gekürzte, Liste:
+Das liefert folgende, hier deutlich gek&uuml;rzte, Liste:
 </p>
 <pre>
 latest"
@@ -72,13 +72,13 @@ latest"
 ...
 </pre>
 <p>
-In den sprechenden Tags steht <em>slim</em> für die <em>slim</em>-Variante, <em>threaded</em> für ein Perl mit Threadunterstützung. Perls ohne Threads &ndash; der Default &ndash; sowie <a href="https://hub.docker.com/_/buildpack-deps/">buildpacks-deps</a> werden nicht gesondert bezeichnet. <em>buster</em> und <em>stretch</em> kennzeichnen die jeweilige Debianbasis.
+In den sprechenden Tags steht <em>slim</em> f&uuml;r die <em>slim</em>-Variante, <em>threaded</em> f&uuml;r ein Perl mit Threadunterst&uuml;tzung. Perls ohne Threads &ndash; der Default &ndash; sowie <a href="https://hub.docker.com/_/buildpack-deps/">buildpacks-deps</a> werden nicht gesondert bezeichnet. <em>buster</em> und <em>stretch</em> kennzeichnen die jeweilige Debianbasis.
 </p>
 
 <p>&nbsp;</p>
 <h3>Offizielle Perl Images von Dockerhub laden</h3>
 <p>
-Images können wie gewohnt mittels <a href="https://docs.docker.com/engine/reference/commandline/pull/">docker pull</a> heruntergeladen
+Images k&ouml;nnen wie gewohnt mittels <a href="https://docs.docker.com/engine/reference/commandline/pull/">docker pull</a> heruntergeladen
 </p>
 
 <pre>
@@ -101,7 +101,7 @@ perl         5.34-slim-threaded-buster   6e91d128664e   2 weeks ago   128MB
 perl         5.34-slim-buster            49cc294090d8   2 weeks ago   128MB
 </pre>
 <p>
-Hier fällt sofort die deutlich unterschiedliche Größe der <em>slim</em> und <a href="https://hub.docker.com/_/buildpack-deps/">buildpacks-deps</a> Varianten auf.
+Hier f&auml;llt sofort die deutlich unterschiedliche Gr&ouml;&szlig;e der <em>slim</em> und <a href="https://hub.docker.com/_/buildpack-deps/">buildpacks-deps</a> Varianten auf.
 </p>
 
 <p>&nbsp;</p>
@@ -113,10 +113,10 @@ Hier fällt sofort die deutlich unterschiedliche Größe der <em>slim</em> und <
 Zwecks Inspektion werden per <a href="https://docs.docker.com/engine/reference/commandline/run/">docker run</a> je ein <a href="https://hub.docker.com/_/buildpack-deps/">buildpacks-deps</a> und ein <em>slim</em> Wegwerf-Container erzeugt, in die man sich einloggen kann.  
 </p>
 <p>
-Nun wird einfach die Anzahl der vorinstallierten Pakete und der Entwickler-Pakete via <a href="https://wiki.ubuntuusers.de/dpkg/">dpkg -l</a> und <a href="ttps://wiki.ubuntuusers.de/wc/">wc</a> gezählt.
+Nun wird einfach die Anzahl der vorinstallierten Pakete und der Entwickler-Pakete via <a href="https://wiki.ubuntuusers.de/dpkg/">dpkg -l</a> und <a href="ttps://wiki.ubuntuusers.de/wc/">wc</a> gez&auml;hlt.
 </p>
 <p>
-Zunächst ein perl:5.34-buster Image.
+Zun&auml;chst ein perl:5.34-buster Image.
 </p>
 <pre>
 sudo docker run -it --rm  perl:5.34-buster /bin/bash
@@ -149,7 +149,7 @@ root@bbf8ebc06c9b:/# dpkg -l |  grep dev | wc -l
 4
 </pre>
 <p>
-Es fällt auf, das in der <em>slim</em>-Variante wesentlich weniger Pakete (91) als in der <em>buildpacks-deps</em>-Variante (418) vorinstalliert sind. In der <em>buildpacks-deps</em>-Variante sind mit 95 Paketen auch wesentlich mehr Entwicklungsbibliotheken (*-dev Pakete) als in der <em>slim</em>-Variante (4) vorinstalliert. 
+Es f&auml;llt auf, das in der <em>slim</em>-Variante wesentlich weniger Pakete (91) als in der <em>buildpacks-deps</em>-Variante (418) vorinstalliert sind. In der <em>buildpacks-deps</em>-Variante sind mit 95 Paketen auch wesentlich mehr Entwicklungsbibliotheken (*-dev Pakete) als in der <em>slim</em>-Variante (4) vorinstalliert.
 </p>
 
 <p>&nbsp;</p>
@@ -158,7 +158,7 @@ Es fällt auf, das in der <em>slim</em>-Variante wesentlich weniger Pakete (91) 
 Die jeweiligen <em>threaded</em> und <em>non-threaded aka Standard</em> Varianten unterscheiden sich nur einer Stelle - der Compileroption <a href="https://github.com/Perl/perl5/blob/blead/INSTALL"><em>-Dusethreads</em></a>.
 </p>
 <p>
-Das lässt sich an Hand der Dockerfiles aus dem offiziellem <a href="https://github.com/Perl/docker-perl">docker-perl</a> Git-Repo leicht prüfen.
+Das l&auml;sst sich an Hand der Dockerfiles aus dem offiziellem <a href="https://github.com/Perl/docker-perl">docker-perl</a> Git-Repo leicht pr&uuml;fen.
 </p>
 <pre>
 git clone https://github.com/Perl/docker-perl.git
@@ -174,9 +174,9 @@ diff 5.034.000-slim-buster/Dockerfile 5.034.000-slim,threaded-buster/Dockerfile
 </pre>
 
 <p>&nbsp;</p>
-<h3>Perl läuft mit PID 1 im Container: IPC, Signals, exec(), fork()</h3>
+<h3>Perl l&auml;uft mit PID 1 im Container: IPC, Signals, exec(), fork()</h3>
 <p>
-In einem Dockercontainer laufen Programme, hier  Perl, mit der <a href="https://de.wikipedia.org/wiki/Process_identifier">PID</a> 1. Dies hat Auswirkungen auf die Signalbehandlung, insbesondere für SIGTERM und SIGINT. Das ist auch deutlich <a href="https://hub.docker.com/_/perl">dokumentiert</a>.
+In einem Dockercontainer laufen Programme, hier  Perl, mit der <a href="https://de.wikipedia.org/wiki/Process_identifier">PID</a> 1. Dies hat Auswirkungen auf die Signalbehandlung, insbesondere f&uuml;r SIGTERM und SIGINT. Das ist auch deutlich <a href="https://hub.docker.com/_/perl">dokumentiert</a>.
 </p>
 <pre>
 sudo docker run -it --rm  perl:5.34-buster /bin/bash
@@ -185,16 +185,16 @@ root@e23b33ace873:/# perl -E "say $$"
 1
 </pre>
 <p>
-Vor der Containerisierung von Perlprogrammen, die <a href="https://perldoc.perl.org/functions/fork">fork()</a> oder <a href="https://perldoc.pl/perlipc#Signals">Signale</a> nutzen, sollte man z.B. folgende Hinweise und Tipps berücksichtigen: <a href="https://perldoc.pl/perlipc#Signals">Signals in perlipc</a>, <a href="https://github.com/Perl/docker-perl/issues/44">Perl/docker-perl#44</a>, <a href="https://tech-blog.cv-library.co.uk/2017/08/31/perl-as-pid-1-under-docker/">Perl as PID 1 under Docker</a>, <a href="https://hackernoon.com/the-curious-case-of-pid-namespaces-1ce86b6bc900">The Curious Case of Pid Namespaces</a> und <a href="https://github.com/Yelp/dumb-init">dumb-init</a>.
+Vor der Containerisierung von Perlprogrammen, die <a href="https://perldoc.perl.org/functions/fork">fork()</a> oder <a href="https://perldoc.pl/perlipc#Signals">Signale</a> nutzen, sollte man z.B. folgende Hinweise und Tipps ber&uuml;cksichtigen: <a href="https://perldoc.pl/perlipc#Signals">Signals in perlipc</a>, <a href="https://github.com/Perl/docker-perl/issues/44">Perl/docker-perl#44</a>, <a href="https://tech-blog.cv-library.co.uk/2017/08/31/perl-as-pid-1-under-docker/">Perl as PID 1 under Docker</a>, <a href="https://hackernoon.com/the-curious-case-of-pid-namespaces-1ce86b6bc900">The Curious Case of Pid Namespaces</a> und <a href="https://github.com/Yelp/dumb-init">dumb-init</a>.
 </p>
 
 <p>&nbsp;</p>
 <h3>Zwei Perl-Binaries in den Offiziellen Perl Images</h3>
 <p>
-Da Perl für die Debian-Paketverwaltung via apt-get zwingend benötigt wird, sind zwei verschiedene Perl-Binaries in den Offiziellen Perl Images installiert:
+Da Perl f&uuml;r die Debian-Paketverwaltung via apt-get zwingend ben&ouml;tigt wird, sind zwei verschiedene Perl-Binaries in den Offiziellen Perl Images installiert:
 </p>
 <p>
-<strong>/usr/bin/perl</strong>, das über die Paketverwaltung installiert wurde (oft als System-Perl bezeichnet)
+<strong>/usr/bin/perl</strong>, das &uuml;ber die Paketverwaltung installiert wurde (oft als System-Perl bezeichnet)
 </p>
 <pre>
 sudo docker run -it --rm  perl:5.34-buster  /bin/bash
@@ -252,7 +252,7 @@ root@4bbb7adc8926:/# which perl
 /usr/local/bin/perl
 </pre>
 <p>
-Daher sollte die <a href="https://de.wikipedia.org/wiki/Shebang">Shebang</a>-Zeile für Perlprogramme im Dockercontainer wie folgt gesetzt werden:
+Daher sollte die <a href="https://de.wikipedia.org/wiki/Shebang">Shebang</a>-Zeile f&uuml;r Perlprogramme im Dockercontainer wie folgt gesetzt werden:
 </p>
 <pre>
 #!/usr/bin/env perl
@@ -264,10 +264,10 @@ oder auch
 #!/usr/local/bin/perl
 </pre>
 <p>
-Und eben nicht auf <em>/usr/bin/perl</em> verweisen, das wäre das System-Perl.
+Und eben nicht auf <em>/usr/bin/perl</em> verweisen, das w&auml;re das System-Perl.
 </p>
 <p>
-Alternativ kann das Perlprogramm auch direkt aufgerufen (als Parameter an <em>/usr/local/bin/perl</em> übergeben) werden, was üblicherweise für <a href="https://docs.docker.com/engine/reference/builder/#cmd">CMD</a> bzw. <a href="https://docs.docker.com/engine/reference/builder/#entrypoint">ENTRYPOINT</a> in Dockerfiles genutzt wird.
+Alternativ kann das Perlprogramm auch direkt aufgerufen (als Parameter an <em>/usr/local/bin/perl</em> &uuml;bergeben) werden, was &uuml;blicherweise f&uuml;r <a href="https://docs.docker.com/engine/reference/builder/#cmd">CMD</a> bzw. <a href="https://docs.docker.com/engine/reference/builder/#entrypoint">ENTRYPOINT</a> in Dockerfiles genutzt wird.
 </p>
 <p>
 Siehe dazu auch <a href="https://hub.docker.com/_/perl">Official Docker Perl - Coexisting with Debian's /usr/bin/perl</a>, <a href="https://stackoverflow.com/questions/57361953/why-do-official-perl-docker-images-have-two-version-of-perl">Why do official perl docker images have two version of perl?</a> und  <a href="https://github.com/Perl/docker-perl/issues/26">Perl/docker-perl#26</a>.
@@ -275,17 +275,17 @@ Siehe dazu auch <a href="https://hub.docker.com/_/perl">Official Docker Perl - C
 
 
 <p>&nbsp;</p>
-<h3>cpan und cpanm als Installer für CPAN-Module</h3>
+<h3>cpan und cpanm als Installer f&uuml;r CPAN-Module</h3>
 <p>&nbsp;</p>
 <h4>cpan</h4>
 <p>
 Da zwei verschiedene Perl-Binaries in den Offiziellen Perl Images installiert sind, wurde auch der mit Perl ausgelieferte <a href="https://perldoc.perl.org/CPAN">CPAN</a>-Installer zweimal installiert  &ndash; <em>/usr/bin/cpan</em> und <em>/usr/local/bin/cpan</em>.
 </p>
 <p>
-<em>/usr/bin/cpan</em> nutzt das Systemperl in <em>/usr/bin/perl</em>, <em>/usr/local/bin/cpan</em> nutzt das zusätzlich installierte Perl in <em>/usr/local/bin/perl</em>.
+<em>/usr/bin/cpan</em> nutzt das Systemperl in <em>/usr/bin/perl</em>, <em>/usr/local/bin/cpan</em> nutzt das zus&auml;tzlich installierte Perl in <em>/usr/local/bin/perl</em>.
 </p>
 <p>
-Wie oben bereits gezeigt verwenden beide installierte Perls jeweils einen eigenen <a href="https://perldoc.perl.org/variables/@INC">@INC</a>, so daß sie sich nicht gegenseitig in die Quere kommen.
+Wie oben bereits gezeigt verwenden beide installierte Perls jeweils einen eigenen <a href="https://perldoc.perl.org/variables/@INC">@INC</a>, so da&szlig; sie sich nicht gegenseitig in die Quere kommen.
 </p>
 <p>
 <em>/usr/local/bin/cpan</em>
@@ -308,7 +308,7 @@ Appending installation info to /usr/local/lib/x86_64-linux-gnu/perl/5.28.1/perll
   /usr/bin/make install  -- OK
 </pre>
 <p>
-Auch hier sorgt die <strong>Umgebungsvariable PATH</strong> dafür, das Binaries in <em>/usr/local/bin/</em> Vorrang vor <em>/usr/bin/</em> haben.
+Auch hier sorgt die <strong>Umgebungsvariable PATH</strong> daf&uuml;r, das Binaries in <em>/usr/local/bin/</em> Vorrang vor <em>/usr/bin/</em> haben.
 </p>
 <pre>
 root@4bbb7adc8926:/# which cpan
@@ -316,7 +316,7 @@ root@4bbb7adc8926:/# which cpan
 /usr/local/bin/cpan
 </pre>
 <p>
-Notwendige Aufräumarbeiten nach der Installation im Dockerfile
+Notwendige Aufr&auml;umarbeiten nach der Installation im Dockerfile
 </p>
 <pre>
 RUN rm -rf /root/.cpan/
@@ -325,7 +325,7 @@ RUN rm -rf /root/.cpan/
 <p>&nbsp;</p>
 <h4>cpanm</h4>
 <p>
-<a href="https://metacpan.org/dist/App-cpanminus/view/lib/App/cpanminus/fatscript.pm">cpanm</a> wird nur ein Mal mit dem zusätzlich installierten Perl als <em>/usr/local/bin/cpanm</em> installiert. Das Debian-Paket <em>cpanminus</em>, welches <em>/usr/bin/cpanm</em> enthält, wird nicht installiert.
+<a href="https://metacpan.org/dist/App-cpanminus/view/lib/App/cpanminus/fatscript.pm">cpanm</a> wird nur ein Mal mit dem zus&auml;tzlich installierten Perl als <em>/usr/local/bin/cpanm</em> installiert. Das Debian-Paket <em>cpanminus</em>, welches <em>/usr/bin/cpanm</em> enth&auml;lt, wird nicht installiert.
 </p>
 <pre>
 root@4bbb7adc8926:/# which cpanm
@@ -333,7 +333,7 @@ root@4bbb7adc8926:/# which cpanm
 /usr/local/bin/cpanm
 </pre>
 <p>
-<em>cpanm</em> installiert CPAN-Module in die korrekten Ordner (@INC) des zusätzlich installierten Perls.
+<em>cpanm</em> installiert CPAN-Module in die korrekten Ordner (@INC) des zus&auml;tzlich installierten Perls.
 </p>
 <pre>
 
@@ -347,16 +347,16 @@ Installing /usr/local/lib/perl5/site_perl/5.34.0/x86_64-linux-gnu/.meta/Moose-2.
 20 distributions installed
 </pre>
 <p>
-Notwendige Aufräumarbeiten nach der Installation im Dockerfile
+Notwendige Aufr&auml;umarbeiten nach der Installation im Dockerfile
 </p>
 <pre>
 RUN rm -rf /root/.cpanm/
 </pre>
 
 <p>&nbsp;</p>
-<h4>Umgebungsvariablen für cpan, cpanm, local:lib, Module::Build</h4>
+<h4>Umgebungsvariablen f&uuml;r cpan, cpanm, local:lib, Module::Build</h4>
 <p>
-Bei einigen Installationsproblemen kann man evtl. versuchen, die &ndash; standardmäßig nicht gesetzten &ndash; Umgebungsvariablen PERL_MB_OPT, PERL_MM_OPT, PERL_LOCAL_LIB_ROOT und PERL5LIB für <a href="https://metacpan.org/pod/Module::Build">Module::Build</a>, <a href="https://metacpan.org/pod/local::lib">local:lib</a>, <a href="https://metacpan.org/dist/App-cpanminus/view/lib/App/cpanminus/fatscript.pm">cpanm</a> oder <a href="https://perldoc.perl.org/CPAN">cpan</a> temporär im Dockerfile zu setzen. Also etwas <a href="https://github.com/Perl/docker-perl/issues/26">wie</a>
+Bei einigen Installationsproblemen kann man evtl. versuchen, die &ndash; standardm&auml;&szlig;ig nicht gesetzten &ndash; Umgebungsvariablen PERL_MB_OPT, PERL_MM_OPT, PERL_LOCAL_LIB_ROOT und PERL5LIB f&uuml;r <a href="https://metacpan.org/pod/Module::Build">Module::Build</a>, <a href="https://metacpan.org/pod/local::lib">local:lib</a>, <a href="https://metacpan.org/dist/App-cpanminus/view/lib/App/cpanminus/fatscript.pm">cpanm</a> oder <a href="https://perldoc.perl.org/CPAN">cpan</a> tempor&auml;r im Dockerfile zu setzen. Also etwas <a href="https://github.com/Perl/docker-perl/issues/26">wie</a>
 </p>
 <pre>
 RUN PERL_MB_OPT=--install_base "/home/feelsafe/perl5" \
@@ -373,7 +373,7 @@ RUN PERL_MB_OPT=--install_base "/home/feelsafe/perl5" \
 <p>&nbsp;</p>
 <h2>Dancer2 Hello World Beispiel</h2>
 <p>
-Im vorherigen Beitrag <a href="/2021/08/perl-on-docker-dancer2-hello-world-example.html">Perl on Docker - Dancer2 Hello World Beispiel</a>  wurde bereits die Containerisierung/Dockerisierung einer sehr einfachen <a href="https://metacpan.org/pod/Dancer2">Dancer2</a> Webapplikation für Dockereinsteiger mit minimalen Dockerkenntnissen beschrieben. Das dort verwendete Beispiel wird auch in diesem Beitrag nochmals verwendet.
+Im vorherigen Beitrag <a href="/2021/08/perl-on-docker-dancer2-hello-world-example.html">Perl on Docker - Dancer2 Hello World Beispiel</a>  wurde bereits die Containerisierung/Dockerisierung einer sehr einfachen <a href="https://metacpan.org/pod/Dancer2">Dancer2</a> Webapplikation f&uuml;r Dockereinsteiger mit minimalen Dockerkenntnissen beschrieben. Das dort verwendete Beispiel wird auch in diesem Beitrag nochmals verwendet.
 </p>
 <p>
 In zwei eigenen Verzeichnissen &ndash; <em>buildpacks-deps</em>- und  <em>slim</em>-Variante &ndash; werden jeweils die Datei der Webapplikation <em>hello-world.pl</em> und ein passendes <a href="https://docs.docker.com/engine/reference/builder/">Dockerfile</a> erstellt.
@@ -393,7 +393,7 @@ Datei <em>hello-world.pl</em>.
 
 
 <p>&nbsp;</p>
-<h3>Dockerfile für buildpacks-deps Dancer2 Hello World Beispiel</h3>
+<h3>Dockerfile f&uuml;r buildpacks-deps Dancer2 Hello World Beispiel</h3>
 <p>
 Datei <em>Dockerfile</em>.
 </p>
@@ -462,16 +462,16 @@ Das neue Container-Image basiert auf dem offiziellem <a href="https://hub.docker
 Per <a href="https://docs.docker.com/config/labels-custom-metadata/">LABEL</a> werden diverse Metadaten gesetzt, welche die Verwaltung der Images erleichtern sollen.
 </p>
 <p>
-Da im <a href="https://hub.docker.com/_/buildpack-deps/">buildpacks-deps</a>-Image schon sehr viele Werkzeuge und Bibliotheken installiert sind, werden hier nur mittels <a href="https://wiki.ubuntuusers.de/apt/apt-get/">apt-get</a> zunächst alle installierten Pakete auf den neuesten Stand gebracht und die Datenbank <a href="https://sqlite.org/index.html">SQLite</a> installiert. Die Umgebungsvariable <em>DEBIAN_FRONTEND</em> wird per <a href="https://docs.docker.com/engine/reference/builder/#arg">ARG</a> tempor&auml;r &ndash; also nur w&auml;hrend des Builds &ndash; gesetzt. (Bei der Verwendung von <a href="https://docs.docker.com/engine/reference/builder/#env">ENV</a> werden Umgebungsvariablen dauerhaft (unver&auml;nderlich) im Image gesetzt.)
+Da im <a href="https://hub.docker.com/_/buildpack-deps/">buildpacks-deps</a>-Image schon sehr viele Werkzeuge und Bibliotheken installiert sind, werden hier nur mittels <a href="https://wiki.ubuntuusers.de/apt/apt-get/">apt-get</a> zun&auml;chst alle installierten Pakete auf den neuesten Stand gebracht und die Datenbank <a href="https://sqlite.org/index.html">SQLite</a> installiert. Die Umgebungsvariable <em>DEBIAN_FRONTEND</em> wird per <a href="https://docs.docker.com/engine/reference/builder/#arg">ARG</a> tempor&auml;r &ndash; also nur w&auml;hrend des Builds &ndash; gesetzt. (Bei der Verwendung von <a href="https://docs.docker.com/engine/reference/builder/#env">ENV</a> werden Umgebungsvariablen dauerhaft (unver&auml;nderlich) im Image gesetzt.)
 </p>
 <p>
-Anschließend werden per <a href="https://metacpan.org/dist/App-cpanminus/view/lib/App/cpanminus/fatscript.pm">cpanm</a> neben <a href="https://metacpan.org/pod/Dancer2">Dancer2</a> auch die &ndash; im <a href="https://metacpan.org/dist/Dancer2/view/lib/Dancer2/Tutorial.pod">Dancer2::Tutorial</a> erw&auml;hnten &ndash; Module <a href="https://metacpan.org/pod/Template">Template-Toolkit</a>, <a href="https://metacpan.org/pod/File::Slurper">File::Slurper</a> und <a href="https://metacpan.org/pod/DBD::SQLite">DBD::SQLite</a> installiert, auch wenn sie f&uuml;r das Beispiel nicht ben&ouml;tigt werden.
+Anschlie&szlig;end werden per <a href="https://metacpan.org/dist/App-cpanminus/view/lib/App/cpanminus/fatscript.pm">cpanm</a> neben <a href="https://metacpan.org/pod/Dancer2">Dancer2</a> auch die &ndash; im <a href="https://metacpan.org/dist/Dancer2/view/lib/Dancer2/Tutorial.pod">Dancer2::Tutorial</a> erw&auml;hnten &ndash; Module <a href="https://metacpan.org/pod/Template">Template-Toolkit</a>, <a href="https://metacpan.org/pod/File::Slurper">File::Slurper</a> und <a href="https://metacpan.org/pod/DBD::SQLite">DBD::SQLite</a> installiert, auch wenn sie f&uuml;r das Beispiel nicht ben&ouml;tigt werden.
 </p>
 <p>
 Danach werden noch alle tempor&auml;ren Dateien und apt-repos gel&ouml;scht, um das Image so klein wie m&ouml;glich zu halten.
 </p>
 <p>
-Die <a href="https://docs.docker.com/engine/reference/builder/#workdir">WORKDIR</a>-Anweisung erzeugt den Ordner <em>/app</em> im Containerimage und setzt diesen als Startpunkt für nachfolgende Befehle, z.B. COPY.
+Die <a href="https://docs.docker.com/engine/reference/builder/#workdir">WORKDIR</a>-Anweisung erzeugt den Ordner <em>/app</em> im Containerimage und setzt diesen als Startpunkt f&uuml;r nachfolgende Befehle, z.B. COPY.
 </p>
 <p>
 Anschlie&szlig;end wird die Datei <em>hello-world.pl</em> im aktuellen Verzeichis per <a href="https://docs.docker.com/engine/reference/builder/#copy">COPY</a> in das Image kopiert.
@@ -491,7 +491,7 @@ sudo DOCKER_BUILDKIT=1 docker build -t big-perl-dancer:v10 .
 </pre>
 
 <p>&nbsp;</p>
-<h3>Dockerfile für Slim Dancer2 Hello World Beispiel</h3>
+<h3>Dockerfile f&uuml;r Slim Dancer2 Hello World Beispiel</h3>
 <p>
 Datei <em>Dockerfile</em>.
 </p>
@@ -559,13 +559,13 @@ ENTRYPOINT ["/usr/local/bin/perl", "/app/hello-world.pl"]
 <p>
 Das neue Container-Image basiert auf dem offiziellem <a href="https://hub.docker.com/_/perl/">Perl</a> Buster Docker Image in der <em>slim</em>-Variante ohne Threads (<a href="https://docs.docker.com/engine/reference/builder/#from">FROM</a> perl:5.34.0-slim).
 </p>
-<p>Der Aufbau des Dockerfiles für die <em>slim</em>-Variante entspricht weitestgehend dem der <em>buildpacks-deps</em>-Variante (s.o.). 
+<p>Der Aufbau des Dockerfiles f&uuml;r die <em>slim</em>-Variante entspricht weitestgehend dem der <em>buildpacks-deps</em>-Variante (s.o.). 
 </p>
 <p>
-Bei der <em>slim</em> Variante müssen zuerst die Entwicklerwerkzeuge (gcc, cc, make, ...), passende Header und Bibliotheken installiert werden, bevor die gewünschten CPAN-Module installiert werden können.
+Bei der <em>slim</em> Variante m&uuml;ssen zuerst die Entwicklerwerkzeuge (gcc, cc, make, ...), passende Header und Bibliotheken installiert werden, bevor die gew&uuml;nschten CPAN-Module installiert werden k&ouml;nnen.
 </p>
 <p>
-Um das Containerimage möglichst klein zu halten, werden die nicht mehr benötigten Pakete (insbs. Entwicklerwerkzeuge) anschließend in dem <strong>selben</strong> RUN wieder entfernt.
+Um das Containerimage m&ouml;glichst klein zu halten, werden die nicht mehr ben&ouml;tigten Pakete (insbs. Entwicklerwerkzeuge) anschlie&szlig;end in dem <strong>selben</strong> RUN wieder entfernt.
 </p>
 <p>&nbsp;</p>
 <h3>Containerimage bauen</h3>
@@ -574,9 +574,9 @@ sudo DOCKER_BUILDKIT=1 docker build -t slim-perl-dancer:v10 .
 </pre>
 
 <p>&nbsp;</p>
-<h3>Größenvergleich der beiden Images</h3>
+<h3>Gr&ouml;&szlig;envergleich der beiden Images</h3>
 <p>
-Zunächst ein Blick auf die Größe der neu gebauten Images im Vergleich zu den Ausgangsimages.
+Zun&auml;chst ein Blick auf die Gr&ouml;&szlig;e der neu gebauten Images im Vergleich zu den Ausgangsimages.
 </p>
 <pre>
 sudo docker images
@@ -588,10 +588,10 @@ perl               5.34-buster        4307319f1e3e   2 weeks ago      860MB
 perl               5.34-slim-buster   49cc294090d8   2 weeks ago      128MB
 </pre>
 <p>
-Erwartungsgemäß ist das Image der <em>buildpacks-deps</em>-Variante deutlich größer als das der <em>slim</em>-Variante &ndash; fast 6 mal so groß (884/152 = 5,8157).
+Erwartungsgem&auml;&szlig; ist das Image der <em>buildpacks-deps</em>-Variante deutlich gr&ouml;&szlig;er als das der <em>slim</em>-Variante &ndash; fast 6 mal so gro&szlig; (884/152 = 5,8157).
 </p>
 <p>
-In absoluten Zahlen sind beide Varianten gegenüber dem Ausgangsimage genau gleich um jeweils 24 MB gewachsen:
+In absoluten Zahlen sind beide Varianten gegen&uuml;ber dem Ausgangsimage genau gleich um jeweils 24 MB gewachsen:
 </p>
 <ul>
 	<li><em>slim</em>-Variante (152 - 128 = 24)</li>
@@ -602,7 +602,7 @@ In absoluten Zahlen sind beide Varianten gegenüber dem Ausgangsimage genau glei
 <p>&nbsp;</p>
 <h3>Beispiel Container starten und testen</h3>
 <p>
-Jetzt können die neuen Container gestartet und getestet werden.
+Jetzt k&ouml;nnen die neuen Container gestartet und getestet werden.
 </p>
 <h4>buildpacks-deps Container</h4>
 <p>
@@ -626,7 +626,7 @@ buildpacks-deps Container stoppen
 sudo docker stop big-container
 </pre>
 <p>
-buildpacks-deps Container ggf. löschen
+buildpacks-deps Container ggf. l&ouml;schen
 </p>
 <pre>
 sudo docker rm big-container
@@ -655,7 +655,7 @@ Slim Container stoppen
 sudo docker stop slim-container
 </pre>
 <p>
-Slim Container ggf. löschen
+Slim Container ggf. l&ouml;schen
 </p>
 <pre>
 sudo docker rm slim-container
@@ -664,10 +664,10 @@ sudo docker rm slim-container
 <p>&nbsp;</p>
 <h2>Zusammenfassung</h2>
 <p>
-Wie bereits in der <a href="#intro">Einführung</a> erwähnt, sollen <a href="https://hub.docker.com/_/perl">Official Docker Perl Images</a> das Erstellen eigener Docker-Images für <a href="https://www.perl.org/">Perl</a>-Anwendungen erleichtern.
+Wie bereits in der <a href="#intro">Einf&uuml;hrung</a> erw&auml;hnt, sollen <a href="https://hub.docker.com/_/perl">Official Docker Perl Images</a> das Erstellen eigener Docker-Images f&uuml;r <a href="https://www.perl.org/">Perl</a>-Anwendungen erleichtern.
 </p>
 <p>
-Diese Aufgabe lösen die <a href="https://hub.docker.com/_/perl">Official Docker Perl Images</a> mit Bravour &ndash; egal ob kleine (slim) oder entwicklerfreundliche (buildpacks-deps) Container, legacy Anwendungen mit alten Perls oder Modern Perl mit coolen neuen <a href="https://perldoc.perl.org/feature">Features</a> und vieles andere mehr.
+Diese Aufgabe l&ouml;sen die <a href="https://hub.docker.com/_/perl">Official Docker Perl Images</a> mit Bravour &ndash; egal ob kleine (slim) oder entwicklerfreundliche (buildpacks-deps) Container, legacy Anwendungen mit alten Perls oder Modern Perl mit coolen neuen <a href="https://perldoc.perl.org/feature">Features</a> und vieles andere mehr.
 </p>
 
 
@@ -681,7 +681,7 @@ Diese Aufgabe lösen die <a href="https://hub.docker.com/_/perl">Official Docker
 <li><a href="http://blogs.perl.org/users/atoomic/2020/01/docker-perl-and-github.html">Docker, Perl and GitHub</a></li>
 <li><a href="https://github.com/Perl/docker-perl-tester">docker-perl-tester</a></li>
 <li><a href="/2021/08/perl-on-docker-dancer2-hello-world-example.html">Perl on Docker - Dancer2 Hello World Beispiel</a></li>
-<li><a href="/2021/09/perl-on-docker-multi-stage-builds-zur-verkuerzung-von-build-laufzeiten.html">Perl on Docker - Multi-stage Builds zur Verkürzung von Build-Laufzeiten</a></li>
+<li><a href="/2021/09/perl-on-docker-multi-stage-builds-zur-verkuerzung-von-build-laufzeiten.html">Perl on Docker - Multi-stage Builds zur Verk&uuml;rzung von Build-Laufzeiten</a></li>
 <li><a href="/2021/09/perl-on-docker-dancer2-und-redis-docker-compose-beispiel.html">Perl on Docker - Dancer2 und Redis docker-compose Beispiel</a></li>
 <li><a href="https://www.docker.com/">Docker</a></li>
 <li><a href="https://docs.docker.com/">Docker Docs</a></li>
