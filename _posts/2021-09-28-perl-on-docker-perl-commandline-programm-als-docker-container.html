@@ -1,0 +1,248 @@
+---
+layout: post
+title: "Perl on Docker - Perl commandline Programm als Docker Container erstellen und nutzen"
+date: '2021-09-28 10:15:00 +0200'
+permalink: /2021/09/perl-on-docker-perl-commandline-programm-als-docker-container.html
+excerpt: "Perl on Docker - Perl commandline Programm als Docker Container erstellen und nutzen"
+categories:
+- 'container'
+---
+<p>
+<img alt="Camel led by a guide - Wahiba Sands, Oman, Wahiba desert" src="/assets/images/vera-davidova-syADksVMrKk-unsplash.jpg" class="float-center"/>
+</p>
+
+<p>&nbsp;</p>
+<h2 id="intro">Einf&uuml;hrung</h2>
+<p>
+Bei Perl-Programmen werden oft eine Menge zus&auml;tzlicher Bibliotheken (z.B. <a href="https://metacpan.org/">CPAN</a>-Module) ben&ouml;tigt, die eigens installiert werden m&uuml;ssen.
+</p>
+<p>
+Manchmal stehen nur &auml;ltere Modul- und Programmversionen zur Verf&uuml;gung, die von anderen Anwendungen genutzt werden und daher nicht ohne weiteres aktualisiert werden k&ouml;nnen. Gelegentlich ist es auch umgekehrt: ein altes Tools, das sich nicht oder nur schwer aktualisieren l&auml;sst, wird in einer neuen Umgebung mit aktuelleren Bibliotheken ben&ouml;tigt.
+</p>
+<p>
+Hier bietet es sich geradzu an, die Kommandozeilenanwendung in einen eigenen <a href="https://www.docker.com/">Container</a> zu verfrachten und diesen als Kommandozeilentool zu verwenden. Auch, wenn man daf&uuml;r eigens Docker installieren muss. Der Geschwindigkeitsunterschied, der sich durch den Containeroverhead ergibt, ist i.d.R. zu vernachl&auml;ssigen
+</p>
+
+
+<p>&nbsp;</p>
+<h2>Beispiel: W3C Link Checker</h2>
+<p>
+Den <a href="https://validator.w3.org/checklink">W3C Link Checker - Check links and anchors in Web pages or full Web sites </a> gibt es neben der Onlineversion auch als <a href="https://packages.ubuntu.com/focal/w3c-linkchecker">Ubuntu/Debian Paket in Version version 4.81</a> und in <a href="https://metacpan.org/dist/W3C-LinkChecker">Version 5.0.0 auf MetaCPAN</a>.
+</p>
+<p>
+In diesem Beispiel wird das Kommandzeilenprogramm <a href="https://metacpan.org/dist/W3C-LinkChecker/view/bin/checklink.pod">checklink - check the validity of links in an HTML or XHTML document</a> in der neuesten Version per <a href="https://metacpan.org/dist/App-cpanminus/view/lib/App/cpanminus/fatscript.pm">cpanm</a> als <em>/usr/local/bin/checklink</em> in einem eigenen Container mit dem neuesten Perl installiert.
+</p>
+<p>
+Zu Vergleichszwecken wird das Paket <em>w3c-linkchecker</em> mit installiert, welches eine &auml;ltere Version als <em>/usr/bin/checklink</em> liefert. 
+</p>
+<p>
+Der Sourcecode des Beispiels findet sich auch im <a href="https://github.com/perl-howto/perl-howto-code/tree/main/Perl-On-Docker/Commandline">Github Repo perl-howto-code</a>.
+</p>
+
+<p>&nbsp;</p>
+<h3>Docker Image bauen</h3>
+<p>
+Datei <a href="https://docs.docker.com/engine/reference/builder/">Dockerfile</a>
+</p>
+<pre>
+FROM perl:latest
+
+LABEL maintainer="Thomas Fahle &lt;perlhowto.github.io@gmail.com&gt;"
+LABEL version="0.10"
+LABEL description="W3C::LinkChecker checklink Docker Image"
+
+
+# apt-get
+# Upgrade already installed packages (security)
+# Install w3c-linkchecker (/usr/bin/checklink)
+# Autoremove unused packages
+# Clean local repos
+#
+# cpanm
+# Install W3C::LinkChecker (/usr/local/bin/checklink)
+# Install LWP::Protocol::https to enable linkckecking of HTTPS websites
+#
+# Free disk space to decrease image size
+ARG DEBIAN_FRONTEND=noninteractive
+RUN set -ex; \
+       apt-get update &amp;&amp; \
+       apt-get dist-upgrade -y &amp;&amp; \
+       apt-get -y --no-install-recommends install \
+       w3c-linkchecker &amp;&amp; \
+       apt-get -y autoremove &amp;&amp; \
+       apt-get clean ; \
+       /usr/local/bin/cpanm  \
+        W3C::LinkChecker \
+        LWP::Protocol::https \
+        ; \
+    rm -rf /var/lib/apt/lists/* ; \
+    rm -rf /tmp/* ; \
+    rm -rf /root/.cpanm/
+
+ENTRYPOINT ["/usr/local/bin/checklink"]
+CMD ["--help"]
+</pre>
+
+<p>
+Das neue Container-Image basiert auf <a href="https://hub.docker.com/_/perl">Official Docker Perl Images</a>, die bereits in <a href="/2021/09/perl-on-docker-offizielle-perl-docker-images.html">Perl on Docker - Offizielle Perl Docker Images als Grundlage eigener Images</a> beschrieben wurden, als Basis. (<a href="https://docs.docker.com/engine/reference/builder/#from">FROM</a> perl:latest).
+</p>
+<p>
+Die <a href="https://docs.docker.com/config/labels-custom-metadata/">LABEL</a>-Anweisungen setzen diverse Metadaten, welche die Verwaltung der Images erleichtern sollen.
+</p>
+<p>
+Mittels <a href="https://wiki.ubuntuusers.de/apt/apt-get/">apt-get</a> werden zun&auml;chst alle installierten Pakete auf den neuesten Stand gebracht und das <a href="https://packages.ubuntu.com/focal/w3c-linkchecker">Ubuntu/Debian Paket w3c-linkchecker in Version version 4.81</a> installiert. Die Umgebungsvariable <em>DEBIAN_FRONTEND</em> wird per <a href="https://docs.docker.com/engine/reference/builder/#arg">ARG</a> tempor&auml;r &ndash; also nur w&auml;hrend des Builds &ndash; gesetzt. (Bei der Verwendung von <a href="https://docs.docker.com/engine/reference/builder/#env">ENV</a> werden Umgebungsvariablen dauerhaft (unver&auml;nderlich) im Image gesetzt.)
+</p>
+
+<p>
+Im n&auml;chsten Schritt werden die CPAN Module <a href="https://metacpan.org/dist/W3C-LinkChecker">W3C Link Checker</a> und <a href="https://metacpan.org/pod/LWP::Protocol::https">LWP::Protocol::https</a> mittels <a href="https://metacpan.org/dist/App-cpanminus/view/lib/App/cpanminus/fatscript.pm">cpanm</a> installiert.
+</p>
+
+<p>
+Danach werden noch alle tempor&auml;ren Dateien und apt-repos gel&ouml;scht, um das Image so klein wie m&ouml;glich zu halten.
+</p>
+
+<p>
+Im letzten Schritt wird mittels <a href="https://docs.docker.com/engine/reference/builder/#entrypoint">ENTRYPOINT</a> die Anwendung gesetzt, die mit dem Start des Containers gestartet werden soll (<em>/usr/local/bin/checklink</em>). Die <a href="https://docs.docker.com/engine/reference/builder/#cmd">CMD</a>-Anweisung setzt die Vorgabe-Parameter f&uuml;r die Startanwendung - hier <em>--help</em>. Diese Parameter k&ouml;nnen sp&auml;ter sehr einfach auf der Kommandozeile &uuml;berschrieben werden.
+</p>
+<p>
+Das Image kann jetzt <a href="https://docs.docker.com/engine/reference/commandline/build/">gebaut</a> werden:
+</p>
+<pre>
+sudo DOCKER_BUILDKIT=1 docker build -t w3c-checklink .
+</pre>
+
+<p>&nbsp;</p>
+<h3>Docker Container nutzen</h3>
+<p>
+Der Container <a href="https://docs.docker.com/engine/reference/commandline/run/">l&auml;uft</a> als Wegwerfcontainer. Der Parameter <em>--rm</em> l&ouml;scht den Container automatisch nach Beendigung.
+</p>
+<p>
+Ohne Parameter
+</p>
+<pre>
+sudo docker run --rm w3c-checklink
+</pre>
+<p>
+wird die Hilfe von <em>/usr/local/bin/checklink</em> ausgegeben
+</p>
+<pre>
+W3C Link Checker version 5.0.0 (c) 1999-2019 W3C
+
+Usage: checklink &lt;options&gt; &lt;uris&gt;
+Options:
+ -s, --summary              Result summary only.
+ -b, --broken               Show only the broken links, not the redirects.
+
+ .....
+
+</pre>
+<p>
+Kommandozeilenparameter werden an <em>/usr/local/bin/checklink</em> weitergereicht. So gibt
+</p>
+<pre>
+sudo docker run --rm w3c-checklink --version
+</pre>
+<p>
+die Versionsnummer aus
+</p>
+<pre>
+W3C Link Checker version 5.0.0 (c) 1999-2019 W3C
+</pre>
+<p>
+Die Option <em>--summary</em> 
+</p>
+<pre>
+sudo docker run --rm w3c-checklink --cookies tmp --summary https://perl-howto.github.io
+</pre>
+<p>
+zeigt nur eine Zusammenfassung der Ergebnisse an
+</p>
+<pre>
+Processing	https://perl-howto.github.io/
+
+This may take some time if the document has many links to check.
+.....
+List of broken links and other issues:
+.....
+</pre>
+<p>
+Durch &Uuml;berschreiben des <a href="https://docs.docker.com/engine/reference/builder/#entrypoint">Entrypoints</a> kann auch die die Systemversion von <em>checklink</em> verwendet werden. So gibt
+</p>
+<pre>
+sudo docker run --rm --entrypoint='/usr/bin/checklink' w3c-checklink --version
+</pre>
+<p>
+folgende Versionsnummer aus
+</p>
+<pre>
+W3C Link Checker version 4.81 (c) 1999-2011 W3C
+</pre>
+
+<p>&nbsp;</p>
+<h4>PID 1 und Signale im Container oder warum l&auml;sst sich das Programm nicht mit CRTL-C abbrechen</h4>
+
+<p>
+Wie bereits in <a href="/2021/09/perl-on-docker-offizielle-perl-docker-images.html">Perl on Docker - Offizielle Perl Docker Images als Grundlage eigener Images</a> dargelegt, laufen Prozesse im Docker Container mit PID 1. Das bedeutet, das Signale im Dockercontainer nicht an die laufenden Programme weitergereicht werden. Ein Abruch mit SIGTERM/CRTL-C ist daher nicht m&ouml;glich.
+</p>
+<p>
+Bei aktuellen Dockerversionen (&gt;1.13) ist es m&ouml;glich <a href="https://github.com/krallin/tini">tini - A tiny but valid init for containers</a> als <a href="https://docs.docker.com/engine/reference/run/#specify-an-init-process">Init-Prozess</a> zu <a href="https://stackoverflow.com/questions/43122080/how-to-use-init-parameter-in-docker-run">verwenden</a>, so da&szlig; Signale wie gewohnt durchgereicht werden. Dazu dient der Parameter <em>--init</em>.
+</p>
+<pre>
+sudo docker run --init --rm w3c-checklink --summary https://perl-howto.github.io
+</pre>
+<p>
+Jetzt kann das laufende Programm wieder mit STRG+C abgebrochen werden, so wie man es halt von Kommandozeilenprogrammen gewohnt ist. 
+</p>
+
+<p>&nbsp;</p>
+<h3>Convenience Shell Wrapper Script</h3>
+<p>
+Damit man sich den langen &ndash; und daher fehleranf&auml;lligen &ndash; Aufruf nicht merken muss, bietet sich die Verwendung eines kleinen Wrapper-Scripts f&uuml;r die Shell an. 
+</p>
+<pre>
+#!/bin/bash
+# A wrapper script to run checklink (1p) from within a Docker image
+sudo docker run --init --rm w3c-checklink "$@"
+</pre>
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+
+<li><a href="https://validator.w3.org/checklink">W3C Link Checker - Check links and anchors in Web pages or full Web sites </a></li>
+<li><a href="https://dev.w3.org/perl/modules/W3C/LinkChecker/docs/checklink">Link Checker Documentation</a></li>
+<li><a href="https://metacpan.org/dist/W3C-LinkChecker">Metacpan: W3C Link Checker</a></li>
+<li><a href="https://metacpan.org/dist/W3C-LinkChecker/view/bin/checklink.pod">Metacpan: checklink - check the validity of links in an HTML or XHTML document</a></li>
+<li><a href="https://packages.ubuntu.com/focal/w3c-linkchecker">Paket: w3c-linkchecker</a></li>
+
+<li><a href="https://www.docker.com/">Docker</a></li>
+<li><a href="https://docs.docker.com/">Docker Docs</a></li>
+<li><a href="https://docs.docker.com/engine/reference/run/">Docker run reference</a></li>
+<li><a href="https://docs.docker.com/engine/reference/run/#specify-an-init-process">Specify an init process</a></li>
+<li><a href="https://github.com/krallin/tini">Tini - A tiny but valid init for containers</a></li>
+<li><a href="https://spin.atomicobject.com/2015/11/30/command-line-tools-docker/">Distributing Command Line Tools with Docker</a></li>
+
+<li><a href="https://hub.docker.com/_/perl">Official Docker Perl</a></li>
+<li><a href="https://github.com/Perl/docker-perl">Github docker-perl</a></li>
+
+<li><a href="/2021/08/perl-on-docker-dancer2-hello-world-example.html">Perl on Docker - Dancer2 Hello World Beispiel</a></li>
+<li><a href="/2021/09/perl-on-docker-offizielle-perl-docker-images.html">Perl on Docker - Offizielle Perl Docker Images als Grundlage eigener Images</a></li>
+<li><a href="/2021/09/perl-on-docker-multi-stage-builds-zur-verkuerzung-von-build-laufzeiten.html">Perl on Docker - Multi-stage Builds zur Verk&uuml;rzung von Build-Laufzeiten</a></li>
+<li><a href="/2021/09/perl-on-docker-dancer2-und-redis-docker-compose-beispiel.html">Perl on Docker - Dancer2 und Redis docker-compose Beispiel</a></li>
+</ul>
+
+
+
+<p>&nbsp;</p>
+<p>
+Source-Code der Beispiele im <a href="https://github.com/perl-howto/perl-howto-code">Github Repo perl-howto-code</a>.
+</p>
+
+<p>&nbsp;</p>
+<h2>Bildnachweis</h2>
+<p>
+Resized <a href="https://unsplash.com/photos/syADksVMrKk">Photo</a> by <a href="https://unsplash.com/@veradavidovaphotography?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Vera Davidova</a> on <a href="https://unsplash.com/s/photos/camel?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+</p>
+<p>&nbsp;</p>
+
+  
