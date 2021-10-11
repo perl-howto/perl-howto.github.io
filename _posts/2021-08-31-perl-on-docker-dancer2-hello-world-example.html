@@ -94,7 +94,7 @@ Der Vollst&auml;ndigkeit halber werden die &ndash; im <a href="https://metacpan.
 Danach werden noch alle tempor&auml;ren Dateien und apt-repos gel&ouml;scht, um das Image so klein wie m&ouml;glich zu halten.
 </p>
 <p>
-Die <a href="https://docs.docker.com/engine/reference/builder/#workdir">WORKDIR</a>-Anweisung erzeugt den Ordner <em>/app</em> im Containerimage und setzt diesen als Startpunkt für nachfolgende Befehle, z.B. COPY. 
+Die <a href="https://docs.docker.com/engine/reference/builder/#workdir">WORKDIR</a>-Anweisung erzeugt den Ordner <em>/app</em> im Containerimage und setzt diesen als Startpunkt f&uuml;r nachfolgende Befehle, z.B. COPY.
 </p>
 <p>
 Anschlie&szlig;end wird die Datei <em>hello-world.pl</em> im aktuellen Verzeichis per <a href="https://docs.docker.com/engine/reference/builder/#copy">COPY</a> in das Image kopiert.
@@ -297,6 +297,9 @@ gunzip myimage.tar.gz
 sudo docker load -i myimage.tar
  &gt;&gt;Loaded image: dancer-hello-world:latest
 </pre>
+<p>
+In der Praxis wird allerdings selten auf diesen sehr einfachen Weg zur&uuml;ckgegriffen. Gerade im Unternehmensumfeld bietet sich der Einsatz einer  <a href="https://docs.docker.com/registry/">Docker Registry</a> an.
+</p>
 
 <p>&nbsp;</p>
 <h3>Aufr&auml;umarbeiten</h3>
@@ -406,7 +409,7 @@ That's it.
 <li><a href="https://blog.perl-academy.de/tag/Docker">Optimierung von Docker-Images</a></li>
 <li><a href="https://kofler.info/docker-container-automatisch-starten/">Docker-Container automatisch starten</a></li>
 <li><a href="/2021/09/perl-on-docker-offizielle-perl-docker-images.html">Perl on Docker - Offizielle Perl Docker Images als Grundlage eigener Images</a></li>
-<li><a href="/2021/09/perl-on-docker-multi-stage-builds-zur-verkuerzung-von-build-laufzeiten.html">Perl on Docker - Multi-stage Builds zur Verkürzung von Build-Laufzeiten</a></li>
+<li><a href="/2021/09/perl-on-docker-multi-stage-builds-zur-verkuerzung-von-build-laufzeiten.html">Perl on Docker - Multi-stage Builds zur Verk&uuml;rzung von Build-Laufzeiten</a></li>
 <li><a href="/2021/09/perl-on-docker-dancer2-und-redis-docker-compose-beispiel.html">Perl on Docker - Dancer2 und Redis docker-compose Beispiel</a></li>
 <li><a href="/2021/09/perl-on-docker-perl-commandline-programm-als-docker-container.html">Perl on Docker - Perl commandline Programm als Docker Container erstellen und nutzen</a></li>
 </ul>
