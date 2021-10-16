@@ -1,0 +1,195 @@
+---
+layout: post
+title: "Dotenv - Unterst&uuml;tzung f&uuml;r dotenv in Perl"
+date: '2021-10-16 08:00:00 +0000'
+permalink: /2021/10/dotenv-unterstuetzung-fuer-dotenv-in-perl.html
+excerpt: "Dotenv - Unterst&uuml;tzung f&uuml;r dotenv in Perl - Trennung von Konfiguration und Code"
+categories:
+- 'container'
+---
+<p>
+<img alt="Two silver open wrenches on a black background" src="/assets/images/matt-artz-wbx3FeGOEQ0-unsplash.jpg" class="float-center"/>
+</p>
+
+<p>&nbsp;</p>
+<h2 id="intro">Trennung von Konfiguration und Code - Twelve-Factor App</h2>
+<p>
+Die strikte Trennung der Konfiguration vom Code ist g&auml;ngige Praxis in Softwareentwicklung und <a href="https://de.wikipedia.org/wiki/Continuous_Delivery">Continuous Delivery</a>.
+</p>
+<p>
+Viele Frameworks und Applikationen speichern ihre Konfiguration in <em>.env</em>-Dateien (dotenv) und lesen diese als <a href="https://de.wikipedia.org/wiki/Umgebungsvariable">Umgebungsvariablen</a> ein. Diese Vorgehensweise entspricht der <a href="https://12factor.net/de/">Twelve-Factor App</a> Methodologie.
+</p>
+<p>
+Das <a href="https://metacpan.org/">CPAN</a>-Modul <a href="https://metacpan.org/pod/Dotenv">Dotenv - Support for dotenv in Perl</a> von <a href="https://metacpan.org/author/BOOK">Philippe Bruhat (BooK)</a> liest Schl&uuml;ssel-Werte-Paare aus einer <em>.env</em>-Datei, <a href="https://12factor.net/de/config">setzt diese</a> als Umgebungsvariablen im <a href="https://metacpan.org/pod/perlvar#%25ENV">%ENV</a> und erleichtert so die Entwicklung von Perl Apps nach der <a href="https://12factor.net/de/">Twelve-Factor App</a> Methodologie.
+</p>
+
+
+<p>&nbsp;</p>
+<h2>Aufbau der <em>dotenv</em>-Dateien</h2>
+<p>
+Das <em>env</em>-Datenformat ist ein zeilenbasiertes Format, das aus Zeilen von KEY=VALUE Paaren besteht.
+</p>
+<pre>
+KEY=VALUE
+</pre>
+<p>
+Leerzeilen werden &uuml;bersprungen, Kommentare starten mit dem #-Zeichen und gehen bis zum Ende einer Zeile. 
+</p>
+<pre>
+# Comment
+
+KEY=VALUE # Comment
+</pre>
+<p>
+Das Format ist einigerma&szlig;en kompatibel mit der Shell (so dass es mit einem Minimum an Aufwand m&ouml;glich ist, die Umgebungsvariablen mit Hilfe der <a href="https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html">.</a> oder <a href="https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html">Source-Shell-Builtins</a> zu lesen).
+</p>
+<pre>
+export KEY=VALUE # Comment
+</pre>
+<p>
+Variablen werden aktuell von <a href="https://metacpan.org/pod/Dotenv">Dotenv</a> nicht expandiert. Etwas wie
+</p>
+<pre>
+# Development settings
+DOMAIN=example.org
+ADMIN_EMAIL=admin@${DOMAIN}
+ROOT_URL=${DOMAIN}/app
+</pre>
+<p>
+funktioniert daher leider nicht.
+</p>
+
+<p>&nbsp;</p>
+<h2>Beispiel</h2>
+<p>
+Dieses einfache Beispiel l&auml;dt folgende <em>.env</em>-Datei (Default) im aktuellen Verzeichnis,
+</p>
+<pre>
+#KEY=VALUE
+APP_STAGE="development"
+APP_SSH_OPTS=" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+APP_SSH_KEY_FILE="./id_rsa"
+APP_DB_HOST='db.dev.example.com'
+APP_LOG_LEVEL=TRACE
+export FOO=BAR
+</pre>
+<p>
+f&uuml;gt die dort gefundenen Schl&uuml;ssel und Werte in den <a href="https://metacpan.org/pod/perlvar#%25ENV">%ENV</a> ein 
+</p>
+
+<pre>
+#!/usr/bin/env perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Dotenv</span><span style="color: #000000;">;</span>      <span style="color: #228B22;"># exports nothing</span>
+<span style="color: #000000;">Dotenv</span><span style="color: #000000;">-&gt;load</span><span style="color: #000000;">;</span>    <span style="color: #228B22;"># merge the content of .env in %ENV</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@config_vars</span> = <span style="color: #CD5555;">qw/</span>
+  <span style="color: #CD5555;">APP_STAGE</span>
+  <span style="color: #CD5555;">APP_SSH_OPTS</span>
+  <span style="color: #CD5555;">APP_SSH_KEY_FILE</span>
+  <span style="color: #CD5555;">APP_DB_HOST</span>
+  <span style="color: #CD5555;">APP_LOG_LEVEL</span>
+  <span style="color: #CD5555;">FOO</span>
+  <span style="color: #CD5555;">/</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$config_var</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">sort</span> <span style="color: #00688B;">@config_vars</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;$config_var = $ENV{$config_var}&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+und gibt die Schl&uuml;ssel und Werte aus.
+</p>
+<pre>
+APP_DB_HOST = db.dev.example.com
+APP_LOG_LEVEL = TRACE
+APP_SSH_KEY_FILE = ./id_rsa
+APP_SSH_OPTS =  -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+APP_STAGE = development
+FOO = BAR
+</pre>
+
+
+<p>
+&Uuml;ber den Parameter <em>-load</em> kann auch ein Dateiname angegeben werden.
+</p>
+
+<pre>
+#!/usr/bin/env perl
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Dotenv</span> -<span style="color: #000000;">load</span> <span style="color: #000000;">=&gt;</span> <span style="color: #CD5555;">&#39;myenv&#39;</span><span style="color: #000000;">;</span>    <span style="color: #228B22;"># merge the content of myenv in %ENV</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">@config_vars</span> = <span style="color: #CD5555;">qw/</span>
+  <span style="color: #CD5555;">APP_STAGE</span>
+  <span style="color: #CD5555;">APP_SSH_OPTS</span>
+  <span style="color: #CD5555;">APP_SSH_KEY_FILE</span>
+  <span style="color: #CD5555;">APP_DB_HOST</span>
+  <span style="color: #CD5555;">APP_LOG_LEVEL</span>
+  <span style="color: #CD5555;">FOO</span>
+  <span style="color: #CD5555;">/</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">foreach</span> <span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$config_var</span> <span style="color: #000000;">(</span> <span style="color: #8B008B; font-weight:bold;">sort</span> <span style="color: #00688B;">@config_vars</span> <span style="color: #000000;">)</span> <span style="color: #000000;">{</span>
+    <span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #CD5555;">&quot;$config_var = $ENV{$config_var}&quot;</span><span style="color: #000000;">;</span>
+<span style="color: #000000;">}</span>
+</pre>
+<p>
+<a href="https://metacpan.org/pod/Dotenv">Dotenv</a> kann Variablen nicht nur aus Dateien lesen, sondern auch aus weiteren Quellen. Details finden sich in der Dokumentation.
+</p>
+
+<p>&nbsp;</p>
+<h2>Schutz vor &Uuml;berschreiben der Umgebungsvariablen</h2>
+<p>
+<a href="https://metacpan.org/pod/Dotenv">Dotenv</a> fasst bereits gesetzte Umgebungsvariablen <strong>nicht</strong> an.
+</p>
+<p>
+Bei bereits gesetzter Umgebungsvariable <em>FOO</em> liefert das obige Beispiel 
+</p>
+<pre>
+FOO=EXTERNAL_BAR ./dotenv.pl
+</pre>
+<p>
+jetzt folgende Ausgabe:
+</p>
+<pre>
+APP_DB_HOST = db.dev.example.com
+APP_LOG_LEVEL = TRACE
+APP_SSH_KEY_FILE = ./id_rsa
+APP_SSH_OPTS =  -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+APP_STAGE = development
+FOO = <strong>EXTERNAL_BAR</strong>
+</pre>
+<p>
+Auch bei mehreren Inputs wird dieses Prinzip beibehalten.
+</p>
+
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="https://metacpan.org/pod/Dotenv">Dotenv - Support for dotenv in Perl</a></li>
+<li><a href="https://perlmaven.com/dot-env">.env - the dot env application configuration file</a></li>
+<li><a href="https://www.perlmonks.org/?node_id=11130500">.env loading the dot env file?</a></li>
+<li><a href="https://programminglang.com/en/import-environmental-value-from-envdotenv-and-print-specified-env-value/">Import environmental value from .env(dotenv) and print specified ENV value</a></li>
+<li><a href="https://12factor.net/de/">Twelve-Factor App</a></li>
+<li><a href="https://12factor.net/de/config">Twelve-Factor App - III. Konfiguration</a></li>
+<li><a href="https://www.redhat.com/architect/12-factor-app">An illustrated guide to 12 Factor Apps</a></li>
+<li><a href="https://metacpan.org/pod/Shell::EnvImporter">Shell::EnvImporter - Perl extension for importing environment variable changes from external commands or shell scripts</a> als Alternative</li>
+</ul>
+
+
+<p>&nbsp;</p>
+<p>
+Source-Code der Beispiele im <a href="https://github.com/perl-howto/perl-howto-code">Github Repo perl-howto-code</a>.
+</p>
+
+<p>&nbsp;</p>
+<h2>Bildnachweis</h2>
+<p>
+<a href="https://unsplash.com/photos/wbx3FeGOEQ0">Photo</a> by <a href="https://unsplash.com/@mattartz?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Matt Artz</a> on <a href="https://unsplash.com/collections/1835321/configuration-management?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+</p>
+<p>&nbsp;</p>
