@@ -1,0 +1,102 @@
+---
+layout: post
+title: "Docker::Names::Random - zuf&auml;llige Zeichenketten im Stil der Docker Containernamen erzeugen"
+date: '2021-11-01 08:15:00 +0200'
+permalink: /2021/11/docker-names-random--zufaellige-zeichenketten-im-stil-der-docker-containernamem.html
+excerpt: "Docker::Names::Random - zuf&auml;llige Zeichenketten im Stil der Docker Containernamen erzeugen"
+categories:
+- 'container'
+---
+<p>
+<img alt="Old railroad container, inscribed with a big number 250" src="/assets/images/kai-gradert-l877VCCHdQ8-unsplash.jpg" class="float-center"/>
+</p>
+
+<p>&nbsp;</p>
+<h2 id="intro">Zuf&auml;llige menschenlesbare Namen f&uuml;r Container und vieles mehr</h2>
+<p>
+Wenn man mit <a href="https://www.docker.com/">Docker</a> <a href="https://docs.docker.com/engine/reference/commandline/container_create/">Container erstellt</a> muss man ihnen keine Namen geben. Docker generiert standardm&auml;&szlig;ig selbst menschenlesbare Namen f&uuml;r den Container.
+</p>
+<p>
+Dazu <a href="https://github.com/moby/moby/blob/master/pkg/namesgenerator/names-generator.go">w&auml;hlt</a> Docker zuf&auml;llig ein Adjektiv und den Nachnamen eines Wissenschaftlers oder Hackers aus einer Liste aus und verbindet diese beiden Elemente mit einem <a href="https://de.wikipedia.org/wiki/Unterstrich">Unterstrich</a>.
+</p>
+<p>
+Man erh&auml;lt also zuf&auml;llige Kombinationen wie <em>interesting_mendeleev</em>, <em>epic_engelbart</em>, <em>lucid_dhawan</em>, <em>recursing_cori</em>,
+<em>ecstatic_liskov</em> oder <em>busy_ardinghelli</em>.
+</p>
+<p>
+Das CPAN-Modul <a href="https://metacpan.org/pod/Docker::Names::Random">Docker::Names::Random - Create random strings like Docker does for container names</a> von <a href="https://metacpan.org/author/MIKKOI">Mikko Koivunalho (MIKKOI)</a> baut exakt diesen Mechanismus auf der Basis des <a href="https://github.com/moby/moby/blob/master/pkg/namesgenerator/names-generator.go">Originalprogramms</a> nach und erm&ouml;glicht dessen Verwendung in Perlprogrammen. 
+</p>
+
+
+<p>&nbsp;</p>
+<h2>Beispiel - zuf&auml;llige Zeichenkette im Stil der Docker Containernamen erzeugen</h2>
+<p>
+<a href="https://metacpan.org/pod/Docker::Names::Random">Docker::Names::Random</a> kann wahlweise als <a href="https://perldoc.perl.org/perlobj">Objekt</a>  
+</p>
+<pre>
+#!/usr/bin/env perl
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># As an object (if you create many, this is more efficient).</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Docker::Names::Random</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$dnr</span>         = <span style="color: #000000;">Docker::Names::Random</span><span style="color: #000000;">-&gt;new</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$random_name</span> = <span style="color: #00688B;">$dnr</span><span style="color: #00688B;">-&gt;docker_name</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #00688B;">$random_name</span><span style="color: #000000;">;</span>
+</pre>
+<p>
+oder als <a href="https://perldoc.perl.org/perlsub">Funktion</a> verwendet werden.
+</p>
+<pre>
+#!/usr/bin/env perl
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">strict</span><span style="color: #000000;">;</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">warnings</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">feature</span> <span style="color: #CD5555;">&#39;say&#39;</span><span style="color: #000000;">;</span>
+
+<span style="color: #228B22;"># As an imported function.</span>
+<span style="color: #8B008B; font-weight:bold;">use</span> <span style="color: #000000;">Docker::Names::Random</span> <span style="color: #CD5555;">qw( docker_name )</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">my</span> <span style="color: #00688B;">$random_name</span> = <span style="color: #00688B;">docker_name</span><span style="color: #000000;">(</span><span style="color: #000000;">)</span><span style="color: #000000;">;</span>
+
+<span style="color: #8B008B; font-weight:bold;">say</span> <span style="color: #00688B;">$random_name</span><span style="color: #000000;">;</span>
+</pre>
+
+<p>
+Die obigen Bespiele erzeugen z.B. folgende Ausgabe:
+</p>
+<pre>
+zen_dewdney
+</pre>
+
+
+<p>&nbsp;</p>
+<h2>Siehe auch</h2>
+<ul class="no-bullet">
+<li><a href="https://metacpan.org/pod/Docker::Names::Random">Docker::Names::Random</a></li>
+<li><a href="https://github.com/moby/moby/blob/master/pkg/namesgenerator/names-generator.go">names-generator.go</a></li>
+<li><a href="https://medium.com/peptr/why-boring-wozniak-will-never-be-generated-as-a-container-name-in-docker-763b755f9e2a">Why boring_wozniak Will Never Be Generated as a Container Name in Docker?</a></li>
+<li><a href="https://frightanic.com/computers/docker-default-container-names/">How does Docker generate default container names?</a></li>
+</ul>
+
+
+<p>&nbsp;</p>
+<p>
+Source-Code der Beispiele im <a href="https://github.com/perl-howto/perl-howto-code">Github Repo perl-howto-code</a>.
+</p>
+
+
+<p>&nbsp;</p>
+<h2>Bildnachweis</h2>
+<p>
+<a href="https://unsplash.com/photos/l877VCCHdQ8">Photo</a> by <a href="https://unsplash.com/@kai?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Kai Gradert</a> on <a href="https://unsplash.com/s/photos/container-name?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+</p>
+<p>&nbsp;</p>
+
+  
