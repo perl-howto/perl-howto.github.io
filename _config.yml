@@ -25,6 +25,6 @@ defaults:
       author_full_name: "Thomas Fahle"
       author_url: "http://thomas-fahle.de"
 
-gems:
+plugins:
   - jekyll-sitemap
 
